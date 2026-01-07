@@ -1,0 +1,22 @@
+.buttongroup{
+  display: flex;
+  justify-content: space-between;
+}
+
+.statusIndicator{
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+.statusInactive{
+  background-color: #e53e3e;
+}
+
+.recordingStatus{
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+}
