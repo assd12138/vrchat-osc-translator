@@ -12,11 +12,13 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.11.2",
+    "@ricky0123/vad-web": "^0.0.30",
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-opener": "^2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "react-redux": "^9.2.0"
+    "react-redux": "^9.2.0",
+    "vite-plugin-static-copy": "^3.1.4"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2",

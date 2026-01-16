@@ -15,7 +15,12 @@
 .statusInactive{
   background-color: #e53e3e;
 }
-
+.statusSpeaking{
+  background-color: #23d441;
+}
+.statusPausing{
+  background-color: #f6c23e;
+}
 .recordingStatus{
   display: flex;
   align-items: center;
