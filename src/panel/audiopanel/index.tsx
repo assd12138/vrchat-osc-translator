@@ -3,11 +3,12 @@ import globalStyles from "../../styles/index.module.css";
 import styles from "./index.module.css";
 import { MicVAD } from "@ricky0123/vad-web";
 import { encodeWAV } from "@ricky0123/vad-web/dist/utils";
-import { translateByAudio } from "../../api/translate";
+import { translateByAI, translateByAudio } from "../../api/translate";
 import { useAppSelector } from "../../store/hook";
+import { invoke } from "@tauri-apps/api/core";
 
 export default function () {
-  const template = useAppSelector((state) => state.settings.ai_template);
+  const settings = useAppSelector((state) => state.settings);
   const myVad = useRef<MicVAD>(null);
   // 是否正在录音
   const [recording, setRecording] = useState(false);
@@ -25,18 +26,29 @@ export default function () {
         minSpeechMs: 400,
         preSpeechPadMs: 300,
         onSpeechStart: () => {
+          console.log("开始说话");
           setSpeaking(true);
         },
         onSpeechEnd: async (audio) => {
+          console.log("停止说话");
+
           const wavBuffer = encodeWAV(audio);
           const audioBlob = new Blob([wavBuffer], { type: "audio/wav" });
           const file = new File([audioBlob], "audio.wav", {
             type: audioBlob.type,
             lastModified: Date.now(),
           });
-          const res = await translateByAudio({ file, template });
-          console.log({ res });
-
+          const res = await translateByAudio({ file });
+          const ask = settings.ai_template.replace("{text}", res.text);
+          const translateRes = await translateByAI({
+            token: settings.openai_token,
+            text: ask,
+            api: settings.openai_api_url,
+            model: settings.openai_model,
+          });
+          invoke("send_to_vrc_chat", {
+            text: translateRes.choices[0].message.content,
+          });
           setSpeaking(false);
         },
       });
@@ -66,13 +78,22 @@ export default function () {
       const file = files?.[0]!;
 
       console.log(file);
-      const res = await translateByAudio({ file, template });
-      console.log(res);
-      
+      const res = await translateByAudio({ file });
+      const ask = settings.ai_template.replace("{text}", res.text);
+      const r = await translateByAI({
+        token: settings.openai_token,
+        text: ask,
+        api: settings.openai_api_url,
+        model: settings.openai_model,
+      });
+      console.log(r);
     };
 
     // 触发点击
     input.click();
+  };
+  const refresh = () => {
+    window.location.reload()
   };
 
   return (
@@ -87,6 +108,9 @@ export default function () {
         </button>
         <button onClick={test} className={globalStyles.button}>
           📁 选择
+        </button>
+        <button onClick={refresh} className={globalStyles.button}>
+          🔄️ 刷新
         </button>
       </div>
       <div className={styles.recordingStatus}>

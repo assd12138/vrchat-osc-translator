@@ -2,15 +2,20 @@ import store from "../store/store";
 
 // 封装原生fetch
 const request = async (url: string, options: RequestInit = {}) => {
-  const baseUrl = store.getState().settings.backend_url;
+  const applyOptions = { ...options };
+  let baseUrl = "";
+  if (!url.startsWith("http://") && !url.startsWith("https://")) {    
+    baseUrl = store.getState().settings.backend_url;
+  }
+
   const controller = new AbortController();
   const config = {
-    ...options,
+    ...applyOptions,
     signal: controller.signal,
-    headers: { ...options.headers },
+    headers: { ...applyOptions.headers },
   };
 
-  const timeoutId = setTimeout(() => controller.abort(), 8000);
+  const timeoutId = setTimeout(() => controller.abort(), 60000);
 
   try {
     const response = await fetch(baseUrl + url, config);
