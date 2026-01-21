@@ -20,7 +20,7 @@ export default function () {
         onChange={e => handleChange(e.target.value)}
         value={aiTemplate}
         className={styles.transTemplate}
-        placeholder="请输入翻译模板，例如：请将以下文本翻译成英语：{text}">
+        placeholder={t('翻译提示')}>
       </textarea>
     </div>
   );

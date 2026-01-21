@@ -16,4 +16,5 @@ export default {
   未录音: 'Not Recording',
   说话中: 'Speaking',
   无声音: 'No Sound',
+  翻译提示: 'Please enter a translation template. For example: Please translate the following text into English: {text}'
 }
