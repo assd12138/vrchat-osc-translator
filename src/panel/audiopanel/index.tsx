@@ -7,7 +7,6 @@ import { translateByAI, translateByAudio } from "../../api/translate";
 import { useAppSelector } from "../../store/hook";
 import { invoke } from "@tauri-apps/api/core";
 import { useTranslation } from "react-i18next";
-import i18next from "i18next";
 
 export default function () {
   const { t } = useTranslation();
@@ -70,33 +69,7 @@ export default function () {
     setSpeaking(false);
     setRecording(false);
   };
-  const test = () => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "audio/*"; // 只接受音频文件
-    input.multiple = false; // 单个文件
 
-    // 文件选择回调
-    input.onchange = async (e) => {
-      const target = e.target as HTMLInputElement;
-      const files = target.files;
-      const file = files?.[0]!;
-
-      console.log(file);
-      const res = await translateByAudio({ file });
-      const ask = settings.ai_template.replace("{text}", res.text);
-      const r = await translateByAI({
-        token: settings.openai_token,
-        text: ask,
-        api: settings.openai_api_url,
-        model: settings.openai_model,
-      });
-      console.log(r);
-    };
-
-    // 触发点击
-    input.click();
-  };
   const refresh = () => {
     window.location.reload()
   };
