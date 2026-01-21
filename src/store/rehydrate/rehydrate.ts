@@ -1,11 +1,12 @@
 import { REDUX_STORAGE_KEY, REHYDRATE_KEYS, rehydrateFlag } from "./rehydrateConstant";
-import { setAiTemplate, setBackendUrl, setOscUrl } from "../settings";
+import { setAiTemplate, setBackendUrl, setLanguage, setOscUrl } from "../settings";
 import store from "../store";
 
 export const rehydrateMapper = {
   [REHYDRATE_KEYS.SETTING_OSC_URL]: setOscUrl,
   [REHYDRATE_KEYS.SETTING_BACKEND_URL]: setBackendUrl,
-  [REHYDRATE_KEYS.SETTING_AI_TEMPLATE]: setAiTemplate
+  [REHYDRATE_KEYS.SETTING_AI_TEMPLATE]: setAiTemplate,
+  [REHYDRATE_KEYS.SETTING_LANGUAGE]: setLanguage
 }
 
 export function rehydrate() {
@@ -19,3 +20,5 @@ export function rehydrate() {
   // 初始化已完成
   rehydrateFlag.flag = true
 }
+
+rehydrate()

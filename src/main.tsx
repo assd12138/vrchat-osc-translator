@@ -4,10 +4,11 @@ import { Provider } from "react-redux";
 
 import App from "./App";
 import store from "./store/store";
-import { rehydrate } from "./store/rehydrate/rehydrate";
+import "./store/rehydrate/rehydrate";
+// 任何需要读取store的，需要置于rehydrate之后
+import "./i18n/index"
 
-// 重新水合持久化
-rehydrate()
+
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>

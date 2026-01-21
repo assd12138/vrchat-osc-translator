@@ -16,6 +16,7 @@ const settingsSlice = createSlice({
 【日】{日文翻译}
 【한】{韩文翻译}
 文本原文：{text}`,
+    language: 'auto'
   },
   reducers: {
     setOscUrl: (state, action: PayloadAction<string>) => {
@@ -39,10 +40,14 @@ const settingsSlice = createSlice({
     setOpenaiToken: (state, action: PayloadAction<string>) => {
       state.openai_token = action.payload;
     },
+    setLanguage: (state, action: PayloadAction<string>) => {
+      state.language = action.payload;
+      redux_store(REHYDRATE_KEYS.SETTING_LANGUAGE, action.payload);
+    },
   },
 });
 
-export const { setOscUrl, setBackendUrl, setAiTemplate, setOpenaiApiUrl, setOpenaiModel, setOpenaiToken } =
+export const { setOscUrl, setBackendUrl, setAiTemplate, setOpenaiApiUrl, setOpenaiModel, setOpenaiToken, setLanguage } =
   settingsSlice.actions;
 
 export default settingsSlice;

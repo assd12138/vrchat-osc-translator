@@ -6,8 +6,11 @@ import { encodeWAV } from "@ricky0123/vad-web/dist/utils";
 import { translateByAI, translateByAudio } from "../../api/translate";
 import { useAppSelector } from "../../store/hook";
 import { invoke } from "@tauri-apps/api/core";
+import { useTranslation } from "react-i18next";
+import i18next from "i18next";
 
 export default function () {
+  const { t } = useTranslation();
   const settings = useAppSelector((state) => state.settings);
   const myVad = useRef<MicVAD>(null);
   // 是否正在录音
@@ -64,6 +67,8 @@ export default function () {
     if (!myVad.current) return;
     myVad.current.destroy();
     myVad.current = null;
+    setSpeaking(false);
+    setRecording(false);
   };
   const test = () => {
     const input = document.createElement("input");
@@ -98,19 +103,16 @@ export default function () {
 
   return (
     <div className={globalStyles.panel}>
-      <div className={globalStyles.title}>🎙️ 语音识别控制</div>
+      <div className={globalStyles.title}>🎙️ {t('语音识别控制')}</div>
       <div className={styles.buttongroup}>
         <button onClick={start} className={globalStyles.button}>
-          🎤 开始
+          🎤 {t('开始')}
         </button>
         <button onClick={stop} className={globalStyles.button}>
-          ⏹️ 停止
-        </button>
-        <button onClick={test} className={globalStyles.button}>
-          📁 选择
+          ⏹️ {t('停止')}
         </button>
         <button onClick={refresh} className={globalStyles.button}>
-          🔄️ 刷新
+          🔄️ {t('刷新')}
         </button>
       </div>
       <div className={styles.recordingStatus}>
@@ -125,8 +127,8 @@ export default function () {
             .join(" ")}
         ></span>
         <span>
-          录音状态：
-          <span>未录音</span>
+          {t('录音状态')}：
+          <span>{!recording ? t('未录音') : speaking ? t('说话中') : t('无声音')}</span>
         </span>
       </div>
     </div>
