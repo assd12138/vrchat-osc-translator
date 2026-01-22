@@ -7,6 +7,7 @@ import { translateByAI, translateByAudio } from "../../api/translate";
 import { useAppSelector } from "../../store/hook";
 import { invoke } from "@tauri-apps/api/core";
 import { useTranslation } from "react-i18next";
+import eventBus, { EventBusEvent } from "../../utils/eventBus";
 
 export default function () {
   const { t } = useTranslation();
@@ -33,6 +34,7 @@ export default function () {
         },
         onSpeechEnd: async (audio) => {
           console.log("停止说话");
+          setSpeaking(false);
 
           const wavBuffer = encodeWAV(audio);
           const audioBlob = new Blob([wavBuffer], { type: "audio/wav" });
@@ -40,23 +42,25 @@ export default function () {
             type: audioBlob.type,
             lastModified: Date.now(),
           });
-          const res = await translateByAudio({ file });
-          const ask = settings.ai_template.replace("{text}", res.text);
-          const translateRes = await translateByAI({
+          const transcriptionRes = await translateByAudio({ file });
+          const ask = settings.ai_template.replace("{text}", transcriptionRes.text);
+          const translationRes = await translateByAI({
             token: settings.openai_token,
             text: ask,
             api: settings.openai_api_url,
             model: settings.openai_model,
           });
+          const translation = translationRes.choices[0].message.content;
           invoke("send_to_vrc_chat", {
-            text: translateRes.choices[0].message.content,
+            text: translation
           });
-          setSpeaking(false);
+          eventBus.emit(EventBusEvent.ADD_LOG,t('识别成功',{ transcription: transcriptionRes.text, translation }) )
         },
       });
       vad.start();
       myVad.current = vad;
       setRecording(true);
+      eventBus.emit(EventBusEvent.ADD_LOG,t('开始语音识别'))
     } catch (e) {
       console.error(e);
     }
@@ -68,6 +72,7 @@ export default function () {
     myVad.current = null;
     setSpeaking(false);
     setRecording(false);
+    eventBus.emit(EventBusEvent.ADD_LOG,t('停止语音识别'))
   };
 
   const refresh = () => {

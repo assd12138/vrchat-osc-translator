@@ -27,7 +27,7 @@ export default function () {
   };
 
   const handleLanguageChange = (language: string) => {
-    i18next.changeLanguage(language)
+    i18next.changeLanguage(language === 'auto' ? navigator.language : language)
     dispatch(setLanguage(language));
   };
 

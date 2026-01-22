@@ -21,7 +21,7 @@ export const translateByAI = (data: {
   api: string;
   model: string;
 }) => {
-  return request(data.api+"/v1/chat/completions", {
+  return request(data.api + "/v1/chat/completions", {
     method: "POST",
     body: JSON.stringify({
       model: data.model,
@@ -29,7 +29,7 @@ export const translateByAI = (data: {
         {
           role: "system",
           content:
-            "你是一个翻译专家，当用户让你翻译的时候，严格按照翻译格式输出，不要输出其他内容，也不要输出对应语言的罗马音标",
+            "你是一个翻译专家，当用户让你翻译的时候，严格按照翻译格式输出，不要输出其他内容",
         },
         {
           role: "user",

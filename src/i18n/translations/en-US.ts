@@ -16,5 +16,8 @@ export default {
   未录音: 'Not Recording',
   说话中: 'Speaking',
   无声音: 'No Sound',
-  翻译提示: 'Please enter a translation template. For example: Please translate the following text into English: {text}'
+  翻译提示: 'Please enter a translation template. For example: Please translate the following text into English: {text}',
+  开始语音识别: '🟢 Start Speech Recognition',
+  停止语音识别: '🔴 Stop Speech Recognition',
+  识别成功: '✅ Recognition successful. Original: {transcription}, Translation: {translation}',
 }
