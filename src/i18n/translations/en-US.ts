@@ -19,5 +19,5 @@ export default {
   翻译提示: 'Please enter a translation template. For example: Please translate the following text into English: {text}',
   开始语音识别: '🟢 Start Speech Recognition',
   停止语音识别: '🔴 Stop Speech Recognition',
-  识别成功: '✅ Recognition successful. Original: {transcription}, Translation: {translation}',
+  识别成功: '✅ Recognition successful. Original: {{transcription}}, Translation: {{translation}}',
 }

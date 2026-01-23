@@ -20,6 +20,7 @@ export default function () {
 
   const start = async () => {
     try {
+      if(myVad.current) return;
       const vad = await MicVAD.new({
         baseAssetPath: "/vad/",
         onnxWASMBasePath: "/vad/",

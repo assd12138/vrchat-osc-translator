@@ -19,5 +19,5 @@ export default {
   翻译提示: '请输入翻译模板，例如：请将以下文本翻译成英语：{text}',
   开始语音识别: '🟢 开始语音识别',
   停止语音识别: '🔴 停止语音识别',
-  识别成功: '✅ 识别成功,原文{transcription},译文结果{translation}',
+  识别成功: '✅ 识别成功,原文{{transcription}},译文结果{{translation}}',
 }
