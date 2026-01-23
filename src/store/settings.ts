@@ -10,7 +10,7 @@ const settingsSlice = createSlice({
     openai_api_url: "http://localhost:11434",
     openai_model: "gemma3:4b",
     openai_token: "",
-    ai_template: `请将我的文本按以下模板翻译：
+    ai_template: `请自动检测文本原文的语言类型并按以下模板翻译：
 【中】{中文翻译}
 【En】{英文翻译}
 【日】{日文翻译}
