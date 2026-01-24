@@ -8,8 +8,8 @@ export const translateByAudio = (data: {
   file: File;
 }) => {
   const formData = new FormData();
-  formData.append("file", data.file, "a.mp3");
-  return request("/asr-translate", {
+  formData.append("file", data.file, "audio.wav");
+  return request("/inference", {
     method: "POST",
     body: formData,
   });

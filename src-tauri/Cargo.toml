@@ -1,8 +1,8 @@
 [package]
-name = "vrchat-osc-tauri"
+name = "vrchat-translator"
 version = "0.1.0"
-description = "A Tauri App"
-authors = ["you"]
+description = "An app for VRChat that translate your voice to different language and send OSC messages automatically"
+authors = ["assd12138"]
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
