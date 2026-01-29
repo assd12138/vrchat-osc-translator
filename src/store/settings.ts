@@ -6,8 +6,10 @@ const settingsSlice = createSlice({
   name: "settings",
   initialState: {
     osc_url: "ws://localhost:8080",
-    backend_url: "http://localhost:8000",
-    openai_api_url: "http://localhost:11434",
+    transcription_url: "http://localhost:8000/v1/audio/transcriptions",
+    transcription_model: "whisper-large-v3-turbo",
+    transcription_token: "",
+    openai_api_url: "http://localhost:11434/v1/chat/completions",
     openai_model: "gemma3:4b",
     openai_token: "",
     ai_template: `请自动检测文本原文的语言类型并按以下模板翻译：
@@ -24,8 +26,14 @@ const settingsSlice = createSlice({
       redux_store(REHYDRATE_KEYS.SETTING_OSC_URL, action.payload);
     },
     setBackendUrl: (state, action: PayloadAction<string>) => {
-      state.backend_url = action.payload;
+      state.transcription_url = action.payload;
       redux_store(REHYDRATE_KEYS.SETTING_BACKEND_URL, action.payload);
+    },
+    setTranscriptionModel: (state, action: PayloadAction<string>) => {
+      state.transcription_model = action.payload;
+    },
+    setTranscriptionToken: (state, action: PayloadAction<string>) => {
+      state.transcription_token = action.payload;
     },
     setAiTemplate: (state, action: PayloadAction<string>) => {
       state.ai_template = action.payload;
@@ -47,7 +55,7 @@ const settingsSlice = createSlice({
   },
 });
 
-export const { setOscUrl, setBackendUrl, setAiTemplate, setOpenaiApiUrl, setOpenaiModel, setOpenaiToken, setLanguage } =
+export const { setOscUrl, setBackendUrl, setAiTemplate, setOpenaiApiUrl, setOpenaiModel, setOpenaiToken, setLanguage, setTranscriptionModel, setTranscriptionToken } =
   settingsSlice.actions;
 
 export default settingsSlice;

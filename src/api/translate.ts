@@ -3,15 +3,22 @@ import { request } from ".";
 /**
  * 根据ai翻译模板和音频文件翻译
  */
-export const translateByAudio = (data: {
+export const transcriptionAudio = (data: {
   /** 音频文件 */
   file: File;
+  api: string;
+  model: string;
+  auth: string;
 }) => {
   const formData = new FormData();
   formData.append("file", data.file, "audio.wav");
-  return request("/inference", {
+  formData.append("model", data.model);
+  return request(data.api, {
     method: "POST",
     body: formData,
+    headers: {
+      Authorization: `Bearer ${data.auth}`,
+    },
   });
 };
 
@@ -21,7 +28,7 @@ export const translateByAI = (data: {
   api: string;
   model: string;
 }) => {
-  return request(data.api + "/v1/chat/completions", {
+  return request(data.api, {
     method: "POST",
     body: JSON.stringify({
       model: data.model,

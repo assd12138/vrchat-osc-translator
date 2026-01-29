@@ -3,7 +3,7 @@ import globalStyles from "../../styles/index.module.css";
 import styles from "./index.module.css";
 import { MicVAD } from "@ricky0123/vad-web";
 import { encodeWAV } from "@ricky0123/vad-web/dist/utils";
-import { translateByAI, translateByAudio } from "../../api/translate";
+import { translateByAI, transcriptionAudio } from "../../api/translate";
 import { useAppSelector } from "../../store/hook";
 import { invoke } from "@tauri-apps/api/core";
 import { useTranslation } from "react-i18next";
@@ -20,7 +20,7 @@ export default function () {
 
   const start = async () => {
     try {
-      if(myVad.current) return;
+      if (myVad.current) return;
       const vad = await MicVAD.new({
         baseAssetPath: "/vad/",
         onnxWASMBasePath: "/vad/",
@@ -43,11 +43,16 @@ export default function () {
             type: audioBlob.type,
             lastModified: Date.now(),
           });
-          const transcriptionRes = await translateByAudio({ file });
+          const transcriptionRes = await transcriptionAudio({
+            file,
+            api: settings.transcription_url,
+            auth: settings.transcription_token,
+            model: settings.transcription_model
+          });
           const ask = settings.ai_template.replace("{text}", transcriptionRes.text);
           const translationRes = await translateByAI({
-            token: settings.openai_token,
             text: ask,
+            token: settings.openai_token,
             api: settings.openai_api_url,
             model: settings.openai_model,
           });
@@ -55,13 +60,13 @@ export default function () {
           invoke("send_to_vrc_chat", {
             text: translation
           });
-          eventBus.emit(EventBusEvent.ADD_LOG,t('识别成功',{ transcription: transcriptionRes.text, translation }) )
+          eventBus.emit(EventBusEvent.ADD_LOG, t('识别成功', { transcription: transcriptionRes.text, translation }))
         },
       });
       vad.start();
       myVad.current = vad;
       setRecording(true);
-      eventBus.emit(EventBusEvent.ADD_LOG,t('开始语音识别'))
+      eventBus.emit(EventBusEvent.ADD_LOG, t('开始语音识别'))
     } catch (e) {
       console.error(e);
     }
@@ -73,7 +78,7 @@ export default function () {
     myVad.current = null;
     setSpeaking(false);
     setRecording(false);
-    eventBus.emit(EventBusEvent.ADD_LOG,t('停止语音识别'))
+    eventBus.emit(EventBusEvent.ADD_LOG, t('停止语音识别'))
   };
 
   const refresh = () => {

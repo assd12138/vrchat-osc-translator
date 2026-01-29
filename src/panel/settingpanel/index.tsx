@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { useAppDispatch, useAppSelector } from "../../store/hook";
-import { setBackendUrl, setOpenaiApiUrl, setOscUrl, setOpenaiToken, setOpenaiModel, setLanguage } from "../../store/settings";
+import { setBackendUrl, setOpenaiApiUrl, setOscUrl, setOpenaiToken, setOpenaiModel, setLanguage, setTranscriptionModel, setTranscriptionToken } from "../../store/settings";
 import globalStyles from "../../styles/index.module.css";
 import i18next from "i18next";
 
@@ -8,11 +8,16 @@ export default function () {
   const settings = useAppSelector((state) => state.settings);
   const dispatch = useAppDispatch();
   const { t } = useTranslation()
-  const handleChangeOsc = (url: string) => {
-    dispatch(setOscUrl(url));
-  };
   const handleChangeBackend = (url: string) => {
     dispatch(setBackendUrl(url));
+  };
+
+  const handleChangeTranscriptionModel = (url: string) => {
+    dispatch(setTranscriptionModel(url));
+  };
+  
+  const handleChangeTranscriptionToken = (token: string) => {
+    dispatch(setTranscriptionToken(token));
   };
 
   const handleOpenAIApiChange = (url: string) => {
@@ -43,17 +48,23 @@ export default function () {
         <option value="ja">日本語</option>
         <option value="ko">한국어</option>
       </select>
-      <label className={globalStyles.labelS}>{t('OSC地址')}</label>
+      <label className={globalStyles.labelS}>{t('转译地址')}</label>
       <input
         className={globalStyles.inputS}
-        value={settings.osc_url}
-        onChange={(e) => handleChangeOsc(e.target.value)}
-      />
-      <label className={globalStyles.labelS}>{t('后端地址')}</label>
-      <input
-        className={globalStyles.inputS}
-        value={settings.backend_url}
+        value={settings.transcription_url}
         onChange={(e) => handleChangeBackend(e.target.value)}
+      />
+      <label className={globalStyles.labelS}>{t('转译模型')}</label>
+      <input
+        className={globalStyles.inputS}
+        value={settings.transcription_model}
+        onChange={(e) => handleChangeTranscriptionModel(e.target.value)}
+      />
+      <label className={globalStyles.labelS}>{t('转译Token')}</label>
+      <input
+        className={globalStyles.inputS}
+        value={settings.transcription_token}
+        onChange={(e) => handleChangeTranscriptionToken(e.target.value)}
       />
       <label className={globalStyles.labelS}>{t('openai地址')}</label>
       <input
