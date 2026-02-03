@@ -1,11 +1,16 @@
 import { REDUX_STORAGE_KEY, REHYDRATE_KEYS, rehydrateFlag } from "./rehydrateConstant";
-import { setAiTemplate, setBackendUrl, setLanguage, setOscUrl } from "../settings";
+import { setAiTemplate, setTranscriptionUrl, setLanguage, setOpenaiApiUrl, setTranscriptionModel, setOpenaiModel, setTranscriptionToken, setOpenaiToken } from "../settings";
 import store from "../store";
 
 export const rehydrateMapper = {
-  [REHYDRATE_KEYS.SETTING_OSC_URL]: setOscUrl,
-  [REHYDRATE_KEYS.SETTING_BACKEND_URL]: setBackendUrl,
   [REHYDRATE_KEYS.SETTING_AI_TEMPLATE]: setAiTemplate,
+  [REHYDRATE_KEYS.SETTING_TRANSCRIPTION_URL]: setTranscriptionUrl,
+  [REHYDRATE_KEYS.SETTING_TRANSCRIPTION_MODEL]: setTranscriptionModel,
+  [REHYDRATE_KEYS.SETTING_TRANSCRIPTION_TOKEN]: setTranscriptionToken,
+  [REHYDRATE_KEYS.SETTING_AI_TEMPLATE]: setAiTemplate,
+  [REHYDRATE_KEYS.SETTING_OPENAI_API_URL]: setOpenaiApiUrl,
+  [REHYDRATE_KEYS.SETTING_OPENAI_MODEL]: setOpenaiModel,
+  [REHYDRATE_KEYS.SETTING_OPENAI_TOKEN]: setOpenaiToken,
   [REHYDRATE_KEYS.SETTING_LANGUAGE]: setLanguage
 }
 

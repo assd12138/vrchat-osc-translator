@@ -47,9 +47,12 @@ export default function () {
             file,
             api: settings.transcription_url,
             auth: settings.transcription_token,
-            model: settings.transcription_model
+            model: settings.transcription_model,
           });
-          const ask = settings.ai_template.replace("{text}", transcriptionRes.text);
+          const ask = settings.ai_template.replace(
+            "{text}",
+            transcriptionRes.text,
+          );
           const translationRes = await translateByAI({
             text: ask,
             token: settings.openai_token,
@@ -58,15 +61,21 @@ export default function () {
           });
           const translation = translationRes.choices[0].message.content;
           invoke("send_to_vrc_chat", {
-            text: translation
+            text: translation,
           });
-          eventBus.emit(EventBusEvent.ADD_LOG, t('识别成功', { transcription: transcriptionRes.text, translation }))
+          eventBus.emit(
+            EventBusEvent.ADD_LOG,
+            t("识别成功", {
+              transcription: transcriptionRes.text,
+              translation,
+            }),
+          );
         },
       });
       vad.start();
       myVad.current = vad;
       setRecording(true);
-      eventBus.emit(EventBusEvent.ADD_LOG, t('开始语音识别'))
+      eventBus.emit(EventBusEvent.ADD_LOG, t("开始语音识别"));
     } catch (e) {
       console.error(e);
     }
@@ -78,25 +87,74 @@ export default function () {
     myVad.current = null;
     setSpeaking(false);
     setRecording(false);
-    eventBus.emit(EventBusEvent.ADD_LOG, t('停止语音识别'))
+    eventBus.emit(EventBusEvent.ADD_LOG, t("停止语音识别"));
   };
 
   const refresh = () => {
-    window.location.reload()
+    window.location.reload();
+  };
+  const test = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "audio/*"; // 只接受音频文件
+    input.multiple = false; // 单个文件
+
+    // 文件选择回调
+    input.onchange = async (e) => {
+      const target = e.target as HTMLInputElement;
+      const files = target.files;
+      const file = files?.[0]!;
+
+      console.log(file);
+      console.time('transcription')
+      const transcriptionRes = await transcriptionAudio({
+        file,
+        api: settings.transcription_url,
+        auth: settings.transcription_token,
+        model: settings.transcription_model,
+      });
+      console.timeEnd('transcription')
+      const ask = settings.ai_template.replace("{text}", transcriptionRes.text);
+      console.time( "translate");
+      const translationRes = await translateByAI({
+        token: settings.openai_token,
+        text: ask,
+        api: settings.openai_api_url,
+        model: settings.openai_model,
+      });
+      console.timeEnd("translate")
+      const translation = translationRes.choices[0].message.content;
+      invoke("send_to_vrc_chat", {
+        text: translation,
+      });
+      eventBus.emit(
+        EventBusEvent.ADD_LOG,
+        t("识别成功", {
+          transcription: transcriptionRes.text,
+          translation,
+        }),
+      );
+    };
+
+    // 触发点击
+    input.click();
   };
 
   return (
     <div className={globalStyles.panel}>
-      <div className={globalStyles.title}>🎙️ {t('语音识别控制')}</div>
+      <div className={globalStyles.title}>🎙️ {t("语音识别控制")}</div>
       <div className={styles.buttongroup}>
         <button onClick={start} className={globalStyles.button}>
-          🎤 {t('开始')}
+          🎤 {t("开始")}
         </button>
         <button onClick={stop} className={globalStyles.button}>
-          ⏹️ {t('停止')}
+          ⏹️ {t("停止")}
         </button>
         <button onClick={refresh} className={globalStyles.button}>
-          🔄️ {t('刷新')}
+          🔄️ {t("刷新")}
+        </button>
+        <button onClick={test} className={globalStyles.button}>
+          文件测试
         </button>
       </div>
       <div className={styles.recordingStatus}>
@@ -111,8 +169,10 @@ export default function () {
             .join(" ")}
         ></span>
         <span>
-          {t('录音状态')}：
-          <span>{!recording ? t('未录音') : speaking ? t('说话中') : t('无声音')}</span>
+          {t("录音状态")}：
+          <span>
+            {!recording ? t("未录音") : speaking ? t("说话中") : t("无声音")}
+          </span>
         </span>
       </div>
     </div>

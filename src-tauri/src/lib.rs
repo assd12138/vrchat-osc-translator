@@ -14,10 +14,7 @@ async fn send_to_vrc_chat(text: String) -> Result<(), String> {
 
     let msg = OscMessage {
         addr: "/chatbox/input".to_string(),
-        args: vec![
-            OscType::String(text),
-            OscType::Bool(true),
-        ],
+        args: vec![OscType::String(text), OscType::Bool(true)],
     };
 
     let packet = OscPacket::Message(msg);
@@ -28,12 +25,12 @@ async fn send_to_vrc_chat(text: String) -> Result<(), String> {
     Ok(())
 }
 
-
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![greet,send_to_vrc_chat])
+        .invoke_handler(tauri::generate_handler![greet, send_to_vrc_chat])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

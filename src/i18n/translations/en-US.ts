@@ -7,6 +7,7 @@ export default {
   系统设置: 'System Settings',
   转译地址: 'Transcription API',
   转译模型: 'Transcription Model',
+  转译Token: 'Transcription Token',
   openai地址: 'OpenAI API',
   模型名称: 'Model Name',
   AI翻译模板: 'AI Translation Template',
@@ -20,4 +21,5 @@ export default {
   开始语音识别: '🟢 Start Speech Recognition',
   停止语音识别: '🔴 Stop Speech Recognition',
   识别成功: '✅ Recognition successful. Original: {{transcription}}, Translation: {{translation}}',
+  恢复默认: 'Restore Default',
 }

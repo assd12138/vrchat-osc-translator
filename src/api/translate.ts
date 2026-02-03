@@ -17,7 +17,7 @@ export const transcriptionAudio = (data: {
     method: "POST",
     body: formData,
     headers: {
-      Authorization: `Bearer ${data.auth}`,
+      Authorization: `Bearer ${data.auth}`
     },
   });
 };

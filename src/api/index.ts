@@ -1,3 +1,5 @@
+import {fetch} from "@tauri-apps/plugin-http"
+
 
 // 封装原生fetch
 const request = async (url: string, options: RequestInit = {}) => {
