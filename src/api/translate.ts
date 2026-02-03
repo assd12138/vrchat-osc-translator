@@ -51,3 +51,29 @@ export const translateByAI = (data: {
     },
   });
 };
+
+export const transformOCR = async ({ base64 }: { base64: string; }) => {
+  return request('http://localhost:11434/v1/chat/completions', {
+    method: 'POST',
+    body: JSON.stringify({
+      "model": "glm-ocr",
+      "messages": [
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "image_url",
+              "image_url": {
+                url: base64
+              }
+            },
+            {
+              type: "text",
+              text: "Text Recognition:"
+            }
+          ]
+        }
+      ]
+    }) 
+  })
+}

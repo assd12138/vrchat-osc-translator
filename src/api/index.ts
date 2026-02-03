@@ -1,5 +1,4 @@
-import {fetch} from "@tauri-apps/plugin-http"
-
+import fetch from '../cross-platform/fetch'
 
 // 封装原生fetch
 const request = async (url: string, options: RequestInit = {}) => {
