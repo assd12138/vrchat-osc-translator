@@ -3,7 +3,11 @@ import globalStyles from "../../styles/index.module.css";
 import styles from "./index.module.css";
 import { MicVAD } from "@ricky0123/vad-web";
 import { encodeWAV } from "@ricky0123/vad-web/dist/utils";
-import { translateByAI, transcriptionAudio, transformOCR } from "../../api/translate";
+import {
+  translateByAI,
+  transcriptionAudio,
+  transformOCR,
+} from "../../api/translate";
 import { useAppSelector } from "../../store/hook";
 import invoke from "../../cross-platform/invoke";
 import { useTranslation } from "react-i18next";
@@ -58,6 +62,9 @@ export default function () {
             token: settings.openai_token,
             api: settings.openai_api_url,
             model: settings.openai_model,
+            assignObj:{
+              max_tokens: 500
+            }
           });
           const translation = translationRes.choices[0].message.content;
           invoke("send_to_vrc_chat", {
@@ -94,40 +101,55 @@ export default function () {
     window.location.reload();
   };
 
-  const [a,setA] = useState('')
+  const [a, setA] = useState("");
+  const [b, setB] = useState("");
   const test = async () => {
-    const items = await navigator.clipboard.read()
+    const items = await navigator.clipboard.read();
     console.log(items);
     let base64String: string | null = null;
     try {
       for (const item of items) {
-        if (item.types.includes("image/png") || item.types.includes("image/jpeg") || item.types.includes("image/webp")) {
-          const blob = await item.getType(item.types.find(type => type.startsWith('image/')) || item.types[0]);
+        if (
+          item.types.includes("image/png") ||
+          item.types.includes("image/jpeg") ||
+          item.types.includes("image/webp")
+        ) {
+          const blob = await item.getType(
+            item.types.find((type) => type.startsWith("image/")) ||
+              item.types[0],
+          );
           base64String = await new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.onloadend = () => resolve(reader.result as string);
             reader.onerror = reject;
             reader.readAsDataURL(blob);
-          })
+          });
 
           break; // 找到第一张图片后退出
         }
       }
       if (!base64String) {
-        console.log('剪贴板无图片')
+        console.log("剪贴板无图片");
       } else {
-        console.time('ocr')
+        console.time("ocr");
         const res = await transformOCR({ base64: base64String });
         console.log({ res });
-        setA(res.choices[0].message.content)
-        console.timeEnd('ocr')
+        const a = res.choices[0].message.content;
+        setA(a);
+        console.timeEnd("ocr");
 
-
+        const translationRes = await translateByAI({
+          text: `将以下内容翻译成中文${a.replace(/\n/g, "")}`,
+          token: settings.openai_token,
+          api: settings.openai_api_url,
+          model: settings.openai_model,
+        });
+        const translation = translationRes.choices[0].message.content;
+        setB(translation);
       }
     } catch (error) {
       console.error("Error processing items:", error);
     }
-
 
     // const input = document.createElement("input");
     // input.type = "file";
@@ -177,7 +199,6 @@ export default function () {
 
   return (
     <div className={globalStyles.panel}>
-      <textarea value={a}></textarea>
       <div className={globalStyles.title}>🎙️ {t("语音识别控制")}</div>
       <div className={styles.buttongroup}>
         <button onClick={start} className={globalStyles.button}>
@@ -211,6 +232,8 @@ export default function () {
           </span>
         </span>
       </div>
+      <textarea style={{width:'45%',height:'200px'}} value={a}></textarea>
+      <textarea style={{width:'45%',height:'200px'}} value={b}></textarea>
     </div>
   );
 }

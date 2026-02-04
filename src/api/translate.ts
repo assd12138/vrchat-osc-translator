@@ -17,7 +17,7 @@ export const transcriptionAudio = (data: {
     method: "POST",
     body: formData,
     headers: {
-      Authorization: `Bearer ${data.auth}`
+      Authorization: `Bearer ${data.auth}`,
     },
   });
 };
@@ -27,6 +27,7 @@ export const translateByAI = (data: {
   text: string;
   api: string;
   model: string;
+  assignObj?: any;
 }) => {
   return request(data.api, {
     method: "POST",
@@ -43,7 +44,11 @@ export const translateByAI = (data: {
           content: data.text,
         },
       ],
-      temperature: 0.7
+      temperature: 0.3,
+      thinking: {
+        type: "disabled",
+      },
+      ...(data.assignObj || {}),
     }),
     headers: {
       Authorization: `Bearer ${data.token}`,
@@ -52,28 +57,28 @@ export const translateByAI = (data: {
   });
 };
 
-export const transformOCR = async ({ base64 }: { base64: string; }) => {
-  return request('http://localhost:11434/v1/chat/completions', {
-    method: 'POST',
+export const transformOCR = async ({ base64 }: { base64: string }) => {
+  return request("http://localhost:11434/v1/chat/completions", {
+    method: "POST",
     body: JSON.stringify({
-      "model": "glm-ocr",
-      "messages": [
+      model: "glm-ocr",
+      messages: [
         {
-          "role": "user",
-          "content": [
+          role: "user",
+          content: [
             {
-              "type": "image_url",
-              "image_url": {
-                url: base64
-              }
+              type: "image_url",
+              image_url: {
+                url: base64,
+              },
             },
             {
               type: "text",
-              text: "Text Recognition:"
-            }
-          ]
-        }
-      ]
-    }) 
-  })
-}
+              text: "Text Recognition:",
+            },
+          ],
+        },
+      ],
+    }),
+  });
+};
