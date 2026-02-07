@@ -139,7 +139,7 @@ export default function () {
         console.timeEnd("ocr");
 
         const translationRes = await translateByAI({
-          text: `将以下内容翻译成中文${a.replace(/\n/g, "")}`,
+          text: `将以下内容翻译成中文：${a.replace(/\n/g, "")}`,
           token: settings.openai_token,
           api: settings.openai_api_url,
           model: settings.openai_model,
