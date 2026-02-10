@@ -58,7 +58,7 @@ export const translateByAI = (data: {
 };
 
 export const transformOCR = async ({ base64 }: { base64: string }) => {
-  return request("http://localhost:11434/v1/chat/completions", {
+  return request("http://yz.xcherry.top:11434/v1/chat/completions", {
     method: "POST",
     body: JSON.stringify({
       model: "glm-ocr",

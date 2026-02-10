@@ -5,8 +5,7 @@ import { MicVAD } from "@ricky0123/vad-web";
 import { encodeWAV } from "@ricky0123/vad-web/dist/utils";
 import {
   translateByAI,
-  transcriptionAudio,
-  transformOCR,
+  transcriptionAudio
 } from "../../api/translate";
 import { useAppSelector } from "../../store/hook";
 import invoke from "../../cross-platform/invoke";
@@ -101,102 +100,6 @@ export default function () {
     window.location.reload();
   };
 
-  const [a, setA] = useState("");
-  const [b, setB] = useState("");
-  const test = async () => {
-    const items = await navigator.clipboard.read();
-    console.log(items);
-    let base64String: string | null = null;
-    try {
-      for (const item of items) {
-        if (
-          item.types.includes("image/png") ||
-          item.types.includes("image/jpeg") ||
-          item.types.includes("image/webp")
-        ) {
-          const blob = await item.getType(
-            item.types.find((type) => type.startsWith("image/")) ||
-              item.types[0],
-          );
-          base64String = await new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result as string);
-            reader.onerror = reject;
-            reader.readAsDataURL(blob);
-          });
-
-          break; // 找到第一张图片后退出
-        }
-      }
-      if (!base64String) {
-        console.log("剪贴板无图片");
-      } else {
-        console.time("ocr");
-        const res = await transformOCR({ base64: base64String });
-        console.log({ res });
-        const a = res.choices[0].message.content;
-        setA(a);
-        console.timeEnd("ocr");
-
-        const translationRes = await translateByAI({
-          text: `将以下内容翻译成中文：${a.replace(/\n/g, "")}`,
-          token: settings.openai_token,
-          api: settings.openai_api_url,
-          model: settings.openai_model,
-        });
-        const translation = translationRes.choices[0].message.content;
-        setB(translation);
-      }
-    } catch (error) {
-      console.error("Error processing items:", error);
-    }
-
-    // const input = document.createElement("input");
-    // input.type = "file";
-    // input.accept = "audio/*"; // 只接受音频文件
-    // input.multiple = false; // 单个文件
-
-    // // 文件选择回调
-    // input.onchange = async (e) => {
-    //   const target = e.target as HTMLInputElement;
-    //   const files = target.files;
-    //   const file = files?.[0]!;
-
-    //   console.log(file);
-    //   console.time('transcription')
-    //   const transcriptionRes = await transcriptionAudio({
-    //     file,
-    //     api: settings.transcription_url,
-    //     auth: settings.transcription_token,
-    //     model: settings.transcription_model,
-    //   });
-    //   console.timeEnd('transcription')
-    //   const ask = settings.ai_template.replace("{text}", transcriptionRes.text);
-    //   console.time( "translate");
-    //   const translationRes = await translateByAI({
-    //     token: settings.openai_token,
-    //     text: ask,
-    //     api: settings.openai_api_url,
-    //     model: settings.openai_model,
-    //   });
-    //   console.timeEnd("translate")
-    //   const translation = translationRes.choices[0].message.content;
-    //   invoke("send_to_vrc_chat", {
-    //     text: translation,
-    //   });
-    //   eventBus.emit(
-    //     EventBusEvent.ADD_LOG,
-    //     t("识别成功", {
-    //       transcription: transcriptionRes.text,
-    //       translation,
-    //     }),
-    //   );
-    // };
-
-    // // 触发点击
-    // input.click();
-  };
-
   return (
     <div className={globalStyles.panel}>
       <div className={globalStyles.title}>🎙️ {t("语音识别控制")}</div>
@@ -209,9 +112,6 @@ export default function () {
         </button>
         <button onClick={refresh} className={globalStyles.button}>
           🔄️ {t("刷新")}
-        </button>
-        <button onClick={test} className={globalStyles.button}>
-          测试
         </button>
       </div>
       <div className={styles.recordingStatus}>
@@ -232,8 +132,6 @@ export default function () {
           </span>
         </span>
       </div>
-      <textarea style={{width:'45%',height:'200px'}} value={a}></textarea>
-      <textarea style={{width:'45%',height:'200px'}} value={b}></textarea>
     </div>
   );
 }
