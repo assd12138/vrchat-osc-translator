@@ -10,7 +10,7 @@ export default function () {
   const settings = useAppSelector((state) => state.settings);
   const [ocr, setOCR] = useState("");
   const [trans, setTrans] = useState("");
-  const test = async () => {
+  const ocrRecogonition = async () => {
     const items = await navigator.clipboard.read();
     console.log(items);
     let base64String: string | null = null;
@@ -61,13 +61,15 @@ export default function () {
   return (
     <div className={globalStyles.panel}>
       <div className={globalStyles.title}>📷 OCR </div>
-      <div>
-        <button onClick={test} className={globalStyles.button}>
-          测试
+      <div className={styles.btnCon}>
+        <button onClick={ocrRecogonition} className={globalStyles.button}>
+          {t('剪贴板图片翻译')}
         </button>
+        
       </div>
       <div className={styles.logContainer}>
         <textarea style={{ width: '45%', height: '200px' }} value={ocr}></textarea>
+        ➡
         <textarea style={{ width: '45%', height: '200px' }} value={trans}></textarea>
       </div>
     </div>
