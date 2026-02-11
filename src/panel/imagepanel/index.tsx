@@ -2,12 +2,35 @@ import { useTranslation } from "react-i18next";
 import globalStyles from "../../styles/index.module.css";
 import styles from "./index.module.css";
 import { getQiniuToken, uploadImage } from "../../api/imageCDN";
+import { createCompressTask, useWorkerHandler } from "@/utils/imagecompressor/transformer";
+
+// 获取图片尺寸
+const getImageDimensions = (url: string): Promise<{ width: number; height: number }> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+
+    img.onload = () => {
+      resolve({
+        width: img.width,
+        height: img.height
+      });
+    };
+
+    img.onerror = () => {
+      reject(new Error('Failed to load image'));
+    };
+
+    img.src = url;
+  });
+};
 
 export default function () {
   const { t } = useTranslation();
+  useWorkerHandler()
+
   const handleImageUpload = async () => {
     const items = await navigator.clipboard.read();
-    const tokenRes = await getQiniuToken()
+    // const tokenRes = await getQiniuToken()
     console.log(items);
 
     for (const item of items) {
@@ -23,10 +46,61 @@ export default function () {
         const file = new File([blob], "image.png", {
           type: blob.type,
         });
-        uploadImage({ file, token: tokenRes.token })
+
+
+
+        // 获取图片尺寸
+        const url = URL.createObjectURL(file);
+        try {
+          const dimensions = await getImageDimensions(url);
+          console.log('图片尺寸:', dimensions);
+
+          // 现在你可以使用 dimensions.width 和 dimensions.height
+          // uploadImage({ file, token: tokenRes.token })
+          createCompressTask({
+            blob: file,
+            height: dimensions.height,
+            width: dimensions.width,
+            name: 'aaaa.jpg',
+            // src: url,
+            key: 1
+          }, {
+            preview: {
+              maxSize: 256
+            },
+            resize: {
+              method: 'setLong',
+              long: 2048
+            },
+            format: {
+              transparentFill: '#ffffff'
+            },
+            jpeg: {
+              quality: 0.75
+            },
+            png: {
+              colors: 128,
+              dithering: 0.5
+            },
+            gif: {
+              colors: 128,
+              dithering: false
+            },
+            avif: {
+              quality: 50,
+              speed: 8
+            }
+          })
+
+        } catch (error) {
+          console.error('获取图片尺寸失败:', error);
+        } finally {
+          URL.revokeObjectURL(url);
+        }
+        break;
       }
     }
-    console.log(tokenRes);
+    // console.log(tokenRes);
   };
   return (
     <div className={globalStyles.panel}>
