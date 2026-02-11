@@ -23,4 +23,5 @@ export default {
   识别成功: '✅ Recognition successful. Original: {{transcription}}, Translation: {{translation}}',
   剪贴板图片翻译: 'Clipboard Image Translation',
   恢复默认: 'Restore Default',
+  图片上传: 'Image Upload',
 }
