@@ -1,6 +1,4 @@
 import { compressImage, upload } from "qiniu-js";
-import { request } from ".";
-import { format } from "date-fns";
 
 
 export const uploadImage = async (data: {
@@ -15,7 +13,9 @@ export const uploadImage = async (data: {
     type: res.dist.type,
   });
   
-  const ob = upload(newFile, format(new Date(), 'HH:mm:ss') + '.png' , data.token, undefined, {
+  const randomFileName = `${Date.now().toString(36)}_${Math.random().toString(36).substring(2)}.png`;
+
+  const ob = upload(newFile, randomFileName, data.token, undefined, {
     upprotocol: 'http'
   })
   ob.subscribe({
@@ -25,11 +25,5 @@ export const uploadImage = async (data: {
     complete(val) {
       console.log(val);
     }
-  })
-}
-
-export const getQiniuToken = () => {
-  return request('http://localhost:3802/qiniuToken', {
-    method: 'GET'
   })
 }

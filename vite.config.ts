@@ -10,6 +10,9 @@ const host = process.env.TAURI_DEV_HOST;
 // https://vite.dev/config/
 export default defineConfig(async () => ({
   plugins: [
+    codeInspectorPlugin({
+      bundler: 'vite'
+    }),
     react(),
     viteStaticCopy({
       targets: [
@@ -34,9 +37,6 @@ export default defineConfig(async () => ({
           dest: "./vad/",
         },
       ],
-    }),
-    codeInspectorPlugin({
-      bundler: 'vite'
     })],
   resolve: {
     alias: {

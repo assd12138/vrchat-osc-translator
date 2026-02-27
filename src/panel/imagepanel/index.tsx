@@ -1,10 +1,11 @@
 import { useTranslation } from "react-i18next";
 import globalStyles from "../../styles/index.module.css";
 import styles from "./index.module.css";
-import { getQiniuToken, uploadImage } from "../../api/imageCDN";
+import { uploadImage } from "../../api/imageCDN";
 import { createCompressTask, useWorkerHandler } from "@/utils/imagecompressor/transformer";
 import eventBus, { EventBusEvent } from "@/utils/eventBus";
 import { useEffect } from "react";
+import tauriInvoke from "@/cross-platform/invoke";
 
 // 获取图片尺寸
 const getImageDimensions = (url: string): Promise<{ width: number; height: number }> => {
@@ -107,10 +108,14 @@ export default function () {
   useEffect(()=>{
     eventBus.on(EventBusEvent.COMPRESS_IAMGE,async (res)=>{
       console.log(res.data.compress.blob)
-      const tokenRes = await getQiniuToken()
+      const token:string = await tauriInvoke("get_qiniu_token",{
+        accessKey:  "your_access_key",
+        secretKey: "your_secret_key",
+        bucket: "your_bucket_name"
+      });
       await uploadImage({
         file: res.data.compress.blob,
-        token: tokenRes.token
+        token
       })
     })
   },[])

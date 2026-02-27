@@ -1,5 +1,7 @@
+use qiniu_upload_token::{UploadPolicy,credential::Credential};
 use rosc::{OscMessage, OscPacket, OscType};
 use std::net::UdpSocket;
+use std::time::Duration;
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
@@ -25,12 +27,20 @@ async fn send_to_vrc_chat(text: String) -> Result<(), String> {
     Ok(())
 }
 
+#[tauri::command]
+async fn get_qiniu_token(access_key: String, secret_key: String, bucket: String) -> Result<String, String> {
+    let credential = Credential::new(&access_key, &secret_key);
+    let upload_token = UploadPolicy::new_for_bucket(&bucket, Duration::from_secs(3600))
+        .build_token(credential, Default::default());
+    Ok(upload_token.to_string())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![greet, send_to_vrc_chat])
+        .invoke_handler(tauri::generate_handler![greet, send_to_vrc_chat,get_qiniu_token])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
