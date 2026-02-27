@@ -3,6 +3,8 @@ import globalStyles from "../../styles/index.module.css";
 import styles from "./index.module.css";
 import { getQiniuToken, uploadImage } from "../../api/imageCDN";
 import { createCompressTask, useWorkerHandler } from "@/utils/imagecompressor/transformer";
+import eventBus, { EventBusEvent } from "@/utils/eventBus";
+import { useEffect } from "react";
 
 // 获取图片尺寸
 const getImageDimensions = (url: string): Promise<{ width: number; height: number }> => {
@@ -102,6 +104,16 @@ export default function () {
     }
     // console.log(tokenRes);
   };
+  useEffect(()=>{
+    eventBus.on(EventBusEvent.COMPRESS_IAMGE,async (res)=>{
+      console.log(res.data.compress.blob)
+      const tokenRes = await getQiniuToken()
+      await uploadImage({
+        file: res.data.compress.blob,
+        token: tokenRes.token
+      })
+    })
+  },[])
   return (
     <div className={globalStyles.panel}>
       <div className={globalStyles.title}>🏞️ Image</div>
