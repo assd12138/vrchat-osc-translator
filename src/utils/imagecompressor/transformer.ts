@@ -2,10 +2,11 @@ import { useEffect } from "react";
 import WorkerC from './wokercompress?worker'
 import { MessageData, OutputMessageData } from "./handler";
 import { CompressOption, ImageInfo } from "./imagebase";
+import eventBus, { EventBusEvent } from "../eventBus";
 let workerC: Worker | null = null
 
 const message = (event: MessageEvent<OutputMessageData>) => {
-  console.log('out',event);
+  eventBus.emitLast(EventBusEvent.COMPRESS_IAMGE,event)
 }
 export function useWorkerHandler() {
   useEffect(() => {
