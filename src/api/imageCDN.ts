@@ -1,3 +1,4 @@
+import eventBus, { EventBusEvent } from "@/utils/eventBus";
 import { compressImage, upload } from "qiniu-js";
 
 
@@ -23,7 +24,13 @@ export const uploadImage = async (data: {
       console.log('next', val);
     },
     complete(val) {
-      console.log(val);
+      const url = `http://qny.xcherry.top/${val.key}`
+      console.log(url);
+      eventBus.emit(EventBusEvent.ADD_LOG,url)
+
+      // navigator.clipboard.writeText(url).then(() => {
+      //   // alert('图片链接已复制到剪贴板');
+      // });
     }
   })
 }

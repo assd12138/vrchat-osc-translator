@@ -4,7 +4,8 @@
  */
 
 import { ImageBase, ProcessOutput } from "./imagebase";
-import { Module } from "./PngWasmModule";
+const {Module} = require("./PngWasmModule.js")
+// import { Module } from "./PngWasmModule";
 
 export class PngImage extends ImageBase {
   async compress(): Promise<ProcessOutput> {
