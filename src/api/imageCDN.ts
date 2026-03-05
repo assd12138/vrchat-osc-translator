@@ -13,7 +13,7 @@ export const uploadImage = async (data: {
   const newFile = new File([res.dist], "image.png", {
     type: res.dist.type,
   });
-  
+
   const randomFileName = `${Date.now().toString(36)}_${Math.random().toString(36).substring(2)}.png`;
 
   const ob = upload(newFile, randomFileName, data.token, undefined, {
@@ -24,9 +24,9 @@ export const uploadImage = async (data: {
       console.log('next', val);
     },
     complete(val) {
-      const url = `http://qny.xcherry.top/${val.key}`
+      const url = new URL(val.key, import.meta.env.VITE_DEFAULT_QINIU_URL).href
       console.log(url);
-      eventBus.emit(EventBusEvent.ADD_LOG,url)
+      eventBus.emit(EventBusEvent.ADD_LOG, url)
 
       // navigator.clipboard.writeText(url).then(() => {
       //   // alert('图片链接已复制到剪贴板');

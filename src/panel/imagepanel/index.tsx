@@ -103,15 +103,15 @@ export default function () {
         break;
       }
     }
-    // console.log(tokenRes);
   };
+
   useEffect(()=>{
     eventBus.on(EventBusEvent.COMPRESS_IAMGE,async (res)=>{
       console.log(res.data.compress.blob)
       const token:string = await tauriInvoke("get_qiniu_token",{
-        accessKey:  "your_access_key",
-        secretKey: "your_secret_key",
-        bucket: "your_bucket_name"
+        accessKey:  import.meta.env.VITE_DEFAULT_QINIU_ACCESS_KEY,
+        secretKey: import.meta.env.VITE_DEFAULT_QINIU_SECRET_KEY,
+        bucket: import.meta.env.VITE_DEFAULT_QINIU_BUCKET
       });
       await uploadImage({
         file: res.data.compress.blob,

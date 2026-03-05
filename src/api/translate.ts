@@ -58,10 +58,10 @@ export const translateByAI = (data: {
 };
 
 export const transformOCR = async ({ base64 }: { base64: string }) => {
-  return request("http://localhost:1234/v1/chat/completions", {
+  return request(import.meta.env.VITE_DEFAULT_OCR_URL, {
     method: "POST",
     body: JSON.stringify({
-      model: "glm-ocr",
+      model: import.meta.env.VITE_DEFAULT_OCR_MODEL,
       messages: [
         {
           role: "user",

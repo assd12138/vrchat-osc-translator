@@ -17,12 +17,12 @@ interface SettingState {
 }
 
 export const initialState: SettingState = {
-  transcription_url: "http://localhost:12313/v1/audio/transcriptions",
-  transcription_model: "whisper-large-v3-turbo",
-  transcription_token: "",
-  openai_api_url: "http://localhost:11434/v1/chat/completions",
-  openai_model: "gemma3:4b",
-  openai_token: "",
+  transcription_url: import.meta.env.VITE_DEFAULT_TRANSCRIPTION_URL,
+  transcription_model: import.meta.env.VITE_DEFAULT_TRANSCRIPTION_MODEL,
+  transcription_token: import.meta.env.VITE_DEFAULT_TRANSCRIPTION_TOKEN,
+  openai_api_url: import.meta.env.VITE_DEFAULT_OPENAI_API_URL,
+  openai_model: import.meta.env.VITE_DEFAULT_OPENAI_MODEL,
+  openai_token: import.meta.env.VITE_DEFAULT_OPENAI_TOKEN,
   ai_template: `请自动检测文本原文的语言类型并按以下模板翻译：
 【中】{中文翻译}
 【En】{英文翻译}

@@ -41,12 +41,12 @@ export default function () {
         console.time("ocr");
         const res = await transformOCR({ base64: base64String });
         console.log({ res });
-        const a = res.choices[0].message.content;
-        setOCR(a);
+        const ocrContent = res.choices[0].message.content;
+        setOCR(ocrContent);
         console.timeEnd("ocr");
 
         const translationRes = await translateByAI({
-          text: `将以下内容翻译成中文：${a.replace(/\n/g, "")}`,
+          text: `将以下内容翻译成中文：${ocrContent.replace(/\n/g, "")}`,
           token: settings.openai_token,
           api: settings.openai_api_url,
           model: settings.openai_model,
