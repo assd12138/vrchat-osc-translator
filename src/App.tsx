@@ -5,6 +5,7 @@ import Systemlog from './panel/systemlog';
 import Settingpanel from './panel/settingpanel';
 import Ocrpanel from './panel/ocrpanel';
 import Imagepanel from './panel/imagepanel';
+import Streamtranslatepanel from './panel/streamtranslatepanel';
 
 function App() {
 
@@ -16,6 +17,7 @@ function App() {
       <Translationpanel />
       <Settingpanel />
       <Systemlog />
+      <Streamtranslatepanel />
     </div>
   );
 }
