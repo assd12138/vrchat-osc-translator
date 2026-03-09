@@ -45,13 +45,14 @@ export default function AudioPanel() {
 							echoCancellation: true,
 							autoGainControl: true,
 							noiseSuppression: true,
-							deviceId
+							deviceId: {
+								exact: deviceId,
+							},
 						},
 					});
 					return stream;
 				},
 				onSpeechEnd: async (audio) => {
-					console.log("停止说话");
 					setSpeaking(false);
 
 					const wavBuffer = encodeWAV(audio);
