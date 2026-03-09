@@ -1,8 +1,8 @@
-.btnCon{
-  margin-bottom: 10px;
+.btnCon {
+	margin-bottom: 10px;
 }
-.logContainer{
-  display: flex;
-  align-items: center;
-  gap: 5px;
+.logContainer {
+	display: flex;
+	align-items: center;
+	gap: 5px;
 }

@@ -1,22 +1,23 @@
 // import { Queue } from "./Queue";
-import { MessageData, convert } from "./handler";
+import { convert, type MessageData } from "./handler";
+
 // import { avifCheck } from "./support";
 
 (async () => {
-  // Ensure avif check in worker
-  // await avifCheck();
-  // const queue = new Queue(3);
+	// Ensure avif check in worker
+	// await avifCheck();
+	// const queue = new Queue(3);
 
-  globalThis.addEventListener(
-    "message",
-    async (event: MessageEvent<MessageData>) => {
-      const output = await convert(event.data, "compress");
-        if (output) {
-          globalThis.postMessage(output);
-        }
-      // queue.push(async () => {
-        
-      // });
-    },
-  );
+	globalThis.addEventListener(
+		"message",
+		async (event: MessageEvent<MessageData>) => {
+			const output = await convert(event.data, "compress");
+			if (output) {
+				globalThis.postMessage(output);
+			}
+			// queue.push(async () => {
+
+			// });
+		},
+	);
 })();

@@ -1,15 +1,15 @@
 .logContainer {
-  background: #edf2f7;
-  padding: 15px;
-  border-radius: 6px;
-  margin: 10px 0;
-  font-family: monospace;
-  white-space: pre-wrap;
-  max-height: 200px;
-  overflow-y: auto;
+	background: #edf2f7;
+	padding: 15px;
+	border-radius: 6px;
+	margin: 10px 0;
+	font-family: monospace;
+	white-space: pre-wrap;
+	max-height: 200px;
+	overflow-y: auto;
 }
 
 .logItem {
-  display: flex;
-  align-items: baseline;
+	display: flex;
+	align-items: baseline;
 }

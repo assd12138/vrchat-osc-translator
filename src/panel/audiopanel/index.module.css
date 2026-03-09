@@ -1,29 +1,29 @@
 .buttongroup {
-  display: flex;
-  /* justify-content: space-between; */
-  gap: 1rem;
+	display: flex;
+	/* justify-content: space-between; */
+	gap: 1rem;
 }
 
 .statusIndicator {
-  display: inline-block;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  margin-right: 8px;
+	display: inline-block;
+	width: 12px;
+	height: 12px;
+	border-radius: 50%;
+	margin-right: 8px;
 }
 
 .statusSpeaking {
-  background-color: #23d441;
+	background-color: #23d441;
 }
 .statusPausing {
-  background-color: #f6c23e;
+	background-color: #f6c23e;
 }
 
 .statusInactive {
-  background-color: #e53e3e;
+	background-color: #e53e3e;
 }
 .recordingStatus {
-  display: flex;
-  align-items: center;
-  margin-top: 10px;
+	display: flex;
+	align-items: center;
+	margin-top: 10px;
 }

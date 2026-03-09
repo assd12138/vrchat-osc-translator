@@ -1,36 +1,33 @@
-import eventBus, { EventBusEvent } from "@/utils/eventBus";
 import { compressImage, upload } from "qiniu-js";
+import eventBus, { EventBusEvent } from "@/utils/eventBus";
 
+export const uploadImage = async (data: { file: File; token: string }) => {
+	const res = await compressImage(data.file, {
+		maxHeight: 2048,
+		maxWidth: 2048,
+	});
 
-export const uploadImage = async (data: {
-  file: File,
-  token: string
-}) => {
-  const res = await compressImage(data.file, {
-    maxHeight: 2048,
-    maxWidth: 2048,
-  })
-  const newFile = new File([res.dist], "image.png", {
-    type: res.dist.type,
-  });
+	const newFile = new File([res.dist], "image.png", {
+		type: res.dist.type,
+	});
 
-  const randomFileName = `${Date.now().toString(36)}_${Math.random().toString(36).substring(2)}.png`;
+	const randomFileName = `${Date.now().toString(36)}_${Math.random().toString(36).substring(2)}.png`;
 
-  const ob = upload(newFile, randomFileName, data.token, undefined, {
-    upprotocol: 'http'
-  })
-  ob.subscribe({
-    next(val) {
-      console.log('next', val);
-    },
-    complete(val) {
-      const url = new URL(val.key, import.meta.env.VITE_DEFAULT_QINIU_URL).href
-      console.log(url);
-      eventBus.emit(EventBusEvent.ADD_LOG, url)
+	const ob = upload(newFile, randomFileName, data.token, undefined, {
+		upprotocol: "http",
+	});
+	ob.subscribe({
+		next(val) {
+			console.log("next", val);
+		},
+		complete(val) {
+			const url = new URL(val.key, import.meta.env.VITE_DEFAULT_QINIU_URL).href;
+			console.log(url);
+			eventBus.emit(EventBusEvent.ADD_LOG, url);
 
-      // navigator.clipboard.writeText(url).then(() => {
-      //   // alert('图片链接已复制到剪贴板');
-      // });
-    }
-  })
-}
+			// navigator.clipboard.writeText(url).then(() => {
+			//   // alert('图片链接已复制到剪贴板');
+			// });
+		},
+	});
+};
