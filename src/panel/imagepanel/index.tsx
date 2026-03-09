@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import tauriInvoke from "@/cross-platform/invoke";
 import eventBus, { EventBusEvent } from "@/utils/eventBus";
@@ -34,6 +34,7 @@ const getImageDimensions = (
 
 export default function ImagePanel() {
 	const { t } = useTranslation();
+	const [url, setUrl] = useState("");
 	useWorkerHandler();
 
 	const handleImageUpload = async () => {
@@ -109,6 +110,9 @@ export default function ImagePanel() {
 		}
 	};
 
+	const copy = () => {
+		navigator.clipboard.writeText(url)
+	}
 	useEffect(() => {
 		eventBus.on(EventBusEvent.COMPRESS_IAMGE, async (res) => {
 			console.log(res.data.compress.blob);
@@ -117,10 +121,11 @@ export default function ImagePanel() {
 				secretKey: import.meta.env.VITE_DEFAULT_QINIU_SECRET_KEY,
 				bucket: import.meta.env.VITE_DEFAULT_QINIU_BUCKET,
 			});
-			await uploadImage({
+			const url = await uploadImage({
 				file: res.data.compress.blob,
 				token,
 			});
+			setUrl(url);
 		});
 	}, []);
 	return (
@@ -130,6 +135,12 @@ export default function ImagePanel() {
 				<button onClick={handleImageUpload} className={globalStyles.button}>
 					{t("图片上传")}
 				</button>
+				<button onClick={copy} className={globalStyles.button}>
+					{t("复制")}
+				</button>
+			</div>
+			<div>
+				<input className={globalStyles.inputS} type="text" value={url} />
 			</div>
 		</div>
 	);

@@ -1,7 +1,8 @@
 import { MicVAD } from "@ricky0123/vad-web";
 import { encodeWAV } from "@ricky0123/vad-web/dist/utils";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { loadMicDevices } from "@/utils";
 import { transcriptionAudio, translateByAI } from "../../api/translate";
 import invoke from "../../cross-platform/invoke";
 import { useAppSelector } from "../../store/hook";
@@ -17,6 +18,10 @@ export default function AudioPanel() {
 	const [recording, setRecording] = useState(false);
 	// 是否正在说话
 	const [speaking, setSpeaking] = useState(false);
+	// 麦克风设备选择
+	const [micDevices, setMicDevices] = useState<MediaDeviceInfo[]>([]);
+	// 选择的麦克风
+	const [deviceId, setDeviceId] = useState<string>();
 
 	const start = async () => {
 		try {
@@ -32,6 +37,18 @@ export default function AudioPanel() {
 				onSpeechStart: () => {
 					console.log("开始说话");
 					setSpeaking(true);
+				},
+				getStream: async () => {
+					const stream = await navigator.mediaDevices.getUserMedia({
+						audio: {
+							channelCount: 1,
+							echoCancellation: true,
+							autoGainControl: true,
+							noiseSuppression: true,
+							deviceId
+						},
+					});
+					return stream;
 				},
 				onSpeechEnd: async (audio) => {
 					console.log("停止说话");
@@ -97,19 +114,47 @@ export default function AudioPanel() {
 		window.location.reload();
 	};
 
+	useEffect(() => {
+		const load = async () => {
+			const devices = await loadMicDevices();
+			setDeviceId(devices.find(item => item.deviceId === 'default')?.deviceId || '')
+			setMicDevices(devices);
+		};
+		load();
+	}, []);
+
 	return (
 		<div className={globalStyles.panel}>
 			<div className={globalStyles.title}>🎙️ {t("语音识别控制")}</div>
 			<div className={styles.buttongroup}>
 				<button onClick={start} className={globalStyles.button}>
-					🎤 {t("开始")}
+					{t("开始")}
 				</button>
 				<button onClick={stop} className={globalStyles.button}>
-					⏹️ {t("停止")}
+					{t("停止")}
 				</button>
 				<button onClick={refresh} className={globalStyles.button}>
-					🔄️ {t("刷新")}
+					{t("刷新")}
 				</button>
+			</div>
+			<div>
+				<select
+					disabled={recording}
+					className={globalStyles.selectS}
+					name="microphones"
+					id="mic"
+					value={deviceId}
+					onChange={(value) => {
+						setDeviceId(value.target.value)
+					}}>
+					{
+						micDevices.map((device) => (
+							<option key={device.deviceId} value={device.deviceId}>
+								{device.label}
+							</option>
+						))
+					}
+				</select>
 			</div>
 			<div className={styles.recordingStatus}>
 				<span

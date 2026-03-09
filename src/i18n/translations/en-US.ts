@@ -26,4 +26,5 @@ export default {
 	剪贴板图片翻译: "Clipboard Image Translation",
 	恢复默认: "Restore Default",
 	图片上传: "Image Upload",
+	复制: "Copy",
 };

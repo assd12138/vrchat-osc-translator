@@ -3,7 +3,7 @@ import Audiopanel from "./panel/audiopanel";
 import Imagepanel from "./panel/imagepanel";
 import Ocrpanel from "./panel/ocrpanel";
 import Settingpanel from "./panel/settingpanel";
-import Streamtranslatepanel from "./panel/streamtranslatepanel";
+// import Streamtranslatepanel from "./panel/streamtranslatepanel";
 import Systemlog from "./panel/systemlog";
 import Translationpanel from "./panel/translationpanel";
 
@@ -16,7 +16,7 @@ function App() {
 			<Translationpanel />
 			<Settingpanel />
 			<Systemlog />
-			<Streamtranslatepanel />
+			{/* <Streamtranslatepanel /> */}
 		</div>
 	);
 }

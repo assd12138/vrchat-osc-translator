@@ -1,5 +1,4 @@
 import { compressImage, upload } from "qiniu-js";
-import eventBus, { EventBusEvent } from "@/utils/eventBus";
 
 export const uploadImage = async (data: { file: File; token: string }) => {
 	const res = await compressImage(data.file, {
@@ -16,18 +15,17 @@ export const uploadImage = async (data: { file: File; token: string }) => {
 	const ob = upload(newFile, randomFileName, data.token, undefined, {
 		upprotocol: "http",
 	});
-	ob.subscribe({
-		next(val) {
-			console.log("next", val);
-		},
-		complete(val) {
-			const url = new URL(val.key, import.meta.env.VITE_DEFAULT_QINIU_URL).href;
-			console.log(url);
-			eventBus.emit(EventBusEvent.ADD_LOG, url);
-
-			// navigator.clipboard.writeText(url).then(() => {
-			//   // alert('图片链接已复制到剪贴板');
-			// });
-		},
+	const url = await new Promise<string>((resolve) => {
+		ob.subscribe({
+			next(val) {
+				console.log("next", val);
+			},
+			complete(val) {
+				const url = new URL(val.key, import.meta.env.VITE_DEFAULT_QINIU_URL)
+					.href;
+				resolve(url);
+			},
+		});
 	});
+	return url;
 };
