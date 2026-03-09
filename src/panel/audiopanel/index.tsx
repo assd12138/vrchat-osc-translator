@@ -117,7 +117,9 @@ export default function AudioPanel() {
 	useEffect(() => {
 		const load = async () => {
 			const devices = await loadMicDevices();
-			setDeviceId(devices.find(item => item.deviceId === 'default')?.deviceId || '')
+			setDeviceId(
+				devices.find((item) => item.deviceId === "default")?.deviceId || "",
+			);
 			setMicDevices(devices);
 		};
 		load();
@@ -145,15 +147,14 @@ export default function AudioPanel() {
 					id="mic"
 					value={deviceId}
 					onChange={(value) => {
-						setDeviceId(value.target.value)
-					}}>
-					{
-						micDevices.map((device) => (
-							<option key={device.deviceId} value={device.deviceId}>
-								{device.label}
-							</option>
-						))
-					}
+						setDeviceId(value.target.value);
+					}}
+				>
+					{micDevices.map((device) => (
+						<option key={device.deviceId} value={device.deviceId}>
+							{device.label}
+						</option>
+					))}
 				</select>
 			</div>
 			<div className={styles.recordingStatus}>

@@ -111,8 +111,8 @@ export default function ImagePanel() {
 	};
 
 	const copy = () => {
-		navigator.clipboard.writeText(url)
-	}
+		navigator.clipboard.writeText(url);
+	};
 	useEffect(() => {
 		eventBus.on(EventBusEvent.COMPRESS_IAMGE, async (res) => {
 			console.log(res.data.compress.blob);
