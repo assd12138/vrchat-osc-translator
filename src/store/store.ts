@@ -4,7 +4,7 @@ import settingsSlice from "./settings";
 const rootReducer = combineSlices(settingsSlice);
 
 const store = configureStore({
-	reducer: rootReducer,
+  reducer: rootReducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

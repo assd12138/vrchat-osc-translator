@@ -8,30 +8,30 @@ import koKR from "./translations/ko-KR";
 import zhCN from "./translations/zh-CN";
 
 const resources = {
-	en: {
-		translation: enUS,
-	},
-	zh: {
-		translation: zhCN,
-	},
-	ja: {
-		translation: jaJP,
-	},
-	ko: {
-		translation: koKR,
-	},
+  en: {
+    translation: enUS,
+  },
+  zh: {
+    translation: zhCN,
+  },
+  ja: {
+    translation: jaJP,
+  },
+  ko: {
+    translation: koKR,
+  },
 };
 
 i18next.use(initReactI18next).init({
-	debug: true,
-	lng:
-		store.getState().settings.language === "auto"
-			? navigator.language
-			: store.getState().settings.language,
-	resources,
-	fallbackLng: {
-		default: ["en"],
-	},
+  debug: true,
+  lng:
+    store.getState().settings.language === "auto"
+      ? navigator.language
+      : store.getState().settings.language,
+  resources,
+  fallbackLng: {
+    default: ["en"],
+  },
 });
 
 export default i18next;
