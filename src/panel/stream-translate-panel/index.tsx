@@ -4,7 +4,7 @@ import {
   pushChunk,
   startTranscriptSession,
   streamFinish,
-} from "@/api/streamtranslate";
+} from "@/api/stream-translate";
 import { concatFloat32, resampleLinear } from "@/utils";
 // import { useAppDispatch, useAppSelector } from "../../store/hook";
 import globalStyles from "../../styles/index.module.css";

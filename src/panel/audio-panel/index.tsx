@@ -7,7 +7,7 @@ import { transcriptionAudio, translateByAI } from "../../api/translate";
 import invoke from "../../cross-platform/invoke";
 import { useAppSelector } from "../../store/hook";
 import globalStyles from "../../styles/index.module.css";
-import eventBus, { EventBusEvent } from "../../utils/eventBus";
+import eventBus, { EventBusEvent } from "../../utils/event-bus";
 import styles from "./index.module.css";
 
 export default function AudioPanel() {

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import eventBus, { EventBusEvent } from "../eventBus";
+import eventBus, { EventBusEvent } from "../event-bus";
 import type { MessageData, OutputMessageData } from "./handler";
 import type { CompressOption, ImageInfo } from "./imagebase";
 import WorkerC from "./wokercompress?worker";

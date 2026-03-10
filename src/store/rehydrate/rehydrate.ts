@@ -13,7 +13,7 @@ import {
   REDUX_STORAGE_KEY,
   REHYDRATE_KEYS,
   rehydrateFlag,
-} from "./rehydrateConstant";
+} from "./rehydrate-constant";
 
 export const rehydrateMapper = {
   [REHYDRATE_KEYS.SETTING_AI_TEMPLATE]: setAiTemplate,

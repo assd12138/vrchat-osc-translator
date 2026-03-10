@@ -1,11 +1,11 @@
 import "./App.css";
-import Audiopanel from "./panel/audiopanel";
-import Imagepanel from "./panel/imagepanel";
-import Ocrpanel from "./panel/ocrpanel";
-import Settingpanel from "./panel/settingpanel";
+import Audiopanel from "./panel/audio-panel";
+import Imagepanel from "./panel/image-panel";
+import Ocrpanel from "./panel/ocr-panel";
+import Settingpanel from "./panel/setting-panel";
 // import Streamtranslatepanel from "./panel/streamtranslatepanel";
-import Systemlog from "./panel/systemlog";
-import Translationpanel from "./panel/translationpanel";
+import Systemlog from "./panel/system-log";
+import Translationpanel from "./panel/translation-panel";
 
 function App() {
   return (

@@ -2,8 +2,8 @@ import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import {
   REDUX_STORAGE_KEY,
   REHYDRATE_KEYS,
-} from "./rehydrate/rehydrateConstant";
-import { redux_store } from "./rehydrate/rehydrateStore";
+} from "./rehydrate/rehydrate-constant";
+import { redux_store } from "./rehydrate/rehydrate-store";
 
 interface SettingState {
   transcription_url: string;

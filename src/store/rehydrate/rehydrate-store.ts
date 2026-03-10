@@ -1,4 +1,4 @@
-import { REDUX_STORAGE_KEY, rehydrateFlag } from "./rehydrateConstant";
+import { REDUX_STORAGE_KEY, rehydrateFlag } from "./rehydrate-constant";
 
 export function redux_store(module: string, data: string) {
   if (!rehydrateFlag.flag) return;

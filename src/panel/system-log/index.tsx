@@ -2,7 +2,7 @@ import { format } from "date-fns";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import globalStyles from "../../styles/index.module.css";
-import eventBus, { EventBusEvent } from "../../utils/eventBus";
+import eventBus, { EventBusEvent } from "../../utils/event-bus";
 import styles from "./index.module.css";
 
 export default function SystemLog() {

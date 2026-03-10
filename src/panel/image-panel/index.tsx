@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import tauriInvoke from "@/cross-platform/invoke";
-import eventBus, { EventBusEvent } from "@/utils/eventBus";
+import eventBus, { EventBusEvent } from "@/utils/event-bus";
 import {
   createCompressTask,
   useWorkerHandler,
 } from "@/utils/imagecompressor/transformer";
-import { uploadImage } from "../../api/imageCDN";
+import { uploadImage } from "../../api/image-cdn";
 import globalStyles from "../../styles/index.module.css";
 import styles from "./index.module.css";
 
