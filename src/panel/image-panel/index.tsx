@@ -130,7 +130,7 @@ export default function ImagePanel() {
   }, []);
   return (
     <div className={globalStyles.panel}>
-      <div className={globalStyles.title}>🏞️ Image</div>
+      <div className={globalStyles.title}>{t("图片分享")}</div>
       <div className={styles.btnCon}>
         <button onClick={handleImageUpload} className={globalStyles.button}>
           {t("图片上传")}

@@ -27,4 +27,5 @@ export default {
   恢复默认: "Restore Default",
   图片上传: "Image Upload",
   复制: "Copy",
+  图片分享: "Image Sharing",
 };
