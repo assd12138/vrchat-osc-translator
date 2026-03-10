@@ -3,7 +3,7 @@ import { encodeWAV } from "@ricky0123/vad-web/dist/utils";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { loadMicDevices } from "@/utils";
-import { transcriptionAudio, translateByAI } from "../../api/translate";
+import { transcriptionAudio, translateByAI, translateByAIStream } from "../../api/translate";
 import invoke from "../../cross-platform/invoke";
 import { useAppSelector } from "../../store/hook";
 import globalStyles from "../../styles/index.module.css";
@@ -71,6 +71,8 @@ export default function AudioPanel() {
             "{text}",
             transcriptionRes.text,
           );
+
+          // 流式翻译
           const translationRes = await translateByAI({
             text: ask,
             token: settings.openai_token,
@@ -78,19 +80,62 @@ export default function AudioPanel() {
             model: settings.openai_model,
             assignObj: {
               max_tokens: 500,
+              stream: true,
             },
           });
-          const translation = translationRes.choices[0].message.content;
-          invoke("send_to_vrc_chat", {
-            text: translation,
-          });
-          eventBus.emit(
-            EventBusEvent.ADD_LOG,
-            t("识别成功", {
-              transcription: transcriptionRes.text,
-              translation,
-            }),
-          );
+
+          // 处理流式响应
+          const reader = translationRes.body?.getReader();
+          if (!reader) {
+
+            return;
+          }
+
+          let fullTranslation = "";
+          const decoder = new TextDecoder();
+
+          try {
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+
+              const chunk = decoder.decode(value, { stream: true });
+              // 解析 SSE 格式的数据行
+              const lines = chunk.split("\n");
+              for (const line of lines) {
+                if (line.startsWith("data: ")) {
+                  const dataStr = line.slice(6);
+                  if (dataStr === "[DONE]") continue;
+                  try {
+                    const parsed = JSON.parse(dataStr);
+                    const delta = parsed.choices?.[0]?.delta?.content;
+                    if (delta) {
+                      fullTranslation += delta;
+                      console.log('翻译', fullTranslation);
+
+                      // 实时发送到 VRChat
+                      invoke("send_to_vrc_chat", {
+                        text: fullTranslation,
+                      });
+                    }
+                  } catch {
+                    // 跳过无法解析的行
+                  }
+                }
+              }
+            }
+
+            // 完成后添加日志
+            eventBus.emit(
+              EventBusEvent.ADD_LOG,
+              t("识别成功", {
+                transcription: transcriptionRes.text,
+                translation: fullTranslation,
+              }),
+            );
+          } catch (error) {
+            console.error("流式翻译错误:", error);
+          }
         },
       });
       vad.start();
@@ -101,6 +146,80 @@ export default function AudioPanel() {
       console.error(e);
     }
   };
+
+  const test = async () => {
+    const ask = settings.ai_template.replace(
+      "{text}",
+      `I used to work for Lotus, supporting 1-2-3.
+Mucking around with autoexec.bat, config.sys, emm386 etc to get 1-2-3 to load was fun. Lots of TSRs using up memory. The amount of times I had to tell people to create a "clean config" by commenting out most of autoexec.bat...
+
+We also had to post people floppy disks with the correct printer driver on. No downloads in those days.
+
+"What would a piece of software have to do today to make you cheer and applaud upon seeing a demo?"
+
+I was at LotusSphere when Lotus Notes 4 was announced and demo-ed. That got a standing ovation.
+`,
+    );
+    console.log(ask);
+
+
+    // 流式翻译
+    const translationRes = await translateByAIStream({
+      text: ask,
+      token: settings.openai_token,
+      api: settings.openai_api_url,
+      model: settings.openai_model,
+      assignObj: {
+        max_tokens: 500
+      },
+    });
+    console.log('bbbb');
+
+
+    // 处理流式响应
+    const reader = translationRes.body?.getReader();
+    if (!reader) {
+
+      return;
+    }
+
+    let fullTranslation = "";
+    const decoder = new TextDecoder();
+
+
+    console.log('aaa');
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value, { stream: true });
+      // 解析 SSE 格式的数据行
+      const lines = chunk.split("\n");
+      for (const line of lines) {
+        if (line.startsWith("data: ")) {
+          const dataStr = line.slice(6);
+          if (dataStr === "[DONE]") continue;
+          try {
+            const parsed = JSON.parse(dataStr);
+            const delta = parsed.choices?.[0]?.delta?.content;
+            if (delta) {
+              fullTranslation += delta;
+              console.log('翻译', fullTranslation);
+
+              // 实时发送到 VRChat
+              invoke("send_to_vrc_chat", {
+                text: fullTranslation,
+              });
+            }
+          } catch {
+            // 跳过无法解析的行
+          }
+        }
+      }
+    }
+
+  }
 
   const stop = () => {
     if (!myVad.current) return;
@@ -137,6 +256,9 @@ export default function AudioPanel() {
           {t("停止")}
         </button>
         <button onClick={refresh} className={globalStyles.button}>
+          {t("刷新")}
+        </button>
+        <button onClick={test} className={globalStyles.button}>
           {t("刷新")}
         </button>
       </div>
