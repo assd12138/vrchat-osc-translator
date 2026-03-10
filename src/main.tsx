@@ -10,8 +10,8 @@ import "./i18n/index";
 
 const loadResources = () => {
   const loadList = [
-    fetch(new URL("./utils/imagecompressor/png.wasm", import.meta.url)),
-    import("./utils/imagecompressor/WokerCompress?worker"),
+    // fetch(new URL("./utils/imagecompressor/png.wasm", import.meta.url)),
+    // import("./utils/imagecompressor/WokerCompress?worker"),
   ];
 
   return Promise.all(loadList);
