@@ -3,7 +3,7 @@ import { encodeWAV } from "@ricky0123/vad-web/dist/utils";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { loadMicDevices } from "@/utils";
-import { transcriptionAudio, translateByAIStream } from "../../api/translate";
+import { transcriptionAudio, translateByAI } from "../../api/translate";
 import invoke from "../../cross-platform/invoke";
 import { useAppSelector } from "../../store/hook";
 import globalStyles from "../../styles/index.module.css";
@@ -72,68 +72,26 @@ export default function AudioPanel() {
             transcriptionRes.text,
           );
 
-          // 流式翻译
-          const translationRes = await translateByAIStream({
+          const translationRes = await translateByAI({
             text: ask,
             token: settings.openai_token,
             api: settings.openai_api_url,
             model: settings.openai_model,
             assignObj: {
               max_tokens: 500,
-              stream: true,
             },
           });
-
-          // 处理流式响应
-          const reader = translationRes.body?.getReader();
-          if (!reader) {
-            return;
-          }
-
-          let fullTranslation = "";
-          const decoder = new TextDecoder();
-
-          try {
-            while (true) {
-              const { done, value } = await reader.read();
-              if (done) break;
-
-              const chunk = decoder.decode(value, { stream: true });
-              // 解析 SSE 格式的数据行
-              const lines = chunk.split("\n");
-              for (const line of lines) {
-                if (line.startsWith("data:")) {
-                  const dataStr = line.slice(5);
-                  if (dataStr === "[DONE]") continue;
-                  try {
-                    const parsed = JSON.parse(dataStr);
-                    const delta = parsed.choices?.[0]?.delta?.content;
-                    if (delta) {
-                      fullTranslation += delta;
-                      console.log(fullTranslation);
-                      // 实时发送到 VRChat
-                      invoke("send_to_vrc_chat", {
-                        text: fullTranslation,
-                      });
-                    }
-                  } catch {
-                    // 跳过无法解析的行
-                  }
-                }
-              }
-            }
-
-            // 完成后添加日志
-            eventBus.emit(
-              EventBusEvent.ADD_LOG,
-              t("识别成功", {
-                transcription: transcriptionRes.text,
-                translation: fullTranslation,
-              }),
-            );
-          } catch (error) {
-            console.error("流式翻译错误:", error);
-          }
+          const translation = translationRes.choices[0].message.content;
+          invoke("send_to_vrc_chat", {
+            text: translation,
+          });
+          eventBus.emit(
+            EventBusEvent.ADD_LOG,
+            t("识别成功", {
+              transcription: transcriptionRes.text,
+              translation,
+            }),
+          );
         },
       });
       vad.start();
