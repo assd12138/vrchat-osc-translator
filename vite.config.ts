@@ -4,7 +4,6 @@ import { codeInspectorPlugin } from "code-inspector-plugin";
 import { defineConfig } from "vite";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 
-// @ts-expect-error process is a nodejs global
 const host = process.env.TAURI_DEV_HOST;
 
 // https://vite.dev/config/
@@ -25,15 +24,11 @@ export default defineConfig(async () => ({
           dest: "./vad/",
         },
         {
-          src: "node_modules/@ricky0123/vad-web/dist/silero_vad_legacy.onnx",
+          src: "node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.wasm",
           dest: "./vad/",
         },
         {
-          src: "node_modules/onnxruntime-web/dist/*.wasm",
-          dest: "./vad/",
-        },
-        {
-          src: "node_modules/onnxruntime-web/dist/*.mjs",
+          src: "node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.mjs",
           dest: "./vad/",
         },
       ],
