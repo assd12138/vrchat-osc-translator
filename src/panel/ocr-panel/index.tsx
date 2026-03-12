@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { openOtherWindow } from "@/cross-platform/openOtherWindow";
 import { transformOCR, translateByAI } from "../../api/translate";
 import { useAppSelector } from "../../store/hook";
 import globalStyles from "../../styles/index.module.css";
@@ -58,6 +59,13 @@ export default function OcrPanel() {
       console.error("Error processing items:", error);
     }
   };
+  const otherTrans = async () => {
+    // openOtherWindow();
+    const stream = await navigator.mediaDevices.getDisplayMedia({
+      video: true,
+      audio: true,
+    });
+  };
   return (
     <div className={globalStyles.panel}>
       <div className={globalStyles.title}>📷 OCR </div>
@@ -68,6 +76,13 @@ export default function OcrPanel() {
           className={globalStyles.button}
         >
           {t("剪贴板图片翻译")}
+        </button>
+        <button
+          type="button"
+          onClick={otherTrans}
+          className={globalStyles.button}
+        >
+          打开识别
         </button>
       </div>
       <div className={styles.logContainer}>

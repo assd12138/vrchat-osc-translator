@@ -6,13 +6,20 @@
   "permissions": [
     "core:default",
     "opener:default",
+    "core:window:default",
+    "core:webview:default",
+    "core:window:allow-show",
+    "core:webview:allow-create-webview-window",
     {
       "identifier": "http:default",
-      "allow": [{
-        "url": "http://*:*"
-      },{
-        "url": "https://*:*"
-      }]
+      "allow": [
+        {
+          "url": "http://*:*"
+        },
+        {
+          "url": "https://*:*"
+        }
+      ]
     }
   ]
 }
