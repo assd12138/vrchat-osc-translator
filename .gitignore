@@ -25,3 +25,6 @@ dist-ssr
 
 # Claude Code
 .claude/
+
+#不上传C++编译结果文件
+src-cpp/*/build

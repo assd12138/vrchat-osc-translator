@@ -2051,6 +2051,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c5a2d376baa530d1238d133232d15e239abad80d05838b4b59354e5268af431f"
 
 [[package]]
+name = "libloader"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4d39e73d63036eb973937a3d247e8c9799b1cd0e131079ae8aba294cb0328073"
+dependencies = [
+ "libloading",
+]
+
+[[package]]
 name = "libloading"
 version = "0.7.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4822,6 +4831,7 @@ checksum = "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a"
 name = "vrchat-translator"
 version = "0.1.0"
 dependencies = [
+ "libloader",
  "qiniu-upload-token",
  "rosc",
  "serde",

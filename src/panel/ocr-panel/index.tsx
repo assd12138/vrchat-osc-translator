@@ -1,6 +1,7 @@
+import { invoke } from "@tauri-apps/api/core";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { openOtherWindow } from "@/cross-platform/openOtherWindow";
+// import { openOtherWindow } from "@/cross-platform/openOtherWindow";
 import { transformOCR, translateByAI } from "../../api/translate";
 import { useAppSelector } from "../../store/hook";
 import globalStyles from "../../styles/index.module.css";
@@ -61,10 +62,10 @@ export default function OcrPanel() {
   };
   const otherTrans = async () => {
     // openOtherWindow();
-    const stream = await navigator.mediaDevices.getDisplayMedia({
-      video: true,
-      audio: true,
-    });
+    // const stream = await navigator.mediaDevices.getDisplayMedia({
+    //   video: true,
+    //   audio: true,
+    // });
   };
   return (
     <div className={globalStyles.panel}>
@@ -83,6 +84,16 @@ export default function OcrPanel() {
           className={globalStyles.button}
         >
           打开识别
+        </button>
+        <button
+          type="button"
+          onClick={async () => {
+            const res = await invoke<string>("dlltest", { a: 4, b: 100 });
+            alert(res);
+          }}
+          className={globalStyles.button}
+        >
+          动态库测试
         </button>
       </div>
       <div className={styles.logContainer}>

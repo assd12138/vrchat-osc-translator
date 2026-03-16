@@ -1,12 +1,14 @@
-use qiniu_upload_token::{UploadPolicy,credential::Credential};
+use libloader::{get_libfn, libloading};
+use qiniu_upload_token::{credential::Credential, UploadPolicy};
 use rosc::{OscMessage, OscPacket, OscType};
 use std::net::UdpSocket;
 use std::time::Duration;
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
+fn dlltest(a: i32, b: i32) -> String {
+    get_libfn!("./clibs/libmathlib.dylib","add",my_add, i32,a:i32,b:i32);
+    format!("{} + {} = {}", a, b, my_add(a, b))
 }
 
 #[tauri::command]
@@ -28,7 +30,11 @@ async fn send_to_vrc_chat(text: String) -> Result<(), String> {
 }
 
 #[tauri::command]
-async fn get_qiniu_token(access_key: String, secret_key: String, bucket: String) -> Result<String, String> {
+async fn get_qiniu_token(
+    access_key: String,
+    secret_key: String,
+    bucket: String,
+) -> Result<String, String> {
     let credential = Credential::new(&access_key, &secret_key);
     let upload_token = UploadPolicy::new_for_bucket(&bucket, Duration::from_secs(3600))
         .build_token(credential, Default::default());
@@ -40,7 +46,11 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![greet, send_to_vrc_chat,get_qiniu_token])
+        .invoke_handler(tauri::generate_handler![
+            dlltest,
+            send_to_vrc_chat,
+            get_qiniu_token
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
