@@ -1,5 +1,4 @@
-use libloading::Library;
-use libloading::Symbol;
+use libloading::{Library, Symbol};
 use qiniu_upload_token::{credential::Credential, UploadPolicy};
 use rosc::{OscMessage, OscPacket, OscType};
 use std::net::UdpSocket;
@@ -9,22 +8,77 @@ use tauri::Manager;
 
 type AddFunc = unsafe extern "C" fn(i32, i32) -> i32;
 
-// Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-// fn dynamic_load(lib_path: String) -> Result<>
+/// 应用全局状态
+struct AppState {
+    /// 预加载的动态库
+    loaded_libs: LoadedLibs,
+    // 未来可以在这里添加其他状态成员
+}
 
-#[tauri::command]
-fn dlltest(app_handle: tauri::AppHandle, a: i32, b: i32) -> Result<String, String> {
-    let libpath = app_handle
+impl AppState {
+    fn new(app_handle: &tauri::AppHandle) -> Result<Self, String> {
+        Ok(AppState {
+            loaded_libs: LoadedLibs::new(app_handle)?,
+        })
+    }
+}
+
+/// 预加载的动态库
+struct LoadedLibs {
+    /// 保存 Library 实例，防止被释放
+    _math_lib: Library,
+    /// 预加载的 add 函数句柄
+    add_func: AddFunc,
+}
+
+impl LoadedLibs {
+    /// 在应用启动时加载所有需要的动态库
+    fn new(app_handle: &tauri::AppHandle) -> Result<Self, String> {
+        let lib = dynamic_load("mathlib".to_string(), app_handle)?;
+
+        unsafe {
+            let add_func: Symbol<AddFunc> = lib.get(b"add").map_err(|_| "加载 add 函数失败")?;
+            // 先提取函数指针，解除与 lib 的生命周期绑定
+            let add_func_ptr = *add_func.into_raw();
+
+            Ok(LoadedLibs {
+                _math_lib: lib,
+                add_func: add_func_ptr,
+            })
+        }
+    }
+}
+
+/// 根据平台不同，动态加载动态库
+/// 返回 Library 实例供调用者管理生命周期
+fn dynamic_load(lib_name: String, app_handle: &tauri::AppHandle) -> Result<Library, String> {
+    let (prefix, suffix) = if cfg!(target_os = "windows") {
+        ("", ".dll")
+    } else if cfg!(target_os = "macos") || cfg!(target_os = "ios") {
+        ("lib", ".dylib")
+    } else {
+        // Linux, Android, etc.
+        ("lib", ".so")
+    };
+
+    let filename = format!("{}{}{}", prefix, lib_name, suffix);
+    let lib_path = app_handle
         .path()
-        .resolve("resources/clibs/libmathlib.dylib", BaseDirectory::Resource)
-        .expect("resources error")
+        .resolve(
+            &format!("resources/clibs/{}", filename),
+            BaseDirectory::Resource,
+        )
+        .map_err(|e| format!("资源路径解析失败：{}", e))?
         .to_string_lossy()
         .into_owned();
-    let result = unsafe {
-        let lib = Library::new(libpath).expect("加载库异常");
-        let my_add: Symbol<AddFunc> = lib.get(b"add").map_err(|_e| "加载函数异常")?;
-        my_add(a, b)
-    };
+
+    unsafe { Library::new(&lib_path).map_err(|e| format!("加载库失败 [{}]: {}", lib_path, e)) }
+}
+
+#[tauri::command]
+fn dlltest(a: i32, b: i32, state: tauri::State<AppState>) -> Result<String, String> {
+    // 直接使用预加载的函数句柄
+    let result = unsafe { (state.loaded_libs.add_func)(a, b) };
     Ok(format!("{} + {} = {}", a, b, result))
 }
 
@@ -63,6 +117,12 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_opener::init())
+        .setup(|app| {
+            // 应用启动时初始化全局状态
+            let state = AppState::new(&app.app_handle())?;
+            app.manage(state);
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             dlltest,
             send_to_vrc_chat,
