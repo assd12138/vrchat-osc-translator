@@ -7,7 +7,6 @@ use std::net::UdpSocket;
 use std::time::Duration;
 use tauri::Manager;
 
-type AddFunc = unsafe extern "C" fn(i32, i32) -> i32;
 
 /// 应用全局状态
 struct AppState {
@@ -28,7 +27,10 @@ impl AppState {
 fn dlltest(a: i32, b: i32, state: tauri::State<AppState>) -> Result<String, String> {
     // 直接使用预加载的函数句柄
     let result = unsafe { (state.loaded_libs.get_add_func())(a, b) };
-    Ok(format!("{} + {} = {}", a, b, result))
+    let check_vr_installed = unsafe { (state.loaded_libs.get_vr_is_installed_func())() };
+
+    Ok(format!("{} + {} = {},{}", a, b, result,check_vr_installed))
+  
 }
 
 #[tauri::command]
