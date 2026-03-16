@@ -67,6 +67,7 @@ export default function OcrPanel() {
     //   audio: true,
     // });
   };
+  const [test, setTest] = useState("");
   return (
     <div className={globalStyles.panel}>
       <div className={globalStyles.title}>📷 OCR </div>
@@ -88,14 +89,21 @@ export default function OcrPanel() {
         <button
           type="button"
           onClick={async () => {
-            const res = await invoke<string>("dlltest", { a: 4, b: 100 });
-            alert(res);
+            try {
+              const res = await invoke<string>("dlltest", { a: 4, b: 100 });
+              setTest(res);
+            } catch (error) {
+              if (error instanceof Error) {
+                setTest(error.message);
+              }
+            }
           }}
           className={globalStyles.button}
         >
           动态库测试
         </button>
       </div>
+      <div>{test}</div>
       <div className={styles.logContainer}>
         <textarea
           style={{ width: "45%", height: "200px" }}

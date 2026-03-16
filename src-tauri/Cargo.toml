@@ -26,4 +26,4 @@ rosc = "0.8"
 tokio = { version = "1", features = ["full"] }
 tauri-plugin-http = "2"
 qiniu-upload-token = "0.2.4"
-libloader = "0.1.4" #动态库加载
+libloading = "0.8" #动态库加载

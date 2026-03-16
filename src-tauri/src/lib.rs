@@ -1,14 +1,31 @@
-use libloader::{get_libfn, libloading};
+use libloading::Library;
+use libloading::Symbol;
 use qiniu_upload_token::{credential::Credential, UploadPolicy};
 use rosc::{OscMessage, OscPacket, OscType};
 use std::net::UdpSocket;
 use std::time::Duration;
+use tauri::path::BaseDirectory;
+use tauri::Manager;
+
+type AddFunc = unsafe extern "C" fn(i32, i32) -> i32;
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
+// fn dynamic_load(lib_path: String) -> Result<>
+
 #[tauri::command]
-fn dlltest(a: i32, b: i32) -> String {
-    get_libfn!("./clibs/libmathlib.dylib","add",my_add, i32,a:i32,b:i32);
-    format!("{} + {} = {}", a, b, my_add(a, b))
+fn dlltest(app_handle: tauri::AppHandle, a: i32, b: i32) -> Result<String, String> {
+    let libpath = app_handle
+        .path()
+        .resolve("resources/clibs/libmathlib.dylib", BaseDirectory::Resource)
+        .expect("resources error")
+        .to_string_lossy()
+        .into_owned();
+    let result = unsafe {
+        let lib = Library::new(libpath).expect("加载库异常");
+        let my_add: Symbol<AddFunc> = lib.get(b"add").map_err(|_e| "加载函数异常")?;
+        my_add(a, b)
+    };
+    Ok(format!("{} + {} = {}", a, b, result))
 }
 
 #[tauri::command]
