@@ -1,6 +1,6 @@
-import { invoke } from "@tauri-apps/api/core";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import tauriInvoke from "@/cross-platform/invoke";
 // import { openOtherWindow } from "@/cross-platform/openOtherWindow";
 import { transformOCR, translateByAI } from "../../api/translate";
 import { useAppSelector } from "../../store/hook";
@@ -90,7 +90,10 @@ export default function OcrPanel() {
           type="button"
           onClick={async () => {
             try {
-              const res = await invoke<string>("dlltest", { a: 4, b: 100 });
+              const res = await tauriInvoke<string>("dlltest", {
+                a: 4,
+                b: 100,
+              });
               setTest(res);
             } catch (error) {
               if (error instanceof Error) {

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { loadMicDevices } from "@/utils";
 import { transcriptionAudio, translateByAI } from "../../api/translate";
-import invoke from "../../cross-platform/invoke";
+import tauriInvoke from "../../cross-platform/invoke";
 import { useAppSelector } from "../../store/hook";
 import globalStyles from "../../styles/index.module.css";
 import eventBus, { EventBusEvent } from "../../utils/event-bus";
@@ -82,7 +82,7 @@ export default function AudioPanel() {
             },
           });
           const translation = translationRes.choices[0].message.content;
-          invoke("send_to_vrc_chat", {
+          tauriInvoke("send_to_vrc_chat", {
             text: translation,
           });
           eventBus.emit(
