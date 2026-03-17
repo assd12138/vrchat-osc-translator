@@ -22,3 +22,11 @@ For transcribe api, you can host it by use whisper-cpp(cpu transcribe it too slo
 For translate api, you can host it by ollama or llm studio, or just buy an api key from sass company like [openrouter](https://openrouter.ai/),some may even supply some free tiny models.
 
 These keys should not be shared with anyone. The leak of auth key maybe cost you a lot of money.
+
+## develop
+
+Basically, it's easy to develop the frontend part by using nodejs, to run the tauri part, you need to setup the follow environment
+
+1. [Rust](https://www.rust-lang.org/)
+2. [Tauri](https://tauri.app/)
+3. For openvr library, you also need to install MSVC/cmake/llvm to support the openvr-sys crates compile and static link openvr to application on windows. See also [openvr-sys](https://github.com/rust-openvr/rust-openvr?tab=readme-ov-file#requirements)

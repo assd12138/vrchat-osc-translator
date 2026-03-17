@@ -7,7 +7,6 @@ use std::net::UdpSocket;
 use std::time::Duration;
 use tauri::Manager;
 
-
 /// 应用全局状态
 struct AppState {
     /// 预加载的动态库
@@ -23,14 +22,18 @@ impl AppState {
     }
 }
 
+fn testopenvrbind() -> bool {
+    let is_installed: bool = unsafe { openvr_sys::VR_IsRuntimeInstalled() };
+
+    is_installed
+}
+
 #[tauri::command]
 fn dlltest(a: i32, b: i32, state: tauri::State<AppState>) -> Result<String, String> {
     // 直接使用预加载的函数句柄
     let result = unsafe { (state.loaded_libs.get_add_func())(a, b) };
-    let check_vr_installed = unsafe { (state.loaded_libs.get_vr_is_installed_func())() };
 
-    Ok(format!("{} + {} = {},{}", a, b, result,check_vr_installed))
-  
+    Ok(format!("{} + {} = {},{}", a, b, result, testopenvrbind()))
 }
 
 #[tauri::command]
