@@ -1,4 +1,5 @@
 mod lib_loader;
+mod libopenvr;
 
 use lib_loader::LoadedLibs;
 use qiniu_upload_token::{credential::Credential, UploadPolicy};
@@ -33,7 +34,14 @@ fn dlltest(a: i32, b: i32, state: tauri::State<AppState>) -> Result<String, Stri
     // 直接使用预加载的函数句柄
     let result = unsafe { (state.loaded_libs.get_add_func())(a, b) };
 
-    Ok(format!("{} + {} = {},{}", a, b, result, testopenvrbind()))
+    Ok(format!(
+        "{} + {} = {},{},{}",
+        a,
+        b,
+        result,
+        testopenvrbind(),
+        libopenvr::openvr_test()
+    ))
 }
 
 #[tauri::command]
