@@ -1,6 +1,10 @@
-import { REDUX_STORAGE_KEY, rehydrateFlag } from "./rehydrate-constant";
+import {
+  REDUX_STORAGE_KEY,
+  rehydrateFlag,
+  EApiProviderType,
+} from "./rehydrate-constant";
 
-export function redux_store(module: string, data: string) {
+export function redux_store(module: string, data: string | EApiProviderType) {
   if (!rehydrateFlag.flag) return;
 
   // biome-ignore lint/suspicious/noExplicitAny: 任意存储，无需定义

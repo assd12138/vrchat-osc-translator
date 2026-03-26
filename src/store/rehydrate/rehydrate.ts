@@ -7,12 +7,15 @@ import {
   setTranscriptionModel,
   setTranscriptionToken,
   setTranscriptionUrl,
+  setApiProviderType,
+  setLongcatApiAuth,
 } from "../settings";
 import store from "../store";
 import {
   REDUX_STORAGE_KEY,
   REHYDRATE_KEYS,
   rehydrateFlag,
+  EApiProviderType,
 } from "./rehydrate-constant";
 
 export const rehydrateMapper = {
@@ -25,6 +28,9 @@ export const rehydrateMapper = {
   [REHYDRATE_KEYS.SETTING_OPENAI_MODEL]: setOpenaiModel,
   [REHYDRATE_KEYS.SETTING_OPENAI_TOKEN]: setOpenaiToken,
   [REHYDRATE_KEYS.SETTING_LANGUAGE]: setLanguage,
+  [REHYDRATE_KEYS.SETTING_API_PROVIDER_TYPE]: (value: string) =>
+    setApiProviderType(value as EApiProviderType),
+  [REHYDRATE_KEYS.SETTING_LONGCAT_API_AUTH]: setLongcatApiAuth,
 };
 
 export function rehydrate() {

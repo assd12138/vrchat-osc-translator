@@ -28,4 +28,6 @@ export default {
   图片上传: "Image Upload",
   复制: "Copy",
   图片分享: "Image Sharing",
+  API供应商: "API Provider",
+  去申请: "Apply For Key",
 };

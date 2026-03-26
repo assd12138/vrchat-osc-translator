@@ -1,9 +1,8 @@
 import { MicVAD } from "@ricky0123/vad-web";
-import { encodeWAV } from "@ricky0123/vad-web/dist/utils";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { transcriptionRouter, translateRouter } from "@/api/commonRouter";
 import { loadMicDevices } from "@/utils";
-import { transcriptionAudio, translateByAI } from "../../api/translate";
 import tauriInvoke from "../../cross-platform/invoke";
 import { useAppSelector } from "../../store/hook";
 import globalStyles from "../../styles/index.module.css";
@@ -12,7 +11,6 @@ import styles from "./index.module.css";
 
 export default function AudioPanel() {
   const { t } = useTranslation();
-  const settings = useAppSelector((state) => state.settings);
   const myVad = useRef<MicVAD>(null);
   // 是否正在录音
   const [recording, setRecording] = useState(false);
@@ -54,42 +52,20 @@ export default function AudioPanel() {
         },
         onSpeechEnd: async (audio) => {
           setSpeaking(false);
+          const transcriptionResult = await transcriptionRouter({ audio });
 
-          const wavBuffer = encodeWAV(audio);
-          const audioBlob = new Blob([wavBuffer], { type: "audio/wav" });
-          const file = new File([audioBlob], "audio.wav", {
-            type: audioBlob.type,
-            lastModified: Date.now(),
+          const translationResult = await translateRouter({
+            text: transcriptionResult,
           });
-          const transcriptionRes = await transcriptionAudio({
-            file,
-            api: settings.transcription_url,
-            auth: settings.transcription_token,
-            model: settings.transcription_model,
-          });
-          const ask = settings.ai_template.replace(
-            "{text}",
-            transcriptionRes.text,
-          );
 
-          const translationRes = await translateByAI({
-            text: ask,
-            token: settings.openai_token,
-            api: settings.openai_api_url,
-            model: settings.openai_model,
-            assignObj: {
-              max_tokens: 500,
-            },
-          });
-          const translation = translationRes.choices[0].message.content;
           tauriInvoke("send_to_vrc_chat", {
-            text: translation,
+            text: translationResult,
           });
           eventBus.emit(
             EventBusEvent.ADD_LOG,
             t("识别成功", {
-              transcription: transcriptionRes.text,
-              translation,
+              transcription: transcriptionResult,
+              translation: translationResult,
             }),
           );
         },

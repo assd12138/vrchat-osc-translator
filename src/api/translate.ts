@@ -1,5 +1,4 @@
-import fetch from "@/cross-platform/fetch";
-import { request } from ".";
+import { request } from "./index";
 /**
  * 根据ai翻译模板和音频文件翻译
  */
@@ -48,42 +47,6 @@ export const translateByAI = (data: {
       thinking: {
         type: "disabled",
       },
-      ...(data.assignObj || {}),
-    }),
-    headers: {
-      Authorization: `Bearer ${data.token}`,
-      "Content-Type": "application/json",
-    },
-  });
-};
-
-export const translateByAIStream = (data: {
-  token: string;
-  text: string;
-  api: string;
-  model: string;
-  assignObj?: object;
-}) => {
-  return fetch(data.api, {
-    method: "POST",
-    body: JSON.stringify({
-      model: data.model,
-      messages: [
-        {
-          role: "system",
-          content:
-            "你是一个翻译专家，当用户让你翻译的时候，严格按照翻译格式输出，不要输出其他内容",
-        },
-        {
-          role: "user",
-          content: data.text,
-        },
-      ],
-      temperature: 0.3,
-      thinking: {
-        type: "disabled",
-      },
-      stream: true,
       ...(data.assignObj || {}),
     }),
     headers: {

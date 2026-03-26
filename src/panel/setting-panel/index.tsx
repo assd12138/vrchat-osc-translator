@@ -1,9 +1,13 @@
 import i18next from "i18next";
 import { useTranslation } from "react-i18next";
+import { openUrl } from "../../cross-platform/openUrl";
 import { useAppDispatch, useAppSelector } from "../../store/hook";
+import { EApiProviderType } from "../../store/rehydrate/rehydrate-constant";
 import {
   reinit,
+  setApiProviderType,
   setLanguage,
+  setLongcatApiAuth,
   setOpenaiApiUrl,
   setOpenaiModel,
   setOpenaiToken,
@@ -46,6 +50,14 @@ export default function SettingPanel() {
     dispatch(setLanguage(language));
   };
 
+  const handleApiProviderChange = (provider: EApiProviderType) => {
+    dispatch(setApiProviderType(provider));
+  };
+
+  const handleLongcatApiAuthChange = (auth: string) => {
+    dispatch(setLongcatApiAuth(auth));
+  };
+
   return (
     <div className={globalStyles.panel}>
       <div className={globalStyles.title}>
@@ -66,42 +78,71 @@ export default function SettingPanel() {
         <option value="ja">日本語</option>
         <option value="ko">한국어</option>
       </select>
-      <label className={globalStyles.labelS}>{t("转译地址")}</label>
-      <input
-        className={globalStyles.inputS}
-        value={settings.transcription_url}
-        onChange={(e) => handleChangeBackend(e.target.value)}
-      />
-      <label className={globalStyles.labelS}>{t("转译模型")}</label>
-      <input
-        className={globalStyles.inputS}
-        value={settings.transcription_model}
-        onChange={(e) => handleChangeTranscriptionModel(e.target.value)}
-      />
-      <label className={globalStyles.labelS}>{t("转译Token")}</label>
-      <input
-        className={globalStyles.inputS}
-        value={settings.transcription_token}
-        onChange={(e) => handleChangeTranscriptionToken(e.target.value)}
-      />
-      <label className={globalStyles.labelS}>{t("openai地址")}</label>
-      <input
-        className={globalStyles.inputS}
-        value={settings.openai_api_url}
-        onChange={(e) => handleOpenAIApiChange(e.target.value)}
-      />
-      <label className={globalStyles.labelS}>OpenAI token</label>
-      <input
-        className={globalStyles.inputS}
-        value={settings.openai_token}
-        onChange={(e) => handleOpenAITokenChange(e.target.value)}
-      />
-      <label className={globalStyles.labelS}>{t("模型名称")}</label>
-      <input
-        className={globalStyles.inputS}
-        value={settings.openai_model}
-        onChange={(e) => handleOpenAIModelChange(e.target.value)}
-      />
+      <label className={globalStyles.labelS}>{t("API供应商")}</label>
+      <select
+        className={globalStyles.selectS}
+        value={settings.api_provider_type}
+        onChange={(e) =>
+          handleApiProviderChange(e.target.value as EApiProviderType)
+        }
+      >
+        <option value={EApiProviderType.CUSTOM}>Custom</option>
+        <option value={EApiProviderType.LONG_CAT}>LongCat</option>
+      </select>
+      {settings.api_provider_type === EApiProviderType.CUSTOM ? (
+        <>
+          <label className={globalStyles.labelS}>{t("转译地址")}</label>
+          <input
+            className={globalStyles.inputS}
+            value={settings.transcription_url}
+            onChange={(e) => handleChangeBackend(e.target.value)}
+          />
+          <label className={globalStyles.labelS}>{t("转译模型")}</label>
+          <input
+            className={globalStyles.inputS}
+            value={settings.transcription_model}
+            onChange={(e) => handleChangeTranscriptionModel(e.target.value)}
+          />
+          <label className={globalStyles.labelS}>{t("转译Token")}</label>
+          <input
+            className={globalStyles.inputS}
+            value={settings.transcription_token}
+            onChange={(e) => handleChangeTranscriptionToken(e.target.value)}
+          />
+          <label className={globalStyles.labelS}>{t("openai地址")}</label>
+          <input
+            className={globalStyles.inputS}
+            value={settings.openai_api_url}
+            onChange={(e) => handleOpenAIApiChange(e.target.value)}
+          />
+          <label className={globalStyles.labelS}>OpenAI token</label>
+          <input
+            className={globalStyles.inputS}
+            value={settings.openai_token}
+            onChange={(e) => handleOpenAITokenChange(e.target.value)}
+          />
+          <label className={globalStyles.labelS}>{t("模型名称")}</label>
+          <input
+            className={globalStyles.inputS}
+            value={settings.openai_model}
+            onChange={(e) => handleOpenAIModelChange(e.target.value)}
+          />
+        </>
+      ) : (
+        <>
+          <label className={globalStyles.labelS}>
+            Authorization
+            <a className={styles.initBtn} onClick={() => openUrl("https://longcat.chat/login")}>
+              {t("去申请")}
+            </a>
+          </label>
+          <input
+            className={globalStyles.inputS}
+            value={settings.longcat_api_auth}
+            onChange={(e) => handleLongcatApiAuthChange(e.target.value)}
+          />
+        </>
+      )}
     </div>
   );
 }

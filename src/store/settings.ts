@@ -1,5 +1,6 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import {
+  EApiProviderType,
   REDUX_STORAGE_KEY,
   REHYDRATE_KEYS,
 } from "./rehydrate/rehydrate-constant";
@@ -14,6 +15,8 @@ interface SettingState {
   openai_token: string;
   ai_template: string;
   language: string;
+  api_provider_type: EApiProviderType;
+  longcat_api_auth: string;
 }
 
 export const initialState: SettingState = {
@@ -30,6 +33,8 @@ export const initialState: SettingState = {
 【한】{韩文翻译}
 文本原文：{text}`,
   language: "auto",
+  api_provider_type: EApiProviderType.LONG_CAT,
+  longcat_api_auth: import.meta.env.VITE_DEFAULT_LONGCAT_API_AUTH,
 };
 
 const settingsSlice = createSlice({
@@ -40,8 +45,8 @@ const settingsSlice = createSlice({
       localStorage.removeItem(REDUX_STORAGE_KEY);
       for (const key in initialState) {
         if (Object.hasOwn(initialState, key)) {
-          state[key as keyof SettingState] =
-            initialState[key as keyof SettingState];
+          // biome-ignore lint/suspicious/noExplicitAny: 重新初始化需要任意类型赋值
+          (state as any)[key] = initialState[key as keyof SettingState];
         }
       }
     },
@@ -77,6 +82,14 @@ const settingsSlice = createSlice({
       state.language = action.payload;
       redux_store(REHYDRATE_KEYS.SETTING_LANGUAGE, action.payload);
     },
+    setApiProviderType: (state, action: PayloadAction<EApiProviderType>) => {
+      state.api_provider_type = action.payload;
+      redux_store(REHYDRATE_KEYS.SETTING_API_PROVIDER_TYPE, action.payload);
+    },
+    setLongcatApiAuth: (state, action: PayloadAction<string>) => {
+      state.longcat_api_auth = action.payload;
+      redux_store(REHYDRATE_KEYS.SETTING_LONGCAT_API_AUTH, action.payload);
+    },
   },
 });
 
@@ -89,6 +102,8 @@ export const {
   setLanguage,
   setTranscriptionModel,
   setTranscriptionToken,
+  setApiProviderType,
+  setLongcatApiAuth,
   reinit,
 } = settingsSlice.actions;
 
