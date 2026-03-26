@@ -1,48 +1,7 @@
-mod lib_loader;
-mod libopenvr;
-
-use lib_loader::LoadedLibs;
 use qiniu_upload_token::{credential::Credential, UploadPolicy};
 use rosc::{OscMessage, OscPacket, OscType};
 use std::net::UdpSocket;
 use std::time::Duration;
-use tauri::Manager;
-
-/// 应用全局状态
-struct AppState {
-    /// 预加载的动态库
-    loaded_libs: LoadedLibs,
-    // 未来可以在这里添加其他状态成员
-}
-
-impl AppState {
-    fn new(app_handle: &tauri::AppHandle) -> Result<Self, String> {
-        Ok(AppState {
-            loaded_libs: LoadedLibs::new(app_handle)?,
-        })
-    }
-}
-
-fn testopenvrbind() -> bool {
-    let is_installed: bool = unsafe { openvr_sys::VR_IsRuntimeInstalled() };
-
-    is_installed
-}
-
-#[tauri::command]
-fn dlltest(a: i32, b: i32, state: tauri::State<AppState>) -> Result<String, String> {
-    // 直接使用预加载的函数句柄
-    let result = unsafe { (state.loaded_libs.get_add_func())(a, b) };
-
-    Ok(format!(
-        "{} + {} = {},{},{}",
-        a,
-        b,
-        result,
-        testopenvrbind(),
-        libopenvr::openvr_test()
-    ))
-}
 
 #[tauri::command]
 async fn send_to_vrc_chat(text: String) -> Result<(), String> {
@@ -79,14 +38,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_opener::init())
-        .setup(|app| {
-            // 应用启动时初始化全局状态
-            let state = AppState::new(&app.app_handle())?;
-            app.manage(state);
-            Ok(())
-        })
         .invoke_handler(tauri::generate_handler![
-            dlltest,
             send_to_vrc_chat,
             get_qiniu_token
         ])

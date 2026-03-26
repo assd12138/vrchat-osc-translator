@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 import { transcriptionRouter, translateRouter } from "@/api/commonRouter";
 import { loadMicDevices } from "@/utils";
 import tauriInvoke from "../../cross-platform/invoke";
-import { useAppSelector } from "../../store/hook";
 import globalStyles from "../../styles/index.module.css";
 import eventBus, { EventBusEvent } from "../../utils/event-bus";
 import styles from "./index.module.css";
