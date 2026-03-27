@@ -4,13 +4,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
-### Development
-- `npm run dev` - Start development server with Tauri
-- `npm run build` - Build the TypeScript and Vite application
-- `npm run preview` - Preview the built application
-- `npm run tauri` - Tauri CLI commands (build, dev, etc.)
-- `npm run android:build` - Build for Android (if configured)
-
 ### Project Structure
 - Frontend: `src/` - React application with Tauri integration
 - Backend: `src-tauri/` - Rust backend with Tauri commands
@@ -103,3 +96,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - API tokens stored in localStorage (client-side only)
 - No server-side token handling
 - All external API calls made from frontend with user-provided credentials
+
+### 开发者的提醒-禁止删除
+- 添加一个store中的内容的时候，如果是api相关的，并且需要使用env来获得定义的时候，需要在.env中添加对应的环境变量，在vite-env.d.ts中添加对应环境变量的定义
