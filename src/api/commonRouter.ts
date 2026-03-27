@@ -9,6 +9,11 @@ import {
   transcriptionByLongCat,
   translateByLongCat,
 } from "./longcat";
+import {
+  ocrByOpenAI,
+  transcriptionByOpenAI,
+  translateByOpenAI,
+} from "./openai";
 import { transcriptionAudio, transformOCR, translateByAI } from "./translate";
 
 /**
@@ -36,6 +41,12 @@ export const translateRouter = async (data: { text: string }) => {
       text: ask,
       token: settings.longcat_api_auth,
       model: "LongCat-Flash-Lite",
+    });
+    result = translationRes.choices[0].message.content;
+  } else if (settings.api_provider_type === EApiProviderType.OPEN_AI) {
+    const translationRes = await translateByOpenAI({
+      text: ask,
+      token: settings.openai_api_auth,
     });
     result = translationRes.choices[0].message.content;
   }
@@ -80,6 +91,18 @@ export const transcriptionRouter = async (data: {
       audio_base64: base64,
     });
     result = transcriptionRes.choices[0].message.content;
+  } else if (settings.api_provider_type === EApiProviderType.OPEN_AI) {
+    const base64 = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+    const transcriptionRes = await transcriptionByOpenAI({
+      token: settings.openai_api_auth,
+      audio_base64: base64,
+    });
+    result = transcriptionRes.choices[0].message.content;
   }
   return result;
 };
@@ -98,6 +121,12 @@ export const transformOCRRouter = async ({ base64 }: { base64: string }) => {
   } else if (settings.api_provider_type === EApiProviderType.LONG_CAT) {
     const ocrRes = await ocrByLongCat({
       token: settings.longcat_api_auth,
+      base64,
+    });
+    result = ocrRes.choices[0].message.content;
+  } else if (settings.api_provider_type === EApiProviderType.OPEN_AI) {
+    const ocrRes = await ocrByOpenAI({
+      token: settings.openai_api_auth,
       base64,
     });
     result = ocrRes.choices[0].message.content;

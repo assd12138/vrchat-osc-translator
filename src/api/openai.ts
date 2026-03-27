@@ -1,15 +1,19 @@
 import { request } from "./index";
 
-const url = "https://api.longcat.chat/openai/v1/chat/completions";
-export const translateByLongCat = (data: {
+const url = "https://api.openai.com/v1/chat/completions";
+
+/**
+ * OpenAI 翻译
+ * 使用 gpt-5-nano 模型
+ */
+export const translateByOpenAI = (data: {
   token: string;
   text: string;
-  model: string;
 }) => {
   return request(url, {
     method: "POST",
     body: JSON.stringify({
-      model: data.model,
+      model: "gpt-5-nano",
       messages: [
         {
           role: "system",
@@ -31,15 +35,18 @@ export const translateByLongCat = (data: {
   });
 };
 
-export const transcriptionByLongCat = (data: {
-  model: string;
+/**
+ * OpenAI 转录
+ * 使用 gpt-4o-mini-transcribe 模型
+ */
+export const transcriptionByOpenAI = (data: {
   audio_base64: string;
   token: string;
 }) => {
   return request(url, {
     method: "POST",
     body: JSON.stringify({
-      model: data.model,
+      model: "gpt-4o-mini-transcribe",
       messages: [
         {
           role: "user",
@@ -60,7 +67,6 @@ export const transcriptionByLongCat = (data: {
         },
       ],
       temperature: 0.3,
-      output_modalities: ["text"],
       stream: false,
     }),
     headers: {
@@ -70,20 +76,23 @@ export const transcriptionByLongCat = (data: {
   });
 };
 
-export const ocrByLongCat = (data: { token: string; base64: string }) => {
+/**
+ * OpenAI OCR
+ * 使用 gpt-4o-mini-transcribe 模型
+ */
+export const ocrByOpenAI = (data: { token: string; base64: string }) => {
   return request(url, {
     method: "POST",
     body: JSON.stringify({
-      model: "LongCat-Flash-Omni-2603",
+      model: "gpt-4o-mini-transcribe",
       messages: [
         {
           role: "user",
           content: [
             {
-              type: "input_image",
-              input_image: {
-                type: "base64",
-                data: [data.base64],
+              type: "image_url",
+              image_url: {
+                url: data.base64,
               },
             },
             {

@@ -8,6 +8,7 @@ import {
   setApiProviderType,
   setLanguage,
   setLongcatApiAuth,
+  setOpenaiApiAuth,
   setOpenaiApiUrl,
   setOpenaiModel,
   setOpenaiToken,
@@ -58,6 +59,10 @@ export default function SettingPanel() {
     dispatch(setLongcatApiAuth(auth));
   };
 
+  const handleOpenaiApiAuthChange = (auth: string) => {
+    dispatch(setOpenaiApiAuth(auth));
+  };
+
   return (
     <div className={globalStyles.panel}>
       <div className={globalStyles.title}>
@@ -88,6 +93,7 @@ export default function SettingPanel() {
       >
         <option value={EApiProviderType.CUSTOM}>Custom</option>
         <option value={EApiProviderType.LONG_CAT}>LongCat</option>
+        <option value={EApiProviderType.OPEN_AI}>OpenAI</option>
       </select>
       {settings.api_provider_type === EApiProviderType.CUSTOM ? (
         <>
@@ -128,7 +134,7 @@ export default function SettingPanel() {
             onChange={(e) => handleOpenAIModelChange(e.target.value)}
           />
         </>
-      ) : (
+      ) : settings.api_provider_type === EApiProviderType.LONG_CAT ? (
         <>
           <label className={globalStyles.labelS}>
             Authorization
@@ -140,6 +146,21 @@ export default function SettingPanel() {
             className={globalStyles.inputS}
             value={settings.longcat_api_auth}
             onChange={(e) => handleLongcatApiAuthChange(e.target.value)}
+          />
+        </>
+      ) : (
+        <>
+          <label className={globalStyles.labelS}>
+            API Key
+            <a className={styles.initBtn} onClick={() => openUrl("https://platform.openai.com/api-keys")}>
+              {t("去申请")}
+            </a>
+          </label>
+          <input
+            className={globalStyles.inputS}
+            type="password"
+            value={settings.openai_api_auth}
+            onChange={(e) => handleOpenaiApiAuthChange(e.target.value)}
           />
         </>
       )}
