@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import tauriInvoke from "@/cross-platform/invoke";
+import invoke, { NATIVE_COMMAND } from "@/cross-platform/invoke";
 import eventBus, { EventBusEvent } from "@/utils/event-bus";
 import {
   createCompressTask,
@@ -116,7 +116,7 @@ export default function ImagePanel() {
   useEffect(() => {
     eventBus.on(EventBusEvent.COMPRESS_IAMGE, async (res) => {
       console.log(res.data.compress.blob);
-      const token: string = await tauriInvoke("get_qiniu_token", {
+      const token: string = await invoke(NATIVE_COMMAND.GET_QINIU_TOKEN, {
         accessKey: import.meta.env.VITE_DEFAULT_QINIU_ACCESS_KEY,
         secretKey: import.meta.env.VITE_DEFAULT_QINIU_SECRET_KEY,
         bucket: import.meta.env.VITE_DEFAULT_QINIU_BUCKET,

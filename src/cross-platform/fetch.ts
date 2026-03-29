@@ -1,7 +1,16 @@
-// tauri
-// import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
-// export default tauriFetch;
+import {
+  type ClientOptions,
+  fetch as tauriFetch,
+} from "@tauri-apps/plugin-http";
+import { RUNTIME, runtime } from "./environmentDetect";
 
-// web
-const webFetch = fetch;
-export default webFetch;
+export default function (
+  input: string | URL | Request,
+  init?: (RequestInit & ClientOptions) | undefined,
+) {
+  if (runtime === RUNTIME.TAURI) {
+    return tauriFetch(input, init);
+  } else {
+    return fetch(input, init);
+  }
+}

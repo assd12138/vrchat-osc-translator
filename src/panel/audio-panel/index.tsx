@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { transcriptionRouter, translateRouter } from "@/api/commonRouter";
 import { loadMicDevices } from "@/utils";
-import tauriInvoke from "../../cross-platform/invoke";
+import invoke, { NATIVE_COMMAND } from "../../cross-platform/invoke";
 import globalStyles from "../../styles/index.module.css";
 import eventBus, { EventBusEvent } from "../../utils/event-bus";
 import styles from "./index.module.css";
@@ -57,7 +57,7 @@ export default function AudioPanel() {
             text: transcriptionResult,
           });
 
-          tauriInvoke("send_to_vrc_chat", {
+          invoke(NATIVE_COMMAND.SEND_TO_VRC_CHAT, {
             text: translationResult,
           });
           eventBus.emit(

@@ -1,3 +1,58 @@
 // tauri invoke
 import { invoke as tauriInvoke } from "@tauri-apps/api/core";
-export default tauriInvoke;
+import { RUNTIME, runtime } from "./environmentDetect";
+
+declare global {
+  interface Window {
+    electronAPI?: ElectronAPI;
+    __TAURI__?: unknown;
+  }
+}
+
+export enum NATIVE_COMMAND {
+  GET_QINIU_TOKEN = "get_qiniu_token",
+  SEND_TO_VRC_CHAT = "send_to_vrc_chat",
+}
+
+// 命令参数类型映射
+interface CommandArgsMap {
+  [NATIVE_COMMAND.GET_QINIU_TOKEN]: QINIU_TOKEN_REQUEST;
+  [NATIVE_COMMAND.SEND_TO_VRC_CHAT]: SEND_TO_VRC_CHAT_REQUEST;
+}
+
+// 命令返回值类型映射
+interface CommandReturnMap {
+  [NATIVE_COMMAND.GET_QINIU_TOKEN]: string;
+  [NATIVE_COMMAND.SEND_TO_VRC_CHAT]: undefined;
+}
+
+// Electron API 类型定义
+interface QINIU_TOKEN_REQUEST extends Record<string, string> {
+  accessKey: string;
+  secretKey: string;
+  bucket: string;
+}
+interface SEND_TO_VRC_CHAT_REQUEST extends Record<string, string> {
+  text: string;
+}
+
+type ElectronAPI = {
+  [K in NATIVE_COMMAND]: (
+    arg: CommandArgsMap[K],
+  ) => Promise<CommandReturnMap[K]>;
+};
+
+export default async function invoke<T extends NATIVE_COMMAND>(
+  command: T,
+  args: CommandArgsMap[T],
+): Promise<CommandReturnMap[T]> {
+  if (runtime === RUNTIME.TAURI) {
+    return tauriInvoke<CommandReturnMap[T]>(command, args);
+  } else if (window.electronAPI) {
+    return window.electronAPI[command](args);
+  }
+  // biome-ignore lint/suspicious/noExplicitAny: 无需处理的代码点
+  return new Promise<any>(() => {
+    return {};
+  });
+}
