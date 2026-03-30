@@ -9,10 +9,7 @@ import "./store/rehydrate/rehydrate";
 import "./i18n/index";
 
 const loadResources = () => {
-  const loadList = [
-    // fetch(new URL("./utils/imagecompressor/png.wasm", import.meta.url)),
-    // import("./utils/imagecompressor/WokerCompress?worker"),
-  ];
+  const loadList = [];
 
   return Promise.all(loadList);
 };

@@ -15,6 +15,7 @@ const electronPath = path.join(
   ".bin",
   "electron",
 );
+const electronRunPath = path.join(__dirname, "..");
 
 const publicConfig = {
   bundle: true,
@@ -24,18 +25,20 @@ const publicConfig = {
   format: "cjs",
   sourcemap: true,
 };
+const distPath = path.join(__dirname, "../dist-electron");
+const srcPath = path.join(__dirname, "../src-electron");
 
 // 配置保持不变
 const mainConfig = {
   ...publicConfig,
-  entryPoints: ["./src-electron/main/index.ts"],
-  outfile: "./dist-electron/main/index.cjs",
+  entryPoints: [path.join(srcPath, "./main/index.ts")],
+  outfile: path.join(distPath, "./main/index.cjs"),
 };
 
 const preloadConfig = {
   ...publicConfig,
-  entryPoints: ["./src-electron/preload/index.ts"],
-  outfile: "./dist-electron/preload/index.cjs",
+  entryPoints: [path.join(srcPath, "./preload/index.ts")],
+  outfile: path.join(distPath, "./preload/index.cjs"),
 };
 
 const startElectron = () => {
@@ -45,7 +48,7 @@ const startElectron = () => {
   }
 
   console.log("🚀 启动 Electron...");
-  electronProcess = spawn(electronPath, ["."], {
+  electronProcess = spawn(electronPath, [electronRunPath], {
     stdio: "inherit",
     shell: true,
   });

@@ -7,7 +7,8 @@ import { viteStaticCopy } from "vite-plugin-static-copy";
 const host = process.env.TAURI_DEV_HOST;
 
 // https://vite.dev/config/
-export default defineConfig(async () => ({
+export default defineConfig({
+  base: "./",
   plugins: [
     codeInspectorPlugin({
       bundler: "vite",
@@ -61,4 +62,4 @@ export default defineConfig(async () => ({
       ignored: ["**/src-tauri/**"],
     },
   },
-}));
+});

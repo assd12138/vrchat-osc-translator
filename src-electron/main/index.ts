@@ -32,7 +32,8 @@ function createMainWindow() {
     mainWindow.webContents.openDevTools();
   } else {
     // 生产环境加载构建后的文件
-    mainWindow.loadFile(path.join(__dirname, "../dist/index.html"));
+    mainWindow.loadFile(path.join(__dirname, "../render/index.html"));
+    mainWindow.webContents.openDevTools();
   }
 
   mainWindow.on("closed", () => {

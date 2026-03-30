@@ -1,8 +1,8 @@
-import { createBrowserRouter } from "react-router";
+import { createHashRouter } from "react-router";
 import MixSoundTranslatePanel from "@/panel/mix-sound-translate-panel";
 import Root from "./Root";
 
-export default createBrowserRouter([
+export default createHashRouter([
   {
     path: "/",
     Component: Root,
