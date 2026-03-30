@@ -54,12 +54,13 @@ async function buildElectron() {
       config: {
         appId: "com.ased12138.vrchat-osc-translator",
         productName: "VRChatOscTranslator",
-        asar: false,
-        files: ["dist-electron/**/*", "package.json", "!**/node_modules"],
+        // asar: false,
+        files: ["dist-electron/**/*", "package.json", "!node_modules/**"],
         mac: {
           target: "dmg",
           category: "public.app-category.productivity",
         },
+        nsis: {},
       },
       publish: "never",
     });
