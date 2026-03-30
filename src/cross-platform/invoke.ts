@@ -12,18 +12,22 @@ declare global {
 export enum NATIVE_COMMAND {
   GET_QINIU_TOKEN = "get_qiniu_token",
   SEND_TO_VRC_CHAT = "send_to_vrc_chat",
+  /** 仅electron */
+  OPEN_EXTERNAL = "open_external",
 }
 
 // 命令参数类型映射
 interface CommandArgsMap {
   [NATIVE_COMMAND.GET_QINIU_TOKEN]: QINIU_TOKEN_REQUEST;
   [NATIVE_COMMAND.SEND_TO_VRC_CHAT]: SEND_TO_VRC_CHAT_REQUEST;
+  [NATIVE_COMMAND.OPEN_EXTERNAL]: OPEN_EXTERNAL_REQUEST;
 }
 
 // 命令返回值类型映射
 interface CommandReturnMap {
   [NATIVE_COMMAND.GET_QINIU_TOKEN]: string;
   [NATIVE_COMMAND.SEND_TO_VRC_CHAT]: undefined;
+  [NATIVE_COMMAND.OPEN_EXTERNAL]: undefined;
 }
 
 // Electron API 类型定义
@@ -34,6 +38,9 @@ interface QINIU_TOKEN_REQUEST extends Record<string, string> {
 }
 interface SEND_TO_VRC_CHAT_REQUEST extends Record<string, string> {
   text: string;
+}
+interface OPEN_EXTERNAL_REQUEST extends Record<string, string> {
+  url: string;
 }
 
 type ElectronAPI = {

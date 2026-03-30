@@ -10,13 +10,9 @@ export async function openUrl(url: string): Promise<void> {
   }
 
   if (runtime === RUNTIME.ELECTRON) {
-    const electronAPI = (
-      window as Window & {
-        electronAPI?: { openExternal: (url: string) => Promise<void> };
-      }
-    ).electronAPI;
+    const electronAPI = window.electronAPI;
     if (electronAPI) {
-      return electronAPI.openExternal(url);
+      return electronAPI.open_external({ url });
     }
   }
 
