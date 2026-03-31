@@ -1,4 +1,5 @@
 import { spawn } from "node:child_process";
+import { rm } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import builder from "electron-builder";
@@ -9,6 +10,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const distPath = path.join(__dirname, "../dist-electron");
 const srcPath = path.join(__dirname, "../src-electron");
+
+async function cleanBuildCache() {
+  await rm(distPath, { recursive: true, force: true });
+}
 
 async function buildRender() {
   const buildProcess = spawn("npm", ["run", "electron-build-render"], {
@@ -35,16 +40,18 @@ async function buildMainAndPreload() {
     sourcemap: false,
     minify: true,
   };
-  await build({
-    ...publicConfig,
-    entryPoints: [path.join(srcPath, "./main/index.ts")],
-    outfile: path.join(distPath, "./main/index.cjs"),
-  });
-  await build({
-    ...publicConfig,
-    entryPoints: [path.join(srcPath, "./preload/index.ts")],
-    outfile: path.join(distPath, "./preload/index.cjs"),
-  });
+  await Promise.all([
+    build({
+      ...publicConfig,
+      entryPoints: [path.join(srcPath, "./main/index.ts")],
+      outfile: path.join(distPath, "./main/index.cjs"),
+    }),
+    build({
+      ...publicConfig,
+      entryPoints: [path.join(srcPath, "./preload/index.ts")],
+      outfile: path.join(distPath, "./preload/index.cjs"),
+    }),
+  ]);
 }
 
 async function buildElectron() {
@@ -70,6 +77,9 @@ async function buildElectron() {
 }
 
 (async () => {
+  // 清理打包产物
+  await cleanBuildCache();
+  // 同时运行打包渲染进程和主进程、预加载脚本
   await Promise.all([buildRender(), buildMainAndPreload()]);
   await buildElectron();
 })();

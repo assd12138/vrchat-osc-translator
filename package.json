@@ -14,7 +14,8 @@
     "android:build": "tauri android build",
     "tauri-dev": "tauri dev",
     "electron-dev": "node ./scripts/dev-electron.js",
-    "electron-build-render": "tsc && vite build --outDir dist-electron/render"
+    "electron-build-render": "tsc && vite build --outDir dist-electron/render",
+    "build-electron": "node ./scripts/release-electron.js"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.11.2",
@@ -24,6 +25,8 @@
     "@tauri-apps/plugin-opener": "^2",
     "date-fns": "^4.1.0",
     "i18next": "^25.8.17",
+    "proxy-agent": "^5.0.0",
+    "qiniu": "^7.15.1",
     "qiniu-js": "^3.4.3",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",

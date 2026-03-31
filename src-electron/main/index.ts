@@ -7,6 +7,7 @@ import {
   shell,
 } from "electron";
 import { sendVrchatMessage } from "./utils/osc";
+import { getQiniuToken } from "./utils/qiniu";
 
 // 判断是否为开发环境
 const isDev = process.env.NODE_ENV === "development" || !app.isPackaged;
@@ -55,15 +56,25 @@ ipcMain.handle("send_to_vrc_chat", async (_event, args: { text: string }) => {
 });
 
 // 获取七牛上传Token
-ipcMain.handle("get_qiniu_token", async (_event) => {
-  try {
-    // const token = generateQiniuToken(accessKey, secretKey, bucket);
-    return "";
-  } catch (error) {
-    console.error("Failed to generate Qiniu token:", error);
-    throw error;
-  }
-});
+ipcMain.handle(
+  "get_qiniu_token",
+  async (
+    _event,
+    {
+      accessKey,
+      secretKey,
+      bucket,
+    }: { accessKey: string; secretKey: string; bucket: string },
+  ) => {
+    try {
+      const token = getQiniuToken(accessKey, secretKey, bucket);
+      return token;
+    } catch (error) {
+      console.error("Failed to generate Qiniu token:", error);
+      throw error;
+    }
+  },
+);
 
 // 打开外部URL
 ipcMain.handle("open_external", async (_event, url: string) => {
