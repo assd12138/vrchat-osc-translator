@@ -61,6 +61,9 @@ async function buildElectron() {
       config: {
         appId: "com.ased12138.vrchat-osc-translator",
         productName: "VRChatOscTranslator",
+        directories: {
+          buildResources: "src-electron/build-resources",
+        },
         // asar: false,
         files: ["dist-electron/**/*", "package.json", "!node_modules/**"],
         mac: {

@@ -13,9 +13,10 @@
     "tauri": "tauri",
     "android:build": "tauri android build",
     "tauri-dev": "tauri dev",
+    "tauri-build": "tauri build",
     "electron-dev": "node ./scripts/dev-electron.js",
-    "electron-build-render": "tsc && vite build --outDir dist-electron/render",
-    "build-electron": "node ./scripts/release-electron.js"
+    "electron-build": "node ./scripts/release-electron.js",
+    "electron-build-render": "tsc && vite build --outDir dist-electron/render"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.11.2",
