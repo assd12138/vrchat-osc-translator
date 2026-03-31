@@ -60,7 +60,7 @@ async function buildElectron() {
       projectDir: path.join(__dirname, ".."),
       config: {
         appId: "com.ased12138.vrchat-osc-translator",
-        productName: "VRChatOscTranslator",
+        productName: "VRChatTranslator",
         directories: {
           buildResources: "src-electron/build-resources",
         },
@@ -70,7 +70,11 @@ async function buildElectron() {
           target: "dmg",
           category: "public.app-category.productivity",
         },
-        nsis: {},
+        nsis: {
+          installerIcon: "src-electron/build-resources/icon.ico",
+          // biome-ignore lint/suspicious/noTemplateCurlyInString: 打包配置模板就是这样的，无需更改为js的模板字符串
+          artifactName: "${productName}-${version}-Setup.${ext}",
+        },
       },
       publish: "never",
     });
