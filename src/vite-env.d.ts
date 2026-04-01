@@ -2,14 +2,16 @@
 type ViteTypeOptions = {};
 
 interface ImportMetaEnv {
-	/** 七牛云权限key-默认 */
-	readonly VITE_DEFAULT_QINIU_ACCESS_KEY: string;
-	/** 七牛云秘钥key-默认 */
-	readonly VITE_DEFAULT_QINIU_SECRET_KEY: string;
-	/** 七牛云存储桶-默认 */
-	readonly VITE_DEFAULT_QINIU_BUCKET: string;
-	/** 七牛云url-默认 */
-	readonly VITE_DEFAULT_QINIU_URL: string;
+	/** s3权限key-默认 */
+	readonly VITE_DEFAULT_S3_ACCESS_KEY: string;
+	/** s3秘钥key-默认 */
+	readonly VITE_DEFAULT_S3_SECRET_KEY: string;
+	/** s3存储桶-默认 */
+	readonly VITE_DEFAULT_S3_BUCKET: string;
+	/** s3的url-默认 */
+	readonly VITE_DEFAULT_S3_URL: string;
+	/** s3的endpoint-默认 */
+	readonly VITE_DEFAULT_S3_ENDPOINT: string;
 	/** 默认转写url */
 	readonly VITE_DEFAULT_TRANSCRIPTION_URL: string;
 	/** 默认转写模型 */

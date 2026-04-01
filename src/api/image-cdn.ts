@@ -21,8 +21,7 @@ export const uploadImage = async (data: { file: File; token: string }) => {
         console.log("next", val);
       },
       complete(val) {
-        const url = new URL(val.key, import.meta.env.VITE_DEFAULT_QINIU_URL)
-          .href;
+        const url = new URL(val.key, import.meta.env.VITE_DEFAULT_S3_URL).href;
         resolve(url);
       },
     });

@@ -19,11 +19,14 @@
     "electron-build-render": "tsc && vite build --outDir dist-electron/render"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1021.0",
     "@reduxjs/toolkit": "^2.11.2",
     "@ricky0123/vad-web": "^0.0.30",
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-http": "^2.5.6",
     "@tauri-apps/plugin-opener": "^2",
+    "@uppy/aws-s3": "^5.1.0",
+    "@uppy/core": "^5.2.0",
     "date-fns": "^4.1.0",
     "i18next": "^25.8.17",
     "proxy-agent": "^5.0.0",
