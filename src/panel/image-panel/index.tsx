@@ -1,133 +1,52 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import invoke, { NATIVE_COMMAND } from "@/cross-platform/invoke";
-import eventBus, { EventBusEvent } from "@/utils/event-bus";
-import {
-  createCompressTask,
-  useWorkerHandler,
-} from "@/utils/imagecompressor/transformer";
-import { uploadImage } from "../../api/image-cdn";
 import globalStyles from "../../styles/index.module.css";
 import styles from "./index.module.css";
-
-// 获取图片尺寸
-const getImageDimensions = (
-  url: string,
-): Promise<{ width: number; height: number }> => {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-
-    img.onload = () => {
-      resolve({
-        width: img.width,
-        height: img.height,
-      });
-    };
-
-    img.onerror = () => {
-      reject(new Error("Failed to load image"));
-    };
-
-    img.src = url;
-  });
-};
 
 export default function ImagePanel() {
   const { t } = useTranslation();
   const [url, setUrl] = useState("");
-  useWorkerHandler();
 
-  const handleImageUpload = async () => {
-    const items = await navigator.clipboard.read();
-    // const tokenRes = await getQiniuToken()
-    console.log(items);
+  const handleFileUpload = async () => {
+    const input = document.createElement("input");
+    input.type = "file";
 
-    for (const item of items) {
-      if (
-        item.types.includes("image/png") ||
-        item.types.includes("image/jpeg") ||
-        item.types.includes("image/webp")
-      ) {
-        const blob = await item.getType(
-          item.types.find((type) => type.startsWith("image/")) || item.types[0],
-        );
-        const file = new File([blob], "image.png", {
-          type: blob.type,
-        });
-
-        // 获取图片尺寸
-        const url = URL.createObjectURL(file);
-        try {
-          const dimensions = await getImageDimensions(url);
-          console.log("图片尺寸:", dimensions);
-
-          // 现在你可以使用 dimensions.width 和 dimensions.height
-          // uploadImage({ file, token: tokenRes.token })
-          createCompressTask(
-            {
-              blob: file,
-              height: dimensions.height,
-              width: dimensions.width,
-              name: "aaaa.jpg",
-              // src: url,
-              key: 1,
-            },
-            {
-              preview: {
-                maxSize: 256,
-              },
-              resize: {
-                method: "setLong",
-                long: 2048,
-              },
-              format: {
-                transparentFill: "#ffffff",
-              },
-              jpeg: {
-                quality: 0.75,
-              },
-              png: {
-                colors: 128,
-                dithering: 0.5,
-              },
-              gif: {
-                colors: 128,
-                dithering: false,
-              },
-              avif: {
-                quality: 50,
-                speed: 8,
-              },
-            },
-          );
-        } catch (error) {
-          console.error("获取图片尺寸失败:", error);
-        } finally {
-          URL.revokeObjectURL(url);
+    const filePath = await new Promise<string | null>((resolve) => {
+      input.onchange = () => {
+        const file = input.files?.[0];
+        if (file) {
+          // Electron 环境下 file.path 包含完整文件路径
+          // @ts-expect-error Electron 扩展的 file.path 属性
+          resolve(file.path as string);
+        } else {
+          resolve(null);
         }
-        break;
-      }
-    }
+      };
+      input.oncancel = () => resolve(null);
+      input.click();
+    });
+
+    if (!filePath) return;
+
+    // 从文件路径生成 key（文件名）
+    const fileName = filePath.split(/[/\\]/).pop() || "image";
+
+    await invoke(NATIVE_COMMAND.UPLOAD_OSS, {
+      filePath,
+      key: fileName,
+      region: import.meta.env.VITE_DEFAULT_S3_REGION,
+      endpoint: import.meta.env.VITE_DEFAULT_S3_ENDPOINT,
+      ak: import.meta.env.VITE_DEFAULT_S3_ACCESS_KEY,
+      sk: import.meta.env.VITE_DEFAULT_S3_SECRET_KEY,
+      bucket: import.meta.env.VITE_DEFAULT_S3_BUCKET,
+    });
   };
 
   const copy = () => {
     navigator.clipboard.writeText(url);
   };
-  useEffect(() => {
-    eventBus.on(EventBusEvent.COMPRESS_IAMGE, async (res) => {
-      console.log(res.data.compress.blob);
-      const token: string = await invoke(NATIVE_COMMAND.GET_QINIU_TOKEN, {
-        accessKey: import.meta.env.VITE_DEFAULT_S3_ACCESS_KEY,
-        secretKey: import.meta.env.VITE_DEFAULT_S3_SECRET_KEY,
-        bucket: import.meta.env.VITE_DEFAULT_S3_BUCKET,
-      });
-      const url = await uploadImage({
-        file: res.data.compress.blob,
-        token,
-      });
-      setUrl(url);
-    });
-  }, []);
+
   return (
     <div className={globalStyles.panel}>
       <div className={globalStyles.title}>{t("图片分享")}</div>

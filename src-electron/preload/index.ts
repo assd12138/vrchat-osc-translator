@@ -13,6 +13,15 @@ contextBridge.exposeInMainWorld("electronAPI", {
     bucket: string;
   }): Promise<string> => ipcRenderer.invoke("get_qiniu_token", args),
 
+  upload_oss: (args: {
+    filePath: string;
+    key: string;
+    region: string;
+    endpoint: string;
+    ak: string;
+    sk: string;
+    bucket: string;
+  }): Promise<void> => ipcRenderer.invoke("upload_oss", args),
   // 打开外部URL
   openExternal: (url: string): Promise<void> =>
     ipcRenderer.invoke("open_external", url),

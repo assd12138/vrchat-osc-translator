@@ -1,3 +1,4 @@
+import { openUrl as tauriOpenUrl } from "@tauri-apps/plugin-opener";
 import { RUNTIME, runtime } from "./environmentDetect";
 
 /**
@@ -5,7 +6,6 @@ import { RUNTIME, runtime } from "./environmentDetect";
  */
 export async function openUrl(url: string): Promise<void> {
   if (runtime === RUNTIME.TAURI) {
-    const { openUrl: tauriOpenUrl } = await import("@tauri-apps/plugin-opener");
     return tauriOpenUrl(url);
   }
 

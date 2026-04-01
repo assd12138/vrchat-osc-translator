@@ -7,6 +7,7 @@ import {
   shell,
 } from "electron";
 import { sendVrchatMessage } from "./utils/osc";
+import { uploadOss } from "./utils/oss";
 import { getQiniuToken } from "./utils/qiniu";
 
 // 判断是否为开发环境
@@ -74,6 +75,47 @@ ipcMain.handle(
     } catch (error) {
       console.error("Failed to generate Qiniu token:", error);
       throw error;
+    }
+  },
+);
+
+// oss上传
+ipcMain.handle(
+  "upload_oss",
+  async (
+    _event,
+    {
+      filePath,
+      region,
+      endpoint,
+      ak,
+      sk,
+      bucket,
+      key,
+    }: {
+      filePath: string;
+      key: string;
+      region: string;
+      endpoint: string;
+      ak: string;
+      sk: string;
+      bucket: string;
+    },
+  ) => {
+    try {
+      await uploadOss({
+        filePath: filePath,
+        config: {
+          region,
+          endpoint,
+          ak,
+          sk,
+          bucket,
+        },
+        key,
+      });
+    } catch (error) {
+      console.error(error);
     }
   },
 );

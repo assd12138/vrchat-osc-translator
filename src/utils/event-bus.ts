@@ -4,7 +4,6 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: 任意传输数据，无需定义 */
 export enum EventBusEvent {
   ADD_LOG = "ADD_LOG",
-  COMPRESS_IAMGE = "COMPRESS_IAMGE",
 }
 
 type EventBusHandler = (data: any) => void;
