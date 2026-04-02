@@ -1,33 +1,6 @@
 import { createReadStream } from "node:fs";
-import { extname } from "node:path";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
-
-const MIME_TYPES: Record<string, string> = {
-  ".jpg": "image/jpeg",
-  ".jpeg": "image/jpeg",
-  ".png": "image/png",
-  ".gif": "image/gif",
-  ".webp": "image/webp",
-  ".svg": "image/svg+xml",
-  ".ico": "image/x-icon",
-  ".bmp": "image/bmp",
-  ".mp4": "video/mp4",
-  ".webm": "video/webm",
-  ".mp3": "audio/mpeg",
-  ".wav": "audio/wav",
-  ".pdf": "application/pdf",
-  ".json": "application/json",
-  ".zip": "application/zip",
-  ".txt": "text/plain",
-  ".html": "text/html",
-  ".css": "text/css",
-  ".js": "application/javascript",
-};
-
-const getMimeType = (filePath: string): string => {
-  const ext = extname(filePath).toLowerCase();
-  return MIME_TYPES[ext] || "application/octet-stream";
-};
+import mime from "mime";
 
 interface ClientConfig {
   region: string;
@@ -74,8 +47,8 @@ export const uploadOss = async (data: {
       Bucket: data.config.bucket,
       Key: data.key,
       Body: createReadStream(data.filePath),
-      ContentType: getMimeType(data.filePath),
+      ContentType: mime.getType(data.filePath) || "application/octet-stream",
     }),
   );
-  console.log({ res });
+  return res;
 };

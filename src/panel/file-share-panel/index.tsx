@@ -9,13 +9,15 @@ export default function FileSharePanel() {
   const [url, setUrl] = useState("");
 
   const handleFileUpload = async () => {
-    await invoke(NATIVE_COMMAND.UPLOAD_OSS, {
+    const file = await invoke(NATIVE_COMMAND.UPLOAD_OSS, {
       region: import.meta.env.VITE_DEFAULT_S3_REGION,
       endpoint: import.meta.env.VITE_DEFAULT_S3_ENDPOINT,
       ak: import.meta.env.VITE_DEFAULT_S3_ACCESS_KEY,
       sk: import.meta.env.VITE_DEFAULT_S3_SECRET_KEY,
       bucket: import.meta.env.VITE_DEFAULT_S3_BUCKET,
     });
+    const externalLink = `${import.meta.env.VITE_DEFAULT_S3_URL}/${file}`;
+    setUrl(externalLink);
   };
 
   const copy = () => {

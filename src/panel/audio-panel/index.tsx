@@ -42,9 +42,11 @@ export default function AudioPanel() {
               echoCancellation: true,
               autoGainControl: true,
               noiseSuppression: true,
-              deviceId: {
-                exact: deviceId,
-              },
+              deviceId: deviceId
+                ? {
+                    exact: deviceId,
+                  }
+                : undefined,
             },
           });
           return stream;

@@ -25,9 +25,9 @@ export default {
     "✅ Recognition successful. Original: {{transcription}}, Translation: {{translation}}",
   剪贴板图片翻译: "Clipboard Image Translation",
   恢复默认: "Restore Default",
-  图片上传: "Image Upload",
+  文件上传: "File Upload",
   复制: "Copy",
-  图片分享: "Image Sharing",
+  文件分享: "File Sharing",
   API供应商: "API Provider",
   去申请: "Apply For Key",
 };

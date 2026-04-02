@@ -10,7 +10,6 @@ declare global {
 }
 
 export enum NATIVE_COMMAND {
-  GET_QINIU_TOKEN = "get_qiniu_token",
   SEND_TO_VRC_CHAT = "send_to_vrc_chat",
   UPLOAD_OSS = "upload_oss",
   /** 仅electron */
@@ -19,7 +18,6 @@ export enum NATIVE_COMMAND {
 
 // 命令参数类型映射
 interface CommandArgsMap {
-  [NATIVE_COMMAND.GET_QINIU_TOKEN]: QINIU_TOKEN_REQUEST;
   [NATIVE_COMMAND.SEND_TO_VRC_CHAT]: SEND_TO_VRC_CHAT_REQUEST;
   [NATIVE_COMMAND.OPEN_EXTERNAL]: OPEN_EXTERNAL_REQUEST;
   [NATIVE_COMMAND.UPLOAD_OSS]: OSS_UPLOAD_REQUEST;
@@ -27,22 +25,12 @@ interface CommandArgsMap {
 
 // 命令返回值类型映射
 interface CommandReturnMap {
-  [NATIVE_COMMAND.GET_QINIU_TOKEN]: string;
   [NATIVE_COMMAND.SEND_TO_VRC_CHAT]: undefined;
   [NATIVE_COMMAND.OPEN_EXTERNAL]: undefined;
-  [NATIVE_COMMAND.UPLOAD_OSS]: undefined;
-}
-
-// Electron API 类型定义
-interface QINIU_TOKEN_REQUEST extends Record<string, string> {
-  accessKey: string;
-  secretKey: string;
-  bucket: string;
+  [NATIVE_COMMAND.UPLOAD_OSS]: string;
 }
 
 interface OSS_UPLOAD_REQUEST extends Record<string, string> {
-  filePath: string;
-  key: string;
   region: string;
   endpoint: string;
   ak: string;

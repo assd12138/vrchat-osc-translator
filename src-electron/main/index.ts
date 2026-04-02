@@ -6,9 +6,9 @@ import {
   ipcMain,
   shell,
 } from "electron";
+import { dialog } from "electron/main";
 import { sendVrchatMessage } from "./utils/osc";
 import { uploadOss } from "./utils/oss";
-import { getQiniuToken } from "./utils/qiniu";
 
 // 判断是否为开发环境
 const isDev = process.env.NODE_ENV === "development" || !app.isPackaged;
@@ -58,43 +58,28 @@ ipcMain.handle("send_to_vrc_chat", async (_event, args: { text: string }) => {
   }
 });
 
-// 获取七牛上传Token
-ipcMain.handle(
-  "get_qiniu_token",
-  async (
-    _event,
-    {
-      accessKey,
-      secretKey,
-      bucket,
-    }: { accessKey: string; secretKey: string; bucket: string },
-  ) => {
-    try {
-      const token = getQiniuToken(accessKey, secretKey, bucket);
-      return token;
-    } catch (error) {
-      console.error("Failed to generate Qiniu token:", error);
-      throw error;
-    }
-  },
-);
+// 生成4位随机字母数字字符串
+function generateRandomKey(): string {
+  const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
+  for (let i = 0; i < 4; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
 
 // oss上传
 ipcMain.handle(
   "upload_oss",
   async (
-    _event,
+    event,
     {
-      filePath,
       region,
       endpoint,
       ak,
       sk,
       bucket,
-      key,
     }: {
-      filePath: string;
-      key: string;
       region: string;
       endpoint: string;
       ak: string;
@@ -103,8 +88,21 @@ ipcMain.handle(
     },
   ) => {
     try {
-      await uploadOss({
-        filePath: filePath,
+      const window = BrowserWindow.fromWebContents(event.sender);
+      if (!window) return;
+      const dialogResult = await dialog.showOpenDialog(window, {
+        properties: ["openFile"],
+      });
+      const filePath = dialogResult.filePaths[0];
+      if (!filePath) return;
+
+      // 提取原有扩展名
+      const ext = path.extname(filePath);
+      // 生成随机文件名
+      const key = generateRandomKey() + ext;
+
+      const res = await uploadOss({
+        filePath,
         config: {
           region,
           endpoint,
@@ -114,6 +112,10 @@ ipcMain.handle(
         },
         key,
       });
+      if (res.$metadata.httpStatusCode === 200) {
+        return key;
+      }
+      return "";
     } catch (error) {
       console.error(error);
     }
