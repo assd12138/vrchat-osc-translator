@@ -24,7 +24,6 @@ const resources = {
 
 i18next.use(initReactI18next).init({
   debug: false,
-  showSupportNotice: false,
   lng:
     store.getState().settings.language === "auto"
       ? navigator.language

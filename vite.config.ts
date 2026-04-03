@@ -1,6 +1,7 @@
 import path from "node:path";
 import react from "@vitejs/plugin-react";
 import { codeInspectorPlugin } from "code-inspector-plugin";
+import { visualizer } from "rollup-plugin-visualizer";
 import { defineConfig } from "vite";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 
@@ -34,6 +35,7 @@ export default defineConfig({
         },
       ],
     }),
+    visualizer(),
   ],
   resolve: {
     alias: {

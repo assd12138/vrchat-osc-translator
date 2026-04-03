@@ -28,12 +28,12 @@
     "@tauri-apps/plugin-http": "^2.5.6",
     "@tauri-apps/plugin-opener": "^2",
     "date-fns": "^4.1.0",
-    "i18next": "^25.8.17",
+    "i18next": "^26.0.3",
     "mime": "^4.1.0",
     "proxy-agent": "^5.0.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "react-i18next": "^16.5.6",
+    "react-i18next": "^17.0.2",
     "react-redux": "^9.2.0",
     "react-router": "^7.13.1"
   },
@@ -49,8 +49,9 @@
     "electron": "^41.1.0",
     "electron-builder": "^26.8.1",
     "esbuild": "^0.27.4",
+    "rollup-plugin-visualizer": "^7.0.1",
     "tree-kill": "^1.2.2",
-    "typescript": "~5.8.3",
+    "typescript": "~6.0.2",
     "vite": "^8.0.0",
     "vite-plugin-static-copy": "^4.0.0"
   }
