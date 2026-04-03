@@ -43,6 +43,25 @@ export default defineConfig({
     },
   },
 
+  build: {
+    rolldownOptions: {
+      output: {
+        codeSplitting: {
+          groups: [
+            {
+              name: "react-dom",
+              test: /node_modules[\\/]react-dom/,
+            },
+            {
+              name: "onnxruntime-web",
+              test: /node_modules[\\/]onnxruntime-web/,
+            },
+          ],
+        },
+      },
+    },
+  },
+
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
   //
   // 1. prevent Vite from obscuring rust errors

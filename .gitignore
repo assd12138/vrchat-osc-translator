@@ -28,5 +28,7 @@ release
 # Claude Code
 .claude/
 
+stats.html
+
 #不上传C++编译结果文件
 src-cpp/*/build
