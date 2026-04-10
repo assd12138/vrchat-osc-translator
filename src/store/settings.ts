@@ -6,7 +6,7 @@ import {
 } from "./rehydrate/rehydrate-constant";
 import { redux_store } from "./rehydrate/rehydrate-store";
 
-interface SettingState {
+export interface SettingState {
   transcription_url: string;
   transcription_model: string;
   transcription_token: string;
