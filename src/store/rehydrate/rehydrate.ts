@@ -1,21 +1,21 @@
 import {
   setAiTemplate,
+  setApiProviderType,
   setLanguage,
+  setLongcatApiAuth,
   setOpenaiApiUrl,
   setOpenaiModel,
   setOpenaiToken,
   setTranscriptionModel,
   setTranscriptionToken,
   setTranscriptionUrl,
-  setApiProviderType,
-  setLongcatApiAuth,
 } from "../settings";
 import store from "../store";
 import {
+  type EApiProviderType,
   REDUX_STORAGE_KEY,
   REHYDRATE_KEYS,
   rehydrateFlag,
-  EApiProviderType,
 } from "./rehydrate-constant";
 
 export const rehydrateMapper = {
@@ -23,7 +23,6 @@ export const rehydrateMapper = {
   [REHYDRATE_KEYS.SETTING_TRANSCRIPTION_URL]: setTranscriptionUrl,
   [REHYDRATE_KEYS.SETTING_TRANSCRIPTION_MODEL]: setTranscriptionModel,
   [REHYDRATE_KEYS.SETTING_TRANSCRIPTION_TOKEN]: setTranscriptionToken,
-  [REHYDRATE_KEYS.SETTING_AI_TEMPLATE]: setAiTemplate,
   [REHYDRATE_KEYS.SETTING_OPENAI_API_URL]: setOpenaiApiUrl,
   [REHYDRATE_KEYS.SETTING_OPENAI_MODEL]: setOpenaiModel,
   [REHYDRATE_KEYS.SETTING_OPENAI_TOKEN]: setOpenaiToken,
