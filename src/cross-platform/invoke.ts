@@ -51,7 +51,7 @@ type ElectronAPI = {
   ) => Promise<CommandReturnMap[K]>;
 };
 
-export default async function invoke<T extends NATIVE_COMMAND>(
+export default function invoke<T extends NATIVE_COMMAND>(
   command: T,
   args: CommandArgsMap[T],
 ): Promise<CommandReturnMap[T]> {
