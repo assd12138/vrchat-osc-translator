@@ -1,6 +1,6 @@
 import { ipcMain } from "electron/main";
 import type { IpcControllerMap } from "../../shared/ipc.types";
-import { camelToKebab } from "../../shared/utils";
+import { camelToSnake } from "../../shared/utils";
 import * as appController from "./controllers/app.controller";
 
 // 1. 将所有控制器放入一个数组，方便统一管理
@@ -16,7 +16,7 @@ export function initializeIpcRouter() {
       if (typeof controller[functionName] === "function") {
         const handler = controller[functionName];
         // 3. 使用函数名生成 IPC 通道名
-        const channel = camelToKebab(functionName);
+        const channel = camelToSnake(functionName);
 
         // 4. 统一注册到 ipcMain.handle，支持异步和返回值
         ipcMain.handle(channel, async (event, ...args) => {

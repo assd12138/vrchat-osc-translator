@@ -1,6 +1,6 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: 通用代码，真正的调用部分类型需要在渲染端约束 */
 import { contextBridge, ipcRenderer } from "electron";
-import { camelToKebab } from "../shared/utils";
+import { camelToSnake } from "../shared/utils";
 
 const ipcApi: Record<string, any> = {};
 
@@ -11,7 +11,7 @@ const apiFunctions = ["open_external", "send_to_vrc_chat", "upload_oss"];
 apiFunctions.forEach((funcName) => {
   ipcApi[funcName] = async (...args: any) => {
     console.log(`[IPC Send] ${funcName}`, args);
-    const channel = camelToKebab(funcName);
+    const channel = camelToSnake(funcName);
     const result = await ipcRenderer.invoke(channel, ...args);
     if (result.success) {
       return result.data;
