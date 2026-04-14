@@ -23,7 +23,7 @@ const client: {
   },
 };
 
-export const uploadOss = async (data: {
+export const uploadToOss = async (data: {
   filePath: string;
   config: ClientConfig;
   key: string;

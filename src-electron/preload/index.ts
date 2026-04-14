@@ -1,19 +1,25 @@
+/** biome-ignore-all lint/suspicious/noExplicitAny: 通用代码，真正的调用部分类型需要在渲染端约束 */
 import { contextBridge, ipcRenderer } from "electron";
+import { camelToKebab } from "../shared/utils";
 
-// 暴露安全的API给渲染进程
-contextBridge.exposeInMainWorld("electronAPI", {
-  // 发送OSC消息到VRChat
-  send_to_vrc_chat: (args: { text: string }): Promise<void> =>
-    ipcRenderer.invoke("send_to_vrc_chat", args),
+const ipcApi: Record<string, any> = {};
 
-  upload_oss: (args: {
-    region: string;
-    endpoint: string;
-    ak: string;
-    sk: string;
-    bucket: string;
-  }): Promise<string> => ipcRenderer.invoke("upload_oss", args),
-  // 打开外部URL
-  openExternal: (url: string): Promise<void> =>
-    ipcRenderer.invoke("open_external", url),
+// 定义要暴露的 API 函数名列表 (驼峰式)
+const apiFunctions = ["open_external", "send_to_vrc_chat", "upload_oss"];
+
+// 动态生成 API 对象
+apiFunctions.forEach((funcName) => {
+  ipcApi[funcName] = async (...args: any) => {
+    console.log(`[IPC Send] ${funcName}`, args);
+    const channel = camelToKebab(funcName);
+    const result = await ipcRenderer.invoke(channel, ...args);
+    if (result.success) {
+      return result.data;
+    } else {
+      // 如果失败，直接抛出错误，方便调用方使用 try...catch
+      throw new Error(result.error.message);
+    }
+  };
 });
+
+contextBridge.exposeInMainWorld("electronAPI", ipcApi);
