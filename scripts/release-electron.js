@@ -15,7 +15,7 @@ async function cleanBuildCache() {
   await rm(distPath, { recursive: true, force: true });
 }
 
-async function buildRender() {
+function buildRender() {
   const buildProcess = spawn("npm", ["run", "electron-build-render"], {
     stdio: "inherit",
     shell: true,

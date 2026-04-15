@@ -14,6 +14,7 @@
     "android:build": "tauri android build",
     "tauri-dev": "tauri dev",
     "tauri-build": "tauri build",
+    "electron-dev:main": "node ./scripts/dev-electron.js",
     "electron-dev": "concurrently 'vite' 'node ./scripts/dev-electron.js'",
     "electron-build": "node ./scripts/release-electron.js",
     "electron-build-render": "tsc && vite build --outDir dist-electron/render"
@@ -48,7 +49,7 @@
     "cross-env": "^10.1.0",
     "electron": "^41.1.0",
     "electron-builder": "^26.8.1",
-    "esbuild": "^0.28.0",
+    "esbuild": "^0.27.4",
     "rollup-plugin-visualizer": "^7.0.1",
     "tree-kill": "^1.2.2",
     "typescript": "~6.0.2",
