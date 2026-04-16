@@ -1,4 +1,13 @@
-import { useState } from "react";
+import {
+  AutoProcessor,
+  env,
+  Gemma4ForConditionalGeneration,
+  type PreTrainedModel,
+  type Processor,
+  type Tensor,
+  TextStreamer,
+} from "@huggingface/transformers";
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import invoke, { NATIVE_COMMAND } from "@/cross-platform/invoke";
 import globalStyles from "../../styles/index.module.css";
@@ -7,6 +16,9 @@ import styles from "./index.module.css";
 export default function FileSharePanel() {
   const { t } = useTranslation();
   const [url, setUrl] = useState("");
+  const [question, setQuestion] = useState("");
+  const processorRef = useRef<Processor | null>(null);
+  const modelRef = useRef<PreTrainedModel | null>(null);
 
   const handleFileUpload = async () => {
     const file = await invoke(NATIVE_COMMAND.UPLOAD_OSS, {
@@ -23,6 +35,66 @@ export default function FileSharePanel() {
   const copy = () => {
     navigator.clipboard.writeText(url);
   };
+  const ask = async () => {
+    if (!processorRef.current || !modelRef.current) return;
+    const processor = processorRef.current;
+    const model = modelRef.current;
+    const messages = [
+      {
+        role: "user",
+        content: [
+          {
+            type: "text",
+            text: question,
+          },
+        ],
+      },
+    ];
+    const prompt = processor.apply_chat_template(messages, {
+      // enable_thinking: false,
+      add_generation_prompt: true,
+    });
+    const inputs = await processor(prompt);
+    if (!processor.tokenizer) return;
+    const outputs = (await model.generate({
+      ...inputs,
+      max_new_tokens: 512,
+      do_sample: false,
+      streamer: new TextStreamer(processor.tokenizer, {
+        skip_prompt: true,
+        skip_special_tokens: false,
+        callback_function: (text) => {
+          console.log(text);
+        },
+      }),
+    })) as Tensor;
+    const decoded = processor.batch_decode(
+      outputs.slice(null, [inputs.input_ids.dims.at(-1), null]),
+      { skip_special_tokens: true },
+    );
+    console.log(decoded[0]);
+  };
+
+  const load = async () => {
+    console.log(123);
+    env.remoteHost = "https://modelscope.cn/";
+    const model_id = "onnx-community/gemma-4-E4B-it-ONNX";
+    const processor = await AutoProcessor.from_pretrained(model_id);
+    const model = await Gemma4ForConditionalGeneration.from_pretrained(
+      model_id,
+      {
+        dtype: "q4f16",
+        device: "webgpu",
+        progress_callback: (info) => {
+          if (info.status === "progress_total") {
+            console.log(`Loading model: ${info.progress}%`);
+          }
+        },
+      },
+    );
+    processorRef.current = processor;
+    modelRef.current = model;
+  };
 
   return (
     <div className={globalStyles.panel}>
@@ -34,8 +106,15 @@ export default function FileSharePanel() {
         <button onClick={copy} className={globalStyles.button}>
           {t("复制")}
         </button>
+        <button onClick={load} className={globalStyles.button}>
+          load
+        </button>
+        <button onClick={ask} className={globalStyles.button}>
+          ask
+        </button>
       </div>
       <div>
+        <input type="text" onChange={(e) => setQuestion(e.target.value)} />
         <input className={globalStyles.inputS} type="text" value={url} />
       </div>
     </div>

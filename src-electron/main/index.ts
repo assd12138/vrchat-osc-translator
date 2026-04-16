@@ -59,7 +59,7 @@ function createMainWindow() {
     // 开发环境加载Vite开发服务器
     mainWindow.loadURL("http://localhost:1420");
     // 打开DevTools
-    // mainWindow.webContents.openDevTools();
+    mainWindow.webContents.openDevTools();
   } else {
     // 生产环境使用自定义协议加载构建后的文件
     mainWindow.loadURL(`${PROTOCOL_NAME}://./index.html`);

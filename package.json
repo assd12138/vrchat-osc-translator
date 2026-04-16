@@ -23,6 +23,7 @@
     "@aws-sdk/client-s3": "3.1023.0",
     "@aws-sdk/lib-storage": "3.1023.0",
     "@aws-sdk/s3-request-presigner": "3.1023.0",
+    "@huggingface/transformers": "^4.0.1",
     "@reduxjs/toolkit": "^2.11.2",
     "@ricky0123/vad-web": "^0.0.30",
     "@tauri-apps/api": "^2",
