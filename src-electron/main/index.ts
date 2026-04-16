@@ -72,7 +72,10 @@ function createMainWindow() {
 }
 
 // 应用生命周期
-
+app.commandLine.appendSwitch(
+  "--enable-features",
+  "WebMachineLearningNeuralNetwork",
+);
 app.whenReady().then(() => {
   initializeIpcRouter();
   registerProtocol();

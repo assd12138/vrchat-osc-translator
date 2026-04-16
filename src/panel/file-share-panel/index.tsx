@@ -4,6 +4,7 @@ import {
   Gemma4ForConditionalGeneration,
   type PreTrainedModel,
   type Processor,
+  read_audio,
   type Tensor,
   TextStreamer,
 } from "@huggingface/transformers";
@@ -16,6 +17,7 @@ import styles from "./index.module.css";
 export default function FileSharePanel() {
   const { t } = useTranslation();
   const [url, setUrl] = useState("");
+  const [per, setPer] = useState("");
   const [question, setQuestion] = useState("");
   const processorRef = useRef<Processor | null>(null);
   const modelRef = useRef<PreTrainedModel | null>(null);
@@ -36,13 +38,19 @@ export default function FileSharePanel() {
     navigator.clipboard.writeText(url);
   };
   const ask = async () => {
-    if (!processorRef.current || !modelRef.current) return;
+    if (!processorRef.current || !modelRef.current) {
+      setUrl("先点击加载模型");
+      return;
+    }
+    setUrl("");
     const processor = processorRef.current;
     const model = modelRef.current;
     const messages = [
       {
         role: "user",
         content: [
+          { type: "image" },
+          { type: "audio" },
           {
             type: "text",
             text: question,
@@ -54,8 +62,12 @@ export default function FileSharePanel() {
       // enable_thinking: false,
       add_generation_prompt: true,
     });
-    const inputs = await processor(prompt);
+    const audio = await read_audio("http://127.0.0.1:5500/ww.wav", 16000);
+    const inputs = await processor(prompt, null, audio, {
+      add_special_tokens: true,
+    });
     if (!processor.tokenizer) return;
+    console.time("耗时");
     const outputs = (await model.generate({
       ...inputs,
       max_new_tokens: 512,
@@ -64,7 +76,8 @@ export default function FileSharePanel() {
         skip_prompt: true,
         skip_special_tokens: false,
         callback_function: (text) => {
-          console.log(text);
+          // setPer(text);
+          setUrl((u) => u + text);
         },
       }),
     })) as Tensor;
@@ -72,13 +85,18 @@ export default function FileSharePanel() {
       outputs.slice(null, [inputs.input_ids.dims.at(-1), null]),
       { skip_special_tokens: true },
     );
+    setUrl(decoded[0]);
     console.log(decoded[0]);
+    console.timeEnd("耗时");
   };
+  const loading = useRef(false);
 
   const load = async () => {
+    if (loading.current || processorRef.current || modelRef.current) return;
+    loading.current = true;
     console.log(123);
     env.remoteHost = "https://modelscope.cn/";
-    const model_id = "onnx-community/gemma-4-E4B-it-ONNX";
+    const model_id = "onnx-community/gemma-4-E2B-it-ONNX";
     const processor = await AutoProcessor.from_pretrained(model_id);
     const model = await Gemma4ForConditionalGeneration.from_pretrained(
       model_id,
@@ -87,7 +105,8 @@ export default function FileSharePanel() {
         device: "webgpu",
         progress_callback: (info) => {
           if (info.status === "progress_total") {
-            console.log(`Loading model: ${info.progress}%`);
+            setPer(`Loading model: ${info.progress}%`);
+            // console.log(`Loading model: ${info.progress}%`);
           }
         },
       },
@@ -98,24 +117,32 @@ export default function FileSharePanel() {
 
   return (
     <div className={globalStyles.panel}>
-      <div className={globalStyles.title}>{t("文件分享")}</div>
+      <div className={globalStyles.title}>
+        onnx-community/gemma-4-E2B-it-ONNX
+      </div>
       <div className={styles.btnCon}>
-        <button onClick={handleFileUpload} className={globalStyles.button}>
+        {/* <button onClick={handleFileUpload} className={globalStyles.button}>
           {t("文件上传")}
         </button>
         <button onClick={copy} className={globalStyles.button}>
           {t("复制")}
-        </button>
+        </button> */}
         <button onClick={load} className={globalStyles.button}>
-          load
+          加载模型
         </button>
         <button onClick={ask} className={globalStyles.button}>
-          ask
+          提问
         </button>
       </div>
       <div>
-        <input type="text" onChange={(e) => setQuestion(e.target.value)} />
-        <input className={globalStyles.inputS} type="text" value={url} />
+        <div>{per}</div>
+        <input
+          placeholder="输入问题"
+          className={globalStyles.inputS}
+          type="text"
+          onChange={(e) => setQuestion(e.target.value)}
+        />
+        <textarea style={{ height: "300px", width: "100%" }} value={url} />
       </div>
     </div>
   );
