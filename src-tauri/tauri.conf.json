@@ -14,7 +14,8 @@
       {
         "title": "vrchat-translator",
         "width": 520,
-        "height": 770
+        "height": 770,
+        "additionalBrowserArgs": "--disable-web-security"
       }
     ],
     "security": {

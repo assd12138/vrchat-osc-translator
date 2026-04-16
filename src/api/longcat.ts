@@ -64,6 +64,7 @@ export const translateByLongCatStream = async (
       ],
       temperature: 0.3,
       stream: true,
+      output_modalities: ["text"],
     }),
     {
       Authorization: `Bearer ${data.token}`,
