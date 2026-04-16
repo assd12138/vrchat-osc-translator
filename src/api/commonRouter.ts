@@ -6,15 +6,25 @@ import { EApiProviderType } from "@/store/rehydrate/rehydrate-constant";
 import store from "@/store/store";
 import {
   ocrByLongCat,
+  ocrByLongCatStream,
   transcriptionByLongCat,
   translateByLongCat,
+  translateByLongCatStream,
 } from "./longcat";
 import {
   ocrByOpenAI,
+  ocrByOpenAIStream,
   transcriptionByOpenAI,
   translateByOpenAI,
+  translateByOpenAIStream,
 } from "./openai";
-import { transcriptionAudio, transformOCR, translateByAI } from "./translate";
+import {
+  transcriptionAudio,
+  transformOCR,
+  transformOCRStream,
+  translateByAI,
+  translateByAIStream,
+} from "./translate";
 
 /**
  * 通用翻译路由
@@ -52,6 +62,56 @@ export const translateRouter = async (data: { text: string }) => {
   }
 
   return result;
+};
+
+/**
+ * 通用翻译路由（流式）
+ * @param data
+ * @param onChunk 每个增量文本块的回调
+ * @param signal 可选的 AbortSignal 用于取消请求
+ */
+export const translateRouterStream = async (
+  data: { text: string },
+  onChunk: (text: string) => void,
+  signal?: AbortSignal,
+) => {
+  const settings = store.getState().settings;
+  const ask = settings.ai_template.replace("{text}", data.text);
+
+  if (settings.api_provider_type === EApiProviderType.CUSTOM) {
+    await translateByAIStream(
+      {
+        text: ask,
+        token: settings.openai_token,
+        api: settings.openai_api_url,
+        model: settings.openai_model,
+        assignObj: {
+          max_tokens: 500,
+        },
+      },
+      onChunk,
+      signal,
+    );
+  } else if (settings.api_provider_type === EApiProviderType.LONG_CAT) {
+    await translateByLongCatStream(
+      {
+        text: ask,
+        token: settings.longcat_api_auth,
+        model: "LongCat-Flash-Lite",
+      },
+      onChunk,
+      signal,
+    );
+  } else if (settings.api_provider_type === EApiProviderType.OPEN_AI) {
+    await translateByOpenAIStream(
+      {
+        text: ask,
+        token: settings.openai_api_auth,
+      },
+      onChunk,
+      signal,
+    );
+  }
 };
 
 /**
@@ -132,4 +192,40 @@ export const transformOCRRouter = async ({ base64 }: { base64: string }) => {
     result = ocrRes.choices[0].message.content;
   }
   return result;
+};
+
+/**
+ * 通用OCR路由（流式）
+ * @param data
+ * @param onChunk 每个增量文本块的回调
+ * @param signal 可选的 AbortSignal 用于取消请求
+ */
+export const transformOCRRouterStream = async (
+  { base64 }: { base64: string },
+  onChunk: (text: string) => void,
+  signal?: AbortSignal,
+) => {
+  const settings = store.getState().settings;
+
+  if (settings.api_provider_type === EApiProviderType.CUSTOM) {
+    await transformOCRStream({ base64 }, onChunk, signal);
+  } else if (settings.api_provider_type === EApiProviderType.LONG_CAT) {
+    await ocrByLongCatStream(
+      {
+        token: settings.longcat_api_auth,
+        base64,
+      },
+      onChunk,
+      signal,
+    );
+  } else if (settings.api_provider_type === EApiProviderType.OPEN_AI) {
+    await ocrByOpenAIStream(
+      {
+        token: settings.openai_api_auth,
+        base64,
+      },
+      onChunk,
+      signal,
+    );
+  }
 };
