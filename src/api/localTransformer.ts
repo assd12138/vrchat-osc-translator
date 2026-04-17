@@ -73,8 +73,14 @@ const runModel = async (config: CommonRunConfig): Promise<string> => {
     streamer: new TextStreamer(processor.tokenizer, {
       skip_prompt: true,
       skip_special_tokens: false,
-      callback_function:
-        config.onChunk || ((text: string) => console.log(text)),
+      callback_function: config.onChunk
+        ? (arg) => {
+            if (arg === "<turn|>") {
+              return;
+            }
+            config.onChunk?.(arg);
+          }
+        : (text: string) => console.log(text),
     }),
   })) as Tensor;
 
