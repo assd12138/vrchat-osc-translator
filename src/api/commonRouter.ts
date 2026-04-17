@@ -6,8 +6,10 @@ import { EApiProviderType } from "@/store/rehydrate/rehydrate-constant";
 import store from "@/store/store";
 import {
   ocrByLocalTransformer,
+  ocrByLocalTransformerStream,
   transcribeByLocalTransformer,
   translateByLocalTransformer,
+  translateByLocalTransformerStream,
 } from "./localTransformer";
 import {
   ocrByLongCat,
@@ -120,6 +122,10 @@ export const translateRouterStream = async (
       onChunk,
       signal,
     );
+  } else if (
+    settings.api_provider_type === EApiProviderType.LOCAL_TRANSFORMER
+  ) {
+    await translateByLocalTransformerStream({ text: ask }, onChunk);
   }
 };
 
@@ -244,5 +250,9 @@ export const transformOCRRouterStream = async (
       onChunk,
       signal,
     );
+  } else if (
+    settings.api_provider_type === EApiProviderType.LOCAL_TRANSFORMER
+  ) {
+    await ocrByLocalTransformerStream({ base64 }, onChunk);
   }
 };

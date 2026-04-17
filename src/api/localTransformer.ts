@@ -3,6 +3,7 @@ import {
   env,
   Gemma4ForConditionalGeneration,
   load_image,
+  type Message,
   type PreTrainedModel,
   type Processor,
   read_audio,
@@ -36,20 +37,62 @@ export const checkModelCached = async (): Promise<boolean> => {
 };
 
 /**
- * 文本翻译
- * @param text - 待翻译的文本
- * @returns 翻译结果
+ * 公共运行配置类型
  */
-export const translateByLocalTransformer = async ({
-  text,
-}: {
-  text: string;
-}): Promise<string> => {
+type CommonRunConfig = {
+  messages: Message[];
+  image?: unknown;
+  audio?: Float32Array;
+  onChunk?: (text: string) => void;
+};
+
+/**
+ * 公共运行方法 - 执行模型推理
+ */
+const runModel = async (config: CommonRunConfig): Promise<string> => {
   if (!transformerRuntime.processor || !transformerRuntime.model) {
     throw new Error("模型未加载");
   }
   const processor = transformerRuntime.processor;
   const model = transformerRuntime.model;
+
+  const prompt = processor.apply_chat_template(config.messages, {
+    add_generation_prompt: true,
+  });
+
+  const inputs = await processor(prompt, config.image, config.audio, {
+    add_special_tokens: true,
+  });
+
+  if (!processor.tokenizer) return "";
+
+  const outputs = (await model.generate({
+    ...inputs,
+    max_new_tokens: 512,
+    do_sample: false,
+    streamer: new TextStreamer(processor.tokenizer, {
+      skip_prompt: true,
+      skip_special_tokens: false,
+      callback_function:
+        config.onChunk || ((text: string) => console.log(text)),
+    }),
+  })) as Tensor;
+
+  const decoded = processor.batch_decode(
+    outputs.slice(null, [inputs.input_ids.dims.at(-1), null]),
+    { skip_special_tokens: true },
+  );
+  return decoded[0];
+};
+
+/**
+ * 文本翻译
+ */
+export const translateByLocalTransformer = ({
+  text,
+}: {
+  text: string;
+}): Promise<string> => {
   const messages = [
     {
       role: "user",
@@ -65,36 +108,36 @@ export const translateByLocalTransformer = async ({
       ],
     },
   ];
-  const prompt = processor.apply_chat_template(messages, {
-    add_generation_prompt: true,
-  });
-  const inputs = await processor(prompt, null, null, {
-    add_special_tokens: true,
-  });
-  if (!processor.tokenizer) return "";
-  const outputs = (await model.generate({
-    ...inputs,
-    max_new_tokens: 512,
-    do_sample: false,
-    streamer: new TextStreamer(processor.tokenizer, {
-      skip_prompt: true,
-      skip_special_tokens: false,
-      callback_function: (text) => {
-        console.log(text);
-      },
-    }),
-  })) as Tensor;
-  const decoded = processor.batch_decode(
-    outputs.slice(null, [inputs.input_ids.dims.at(-1), null]),
-    { skip_special_tokens: true },
-  );
-  return decoded[0];
+  return runModel({ messages });
+};
+
+/**
+ * 文本翻译（流式）
+ */
+export const translateByLocalTransformerStream = (
+  { text }: { text: string },
+  onChunk: (text: string) => void,
+): Promise<string> => {
+  const messages = [
+    {
+      role: "user",
+      content: [
+        {
+          type: "text",
+          text: "你是一个翻译专家，当用户让你翻译的时候，严格按照翻译格式输出，不要输出其他内容",
+        },
+        {
+          type: "text",
+          text: text,
+        },
+      ],
+    },
+  ];
+  return runModel({ messages, onChunk });
 };
 
 /**
  * 语音转译 (Speech-to-Text)
- * @param audioData - 音频数据
- * @returns 转译文本
  */
 export const transcribeByLocalTransformer = async ({
   audioData,
@@ -106,6 +149,7 @@ export const transcribeByLocalTransformer = async ({
   if (!processor || !model) {
     throw new Error("模型未加载");
   }
+
   const messages = [
     {
       role: "user",
@@ -118,39 +162,16 @@ export const transcribeByLocalTransformer = async ({
       ],
     },
   ];
-  const prompt = processor.apply_chat_template(messages, {
-    add_generation_prompt: true,
-  });
+
   const audioObjectURL = URL.createObjectURL(audioData);
   const audio = await read_audio(audioObjectURL, 16000);
   URL.revokeObjectURL(audioObjectURL);
-  const inputs = await processor(prompt, null, audio, {
-    add_special_tokens: true,
-  });
-  if (!processor.tokenizer) return "";
-  const outputs = (await model.generate({
-    ...inputs,
-    max_new_tokens: 512,
-    do_sample: false,
-    streamer: new TextStreamer(processor.tokenizer, {
-      skip_prompt: true,
-      skip_special_tokens: false,
-      callback_function: (text) => {
-        console.log(text);
-      },
-    }),
-  })) as Tensor;
-  const decoded = processor.batch_decode(
-    outputs.slice(null, [inputs.input_ids.dims.at(-1), null]),
-    { skip_special_tokens: true },
-  );
-  return decoded[0];
+
+  return runModel({ messages, audio });
 };
 
 /**
  * OCR识别
- * @param imageData - 图片数据 (可以是 URL、Base64 或 ImageData)
- * @returns 识别文本
  */
 export const ocrByLocalTransformer = async ({
   base64,
@@ -162,6 +183,7 @@ export const ocrByLocalTransformer = async ({
   if (!processor || !model) {
     throw new Error("模型未加载");
   }
+
   const messages = [
     {
       role: "user",
@@ -174,11 +196,10 @@ export const ocrByLocalTransformer = async ({
       ],
     },
   ];
-  const prompt = processor.apply_chat_template(messages, {
-    add_generation_prompt: true,
-  });
+
   const byteString = atob(base64.split(",")[1] ?? base64);
-  const mimeString = base64.split(",")[0]?.split(":")[1]?.split(";")[0] ?? "image/png";
+  const mimeString =
+    base64.split(",")[0]?.split(":")[1]?.split(";")[0] ?? "image/png";
   const ab = new ArrayBuffer(byteString.length);
   const ia = new Uint8Array(ab);
   for (let i = 0; i < byteString.length; i++) {
@@ -189,27 +210,51 @@ export const ocrByLocalTransformer = async ({
   const imageObjectURL = URL.createObjectURL(imageFile);
   const image = await load_image(imageObjectURL);
   URL.revokeObjectURL(imageObjectURL);
-  const inputs = await processor(prompt, image, null, {
-    add_special_tokens: true,
-  });
-  if (!processor.tokenizer) return "";
-  const outputs = (await model.generate({
-    ...inputs,
-    max_new_tokens: 512,
-    do_sample: false,
-    streamer: new TextStreamer(processor.tokenizer, {
-      skip_prompt: true,
-      skip_special_tokens: false,
-      callback_function: (text) => {
-        console.log(text);
-      },
-    }),
-  })) as Tensor;
-  const decoded = processor.batch_decode(
-    outputs.slice(null, [inputs.input_ids.dims.at(-1), null]),
-    { skip_special_tokens: true },
-  );
-  return decoded[0];
+
+  return runModel({ messages, image });
+};
+
+/**
+ * OCR识别（流式）
+ */
+export const ocrByLocalTransformerStream = async (
+  { base64 }: { base64: string },
+  onChunk: (text: string) => void,
+): Promise<string> => {
+  const processor = transformerRuntime.processor;
+  const model = transformerRuntime.model;
+  if (!processor || !model) {
+    throw new Error("模型未加载");
+  }
+
+  const messages = [
+    {
+      role: "user",
+      content: [
+        { type: "image" },
+        {
+          type: "text",
+          text: "OCR this image and extract all text.",
+        },
+      ],
+    },
+  ];
+
+  const byteString = atob(base64.split(",")[1] ?? base64);
+  const mimeString =
+    base64.split(",")[0]?.split(":")[1]?.split(";")[0] ?? "image/png";
+  const ab = new ArrayBuffer(byteString.length);
+  const ia = new Uint8Array(ab);
+  for (let i = 0; i < byteString.length; i++) {
+    ia[i] = byteString.charCodeAt(i);
+  }
+  const blob = new Blob([ab], { type: mimeString });
+  const imageFile = new File([blob], "image.png", { type: mimeString });
+  const imageObjectURL = URL.createObjectURL(imageFile);
+  const image = await load_image(imageObjectURL);
+  URL.revokeObjectURL(imageObjectURL);
+
+  return runModel({ messages, image, onChunk });
 };
 
 /**
