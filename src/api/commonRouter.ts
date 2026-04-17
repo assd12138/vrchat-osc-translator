@@ -5,6 +5,7 @@ import { encodeWAV } from "@ricky0123/vad-web/dist/utils";
 import { EApiProviderType } from "@/store/rehydrate/rehydrate-constant";
 import store from "@/store/store";
 import {
+  ocrByLocalTransformer,
   transcribeByLocalTransformer,
   translateByLocalTransformer,
 } from "./localTransformer";
@@ -142,6 +143,10 @@ export const transformOCRRouter = async ({ base64 }: { base64: string }) => {
       base64,
     });
     result = ocrRes.choices[0].message.content;
+  } else if (
+    settings.api_provider_type === EApiProviderType.LOCAL_TRANSFORMER
+  ) {
+    result = await ocrByLocalTransformer({ base64 });
   }
   return result;
 };

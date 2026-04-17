@@ -2,6 +2,7 @@ import {
   AutoProcessor,
   env,
   Gemma4ForConditionalGeneration,
+  load_image,
   type PreTrainedModel,
   type Processor,
   read_audio,
@@ -100,11 +101,11 @@ export const transcribeByLocalTransformer = async ({
 }: {
   audioData: File | Blob;
 }): Promise<string> => {
-  if (!transformerRuntime.processor || !transformerRuntime.model) {
-    throw new Error("模型未加载");
-  }
   const processor = transformerRuntime.processor;
   const model = transformerRuntime.model;
+  if (!processor || !model) {
+    throw new Error("模型未加载");
+  }
   const messages = [
     {
       role: "user",
@@ -152,15 +153,63 @@ export const transcribeByLocalTransformer = async ({
  * @returns 识别文本
  */
 export const ocrByLocalTransformer = async ({
-  imageData,
+  base64,
 }: {
-  imageData: string | ImageData;
+  base64: string;
 }): Promise<string> => {
-  if (!transformerRuntime.processor || !transformerRuntime.model) {
+  const processor = transformerRuntime.processor;
+  const model = transformerRuntime.model;
+  if (!processor || !model) {
     throw new Error("模型未加载");
   }
-  // TODO: 实现 OCR 识别逻辑
-  throw new Error("OCR识别功能待实现");
+  const messages = [
+    {
+      role: "user",
+      content: [
+        { type: "image" },
+        {
+          type: "text",
+          text: "OCR this image and extract all text.",
+        },
+      ],
+    },
+  ];
+  const prompt = processor.apply_chat_template(messages, {
+    add_generation_prompt: true,
+  });
+  const byteString = atob(base64.split(",")[1] ?? base64);
+  const mimeString = base64.split(",")[0]?.split(":")[1]?.split(";")[0] ?? "image/png";
+  const ab = new ArrayBuffer(byteString.length);
+  const ia = new Uint8Array(ab);
+  for (let i = 0; i < byteString.length; i++) {
+    ia[i] = byteString.charCodeAt(i);
+  }
+  const blob = new Blob([ab], { type: mimeString });
+  const imageFile = new File([blob], "image.png", { type: mimeString });
+  const imageObjectURL = URL.createObjectURL(imageFile);
+  const image = await load_image(imageObjectURL);
+  URL.revokeObjectURL(imageObjectURL);
+  const inputs = await processor(prompt, image, null, {
+    add_special_tokens: true,
+  });
+  if (!processor.tokenizer) return "";
+  const outputs = (await model.generate({
+    ...inputs,
+    max_new_tokens: 512,
+    do_sample: false,
+    streamer: new TextStreamer(processor.tokenizer, {
+      skip_prompt: true,
+      skip_special_tokens: false,
+      callback_function: (text) => {
+        console.log(text);
+      },
+    }),
+  })) as Tensor;
+  const decoded = processor.batch_decode(
+    outputs.slice(null, [inputs.input_ids.dims.at(-1), null]),
+    { skip_special_tokens: true },
+  );
+  return decoded[0];
 };
 
 /**
@@ -178,7 +227,9 @@ export const loadModel = async ({
   )
     return;
   transformerRuntime.loading = true;
-  env.remoteHost = "https://modelscope.cn/";
+  if (navigator.language.includes("zh")) {
+    env.remoteHost = "https://modelscope.cn/";
+  }
   const processor = await AutoProcessor.from_pretrained(MODEL_ID);
   const model = await Gemma4ForConditionalGeneration.from_pretrained(MODEL_ID, {
     dtype: "q4f16",

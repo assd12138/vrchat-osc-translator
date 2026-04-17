@@ -21,7 +21,7 @@ export default function OcrPanel() {
         ) {
           const blob = await item.getType(
             item.types.find((type) => type.startsWith("image/")) ||
-              item.types[0],
+            item.types[0],
           );
           base64String = await new Promise((resolve, reject) => {
             const reader = new FileReader();
