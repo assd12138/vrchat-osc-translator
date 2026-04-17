@@ -78,7 +78,8 @@ export default function SettingPanel() {
   const loadLocalTransformer = () => {
     setLoading(true);
     loadModel({
-      onProgress(percent) {
+      onProgress(percentNative) {
+        const percent = Math.round((percentNative * 100) / 100);
         setLocalProgress(percent);
         if (percent === 100) {
           setLoading(false);
@@ -189,8 +190,10 @@ export default function SettingPanel() {
             <tbody>
               <tr>
                 <td className={styles.localModelTd}>
-                    {isCached === null ? t("检查中") : t(isCached ? "已缓存" : "未缓存")}
-                  </td>
+                  {isCached === null
+                    ? t("检查中")
+                    : t(isCached ? "已缓存" : "未缓存")}
+                </td>
                 <td className={styles.localModelTd}>
                   {t(localProgress === 100 ? "已加载" : "未加载")}
                 </td>
@@ -200,6 +203,9 @@ export default function SettingPanel() {
           {loading && (
             <div>
               <progress value={localProgress} max={100}></progress>
+              <span style={{ fontSize: "12px", marginLeft: "10px" }}>
+                {localProgress}%
+              </span>
             </div>
           )}
           <div>
