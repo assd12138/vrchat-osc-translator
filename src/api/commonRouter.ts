@@ -4,7 +4,10 @@
 import { encodeWAV } from "@ricky0123/vad-web/dist/utils";
 import { EApiProviderType } from "@/store/rehydrate/rehydrate-constant";
 import store from "@/store/store";
-import { translateByLocalTransformer } from "./localTransformer";
+import {
+  transcribeByLocalTransformer,
+  translateByLocalTransformer,
+} from "./localTransformer";
 import {
   ocrByLongCat,
   transcriptionByLongCat,
@@ -108,6 +111,10 @@ export const transcriptionRouter = async (data: {
       audio_base64: base64,
     });
     result = transcriptionRes.choices[0].message.content;
+  } else if (
+    settings.api_provider_type === EApiProviderType.LOCAL_TRANSFORMER
+  ) {
+    result = await transcribeByLocalTransformer({ audioData: file });
   }
   return result;
 };

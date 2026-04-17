@@ -1,7 +1,7 @@
 import i18next from "i18next";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { loadModel } from "@/api/localTransformer";
+import { checkModelCached, loadModel } from "@/api/localTransformer";
 import { openUrl } from "../../cross-platform/openUrl";
 import { useAppDispatch, useAppSelector } from "../../store/hook";
 import { EApiProviderType } from "../../store/rehydrate/rehydrate-constant";
@@ -27,6 +27,13 @@ export default function SettingPanel() {
   const { t } = useTranslation();
   const [localProgress, setLocalProgress] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [isCached, setIsCached] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    if (settings.api_provider_type === EApiProviderType.LOCAL_TRANSFORMER) {
+      checkModelCached().then(setIsCached);
+    }
+  }, [settings.api_provider_type]);
 
   const handleChangeBackend = (url: string) => {
     dispatch(setTranscriptionUrl(url));
@@ -181,7 +188,9 @@ export default function SettingPanel() {
             </thead>
             <tbody>
               <tr>
-                <td className={styles.localModelTd}>{t("未缓存")}</td>
+                <td className={styles.localModelTd}>
+                    {isCached === null ? t("检查中") : t(isCached ? "已缓存" : "未缓存")}
+                  </td>
                 <td className={styles.localModelTd}>
                   {t(localProgress === 100 ? "已加载" : "未加载")}
                 </td>

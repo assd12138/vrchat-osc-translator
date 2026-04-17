@@ -9,6 +9,8 @@ import {
   TextStreamer,
 } from "@huggingface/transformers";
 
+const MODEL_ID = "onnx-community/gemma-4-E4B-it-ONNX";
+
 const transformerRuntime: {
   loading: boolean;
   processor: Processor | null;
@@ -19,60 +21,29 @@ const transformerRuntime: {
   model: null,
 };
 
-const _ask = async () => {
-  if (!transformerRuntime.processor || !transformerRuntime.model) {
-    throw new Error("模型未加载");
+/**
+ * 检查模型是否已缓存
+ */
+export const checkModelCached = async (): Promise<boolean> => {
+  try {
+    const cache = await caches.open("transformers-cache");
+    const cachedFiles = await cache.keys();
+    return cachedFiles.some((req) => req.url.includes(MODEL_ID));
+  } catch {
+    return false;
   }
-  const processor = transformerRuntime.processor;
-  const model = transformerRuntime.model;
-  const messages = [
-    {
-      role: "user",
-      content: [
-        { type: "image" },
-        { type: "audio" },
-        {
-          type: "text",
-          text: "",
-        },
-      ],
-    },
-  ];
-  const prompt = processor.apply_chat_template(messages, {
-    // enable_thinking: false,
-    add_generation_prompt: true,
-  });
-  const audio = await read_audio("http://127.0.0.1:5500/ww.wav", 16000);
-  const inputs = await processor(prompt, null, audio, {
-    add_special_tokens: true,
-  });
-  if (!processor.tokenizer) return;
-  console.time("耗时");
-  const outputs = (await model.generate({
-    ...inputs,
-    max_new_tokens: 512,
-    do_sample: false,
-    streamer: new TextStreamer(processor.tokenizer, {
-      skip_prompt: true,
-      skip_special_tokens: false,
-      callback_function: (text) => {
-        console.log(text);
-      },
-    }),
-  })) as Tensor;
-  const decoded = processor.batch_decode(
-    outputs.slice(null, [inputs.input_ids.dims.at(-1), null]),
-    { skip_special_tokens: true },
-  );
-  console.log(decoded[0]);
-  console.timeEnd("耗时");
 };
 
+/**
+ * 文本翻译
+ * @param text - 待翻译的文本
+ * @returns 翻译结果
+ */
 export const translateByLocalTransformer = async ({
   text,
 }: {
   text: string;
-}) => {
+}): Promise<string> => {
   if (!transformerRuntime.processor || !transformerRuntime.model) {
     throw new Error("模型未加载");
   }
@@ -99,7 +70,7 @@ export const translateByLocalTransformer = async ({
   const inputs = await processor(prompt, null, null, {
     add_special_tokens: true,
   });
-  if (!processor.tokenizer) return;
+  if (!processor.tokenizer) return "";
   const outputs = (await model.generate({
     ...inputs,
     max_new_tokens: 512,
@@ -119,6 +90,82 @@ export const translateByLocalTransformer = async ({
   return decoded[0];
 };
 
+/**
+ * 语音转译 (Speech-to-Text)
+ * @param audioData - 音频数据
+ * @returns 转译文本
+ */
+export const transcribeByLocalTransformer = async ({
+  audioData,
+}: {
+  audioData: File | Blob;
+}): Promise<string> => {
+  if (!transformerRuntime.processor || !transformerRuntime.model) {
+    throw new Error("模型未加载");
+  }
+  const processor = transformerRuntime.processor;
+  const model = transformerRuntime.model;
+  const messages = [
+    {
+      role: "user",
+      content: [
+        { type: "audio" },
+        {
+          type: "text",
+          text: "Transcribe this audio.",
+        },
+      ],
+    },
+  ];
+  const prompt = processor.apply_chat_template(messages, {
+    add_generation_prompt: true,
+  });
+  const audioObjectURL = URL.createObjectURL(audioData);
+  const audio = await read_audio(audioObjectURL, 16000);
+  URL.revokeObjectURL(audioObjectURL);
+  const inputs = await processor(prompt, null, audio, {
+    add_special_tokens: true,
+  });
+  if (!processor.tokenizer) return "";
+  const outputs = (await model.generate({
+    ...inputs,
+    max_new_tokens: 512,
+    do_sample: false,
+    streamer: new TextStreamer(processor.tokenizer, {
+      skip_prompt: true,
+      skip_special_tokens: false,
+      callback_function: (text) => {
+        console.log(text);
+      },
+    }),
+  })) as Tensor;
+  const decoded = processor.batch_decode(
+    outputs.slice(null, [inputs.input_ids.dims.at(-1), null]),
+    { skip_special_tokens: true },
+  );
+  return decoded[0];
+};
+
+/**
+ * OCR识别
+ * @param imageData - 图片数据 (可以是 URL、Base64 或 ImageData)
+ * @returns 识别文本
+ */
+export const ocrByLocalTransformer = async ({
+  imageData,
+}: {
+  imageData: string | ImageData;
+}): Promise<string> => {
+  if (!transformerRuntime.processor || !transformerRuntime.model) {
+    throw new Error("模型未加载");
+  }
+  // TODO: 实现 OCR 识别逻辑
+  throw new Error("OCR识别功能待实现");
+};
+
+/**
+ * 加载模型
+ */
 export const loadModel = async ({
   onProgress,
 }: {
@@ -132,9 +179,8 @@ export const loadModel = async ({
     return;
   transformerRuntime.loading = true;
   env.remoteHost = "https://modelscope.cn/";
-  const model_id = "onnx-community/gemma-4-E4B-it-ONNX";
-  const processor = await AutoProcessor.from_pretrained(model_id);
-  const model = await Gemma4ForConditionalGeneration.from_pretrained(model_id, {
+  const processor = await AutoProcessor.from_pretrained(MODEL_ID);
+  const model = await Gemma4ForConditionalGeneration.from_pretrained(MODEL_ID, {
     dtype: "q4f16",
     device: "webgpu",
     progress_callback: (info) => {

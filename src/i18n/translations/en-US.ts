@@ -39,4 +39,5 @@ export default {
   缓存情况: "Cache Status",
   加载情况: "Load Status",
   加载: "Load",
+  检查中: "Checking...",
 };
