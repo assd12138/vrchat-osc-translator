@@ -56,7 +56,7 @@ export const translateByAI = (data: {
   });
 };
 
-export const transformOCR = async ({ base64 }: { base64: string }) => {
+export const transformOCR = ({ base64 }: { base64: string }) => {
   return request(import.meta.env.VITE_DEFAULT_OCR_URL, {
     method: "POST",
     body: JSON.stringify({

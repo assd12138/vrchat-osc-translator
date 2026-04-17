@@ -30,4 +30,13 @@ export default {
   文件分享: "File Sharing",
   API供应商: "API Provider",
   去申请: "Apply For Key",
+  本地模型状况: "Local Model Status",
+  本地模型: "Local Model",
+  未缓存: "Not Cached",
+  已缓存: "Cached",
+  未加载: "Not Loaded",
+  已加载: "Loaded",
+  缓存情况: "Cache Status",
+  加载情况: "Load Status",
+  加载: "Load",
 };

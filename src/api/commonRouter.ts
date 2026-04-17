@@ -4,6 +4,7 @@
 import { encodeWAV } from "@ricky0123/vad-web/dist/utils";
 import { EApiProviderType } from "@/store/rehydrate/rehydrate-constant";
 import store from "@/store/store";
+import { translateByLocalTransformer } from "./localTransformer";
 import {
   ocrByLongCat,
   transcriptionByLongCat,
@@ -49,6 +50,10 @@ export const translateRouter = async (data: { text: string }) => {
       token: settings.openai_api_auth,
     });
     result = translationRes.choices[0].message.content;
+  } else if (
+    settings.api_provider_type === EApiProviderType.LOCAL_TRANSFORMER
+  ) {
+    result = (await translateByLocalTransformer({ text: ask })) || "";
   }
 
   return result;

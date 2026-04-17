@@ -4,7 +4,7 @@ import { RUNTIME, runtime } from "./environmentDetect";
 /**
  * 在默认浏览器中打开URL
  */
-export async function openUrl(url: string): Promise<void> {
+export function openUrl(url: string) {
   if (runtime === RUNTIME.TAURI) {
     return tauriOpenUrl(url);
   }

@@ -4,3 +4,15 @@
   text-decoration: underline;
   cursor: pointer;
 }
+
+.localModelTable {
+  border-collapse: collapse;
+  font-size: small;
+  margin-bottom: 12px;
+}
+
+.localModelTh,
+.localModelTd {
+  border: 1px solid #ccc;
+  padding: 4px 8px;
+}

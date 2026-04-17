@@ -8,12 +8,12 @@ import Translationpanel from "@/panel/translation-panel";
 export default function Root() {
   return (
     <div className="container">
-      {/* <Audiopanel />
-      <Ocrpanel /> */}
+      <Audiopanel />
+      <Ocrpanel />
       <FileSharePanel />
-      {/* <Translationpanel />
+      <Translationpanel />
       <Settingpanel />
-      <Systemlog /> */}
+      <Systemlog />
     </div>
   );
 }

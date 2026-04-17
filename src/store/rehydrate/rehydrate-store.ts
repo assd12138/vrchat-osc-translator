@@ -1,7 +1,7 @@
 import {
+  type EApiProviderType,
   REDUX_STORAGE_KEY,
   rehydrateFlag,
-  EApiProviderType,
 } from "./rehydrate-constant";
 
 export function redux_store(module: string, data: string | EApiProviderType) {

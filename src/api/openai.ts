@@ -6,10 +6,7 @@ const url = "https://api.openai.com/v1/chat/completions";
  * OpenAI 翻译
  * 使用 gpt-5-nano 模型
  */
-export const translateByOpenAI = (data: {
-  token: string;
-  text: string;
-}) => {
+export const translateByOpenAI = (data: { token: string; text: string }) => {
   return request(url, {
     method: "POST",
     body: JSON.stringify({

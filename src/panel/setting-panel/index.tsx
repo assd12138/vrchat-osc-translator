@@ -1,5 +1,7 @@
 import i18next from "i18next";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { loadModel } from "@/api/localTransformer";
 import { openUrl } from "../../cross-platform/openUrl";
 import { useAppDispatch, useAppSelector } from "../../store/hook";
 import { EApiProviderType } from "../../store/rehydrate/rehydrate-constant";
@@ -23,6 +25,9 @@ export default function SettingPanel() {
   const settings = useAppSelector((state) => state.settings);
   const dispatch = useAppDispatch();
   const { t } = useTranslation();
+  const [localProgress, setLocalProgress] = useState(0);
+  const [loading, setLoading] = useState(false);
+
   const handleChangeBackend = (url: string) => {
     dispatch(setTranscriptionUrl(url));
   };
@@ -63,6 +68,18 @@ export default function SettingPanel() {
     dispatch(setOpenaiApiAuth(auth));
   };
 
+  const loadLocalTransformer = () => {
+    setLoading(true);
+    loadModel({
+      onProgress(percent) {
+        setLocalProgress(percent);
+        if (percent === 100) {
+          setLoading(false);
+        }
+      },
+    });
+  };
+
   return (
     <div className={globalStyles.panel}>
       <div className={globalStyles.title}>
@@ -92,6 +109,7 @@ export default function SettingPanel() {
         }
       >
         <option value={EApiProviderType.CUSTOM}>Custom</option>
+        <option value={EApiProviderType.LOCAL_TRANSFORMER}>Local</option>
         <option value={EApiProviderType.LONG_CAT}>LongCat</option>
         <option value={EApiProviderType.OPEN_AI}>OpenAI</option>
       </select>
@@ -138,7 +156,10 @@ export default function SettingPanel() {
         <>
           <label className={globalStyles.labelS}>
             Authorization
-            <a className={styles.initBtn} onClick={() => openUrl("https://longcat.chat/login")}>
+            <a
+              className={styles.initBtn}
+              onClick={() => openUrl("https://longcat.chat/login")}
+            >
               {t("去申请")}
             </a>
           </label>
@@ -148,11 +169,48 @@ export default function SettingPanel() {
             onChange={(e) => handleLongcatApiAuthChange(e.target.value)}
           />
         </>
+      ) : settings.api_provider_type === EApiProviderType.LOCAL_TRANSFORMER ? (
+        <>
+          <label className={globalStyles.labelS}>{t("本地模型")}</label>
+          <table className={styles.localModelTable}>
+            <thead>
+              <tr>
+                <th className={styles.localModelTh}>{t("缓存情况")}</th>
+                <th className={styles.localModelTh}>{t("加载情况")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className={styles.localModelTd}>{t("未缓存")}</td>
+                <td className={styles.localModelTd}>
+                  {t(localProgress === 100 ? "已加载" : "未加载")}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          {loading && (
+            <div>
+              <progress value={localProgress} max={100}></progress>
+            </div>
+          )}
+          <div>
+            <button
+              disabled={localProgress === 100}
+              onClick={loadLocalTransformer}
+              className={globalStyles.button}
+            >
+              {t("加载")}
+            </button>
+          </div>
+        </>
       ) : (
         <>
           <label className={globalStyles.labelS}>
             API Key
-            <a className={styles.initBtn} onClick={() => openUrl("https://platform.openai.com/api-keys")}>
+            <a
+              className={styles.initBtn}
+              onClick={() => openUrl("https://platform.openai.com/api-keys")}
+            >
               {t("去申请")}
             </a>
           </label>

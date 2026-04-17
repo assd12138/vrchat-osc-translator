@@ -2,6 +2,8 @@ import { MicVAD } from "@ricky0123/vad-web";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { transcriptionRouter, translateRouter } from "@/api/commonRouter";
+import { translateByLocalTransformer } from "@/api/localTransformer";
+import store from "@/store/store";
 import { loadMicDevices } from "@/utils";
 import invoke, { NATIVE_COMMAND } from "../../cross-platform/invoke";
 import globalStyles from "../../styles/index.module.css";
@@ -103,6 +105,15 @@ export default function AudioPanel() {
     };
     load();
   }, []);
+  const test = async () => {
+    const settings = store.getState().settings;
+    const ask = settings.ai_template.replace("{text}", "今天天气怎么样");
+    const a = await translateByLocalTransformer({
+      text: ask,
+    });
+
+    console.log(a);
+  };
 
   return (
     <div className={globalStyles.panel}>
@@ -117,6 +128,7 @@ export default function AudioPanel() {
         <button onClick={refresh} className={globalStyles.button}>
           {t("刷新")}
         </button>
+        <button onClick={test}>test</button>
       </div>
       <div>
         <select

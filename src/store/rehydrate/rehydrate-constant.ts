@@ -30,4 +30,6 @@ export enum EApiProviderType {
   MIMO = "MIMO",
   /** OpenAI */
   OPEN_AI = "OPEN_AI",
+  /** 本地gemma运行 */
+  LOCAL_TRANSFORMER = "LOCAL_TRANSFORMER",
 }
