@@ -13,11 +13,11 @@ apiFunctions.forEach((funcName) => {
     console.log(`[IPC Send] ${funcName}`, args);
     const channel = camelToSnake(funcName);
     const result = await ipcRenderer.invoke(channel, ...args);
-    if (result.success) {
-      return result.data;
+    if (result?.success) {
+      return result?.data;
     } else {
       // 如果失败，直接抛出错误，方便调用方使用 try...catch
-      throw new Error(result.error.message);
+      throw new Error(result?.error?.message);
     }
   };
 });

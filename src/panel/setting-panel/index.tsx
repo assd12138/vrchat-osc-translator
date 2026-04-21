@@ -83,6 +83,8 @@ export default function SettingPanel() {
         setLocalProgress(percent);
         if (percent === 100) {
           setLoading(false);
+        } else {
+          setLoading(true);
         }
       },
     });

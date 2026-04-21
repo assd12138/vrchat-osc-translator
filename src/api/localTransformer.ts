@@ -286,6 +286,8 @@ export const loadModel = async ({
     dtype: "q4f16",
     device: "webgpu",
     progress_callback: (info) => {
+      // console.log(info);
+
       if (info.status === "progress_total") {
         onProgress(info.progress);
       }

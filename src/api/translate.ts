@@ -57,7 +57,7 @@ export const streamRequest = async (
             onChunk(content);
           }
         } catch (e) {
-          console.error(data, e);
+          console.log(data, e);
           // 可能是 JSON 解析错误，忽略
         }
       }
