@@ -122,8 +122,10 @@ export default function SettingPanel() {
         <option value={EApiProviderType.LOCAL_TRANSFORMER}>Local</option>
         <option value={EApiProviderType.LONG_CAT}>LongCat</option>
         <option value={EApiProviderType.OPEN_AI}>OpenAI</option>
+        <option value={EApiProviderType.OMNI}>Omni</option>
       </select>
-      {settings.api_provider_type === EApiProviderType.CUSTOM ? (
+      {settings.api_provider_type === EApiProviderType.CUSTOM ||
+      settings.api_provider_type === EApiProviderType.OMNI ? (
         <>
           <label className={globalStyles.labelS}>{t("转译地址")}</label>
           <input

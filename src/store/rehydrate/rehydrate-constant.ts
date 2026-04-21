@@ -32,4 +32,6 @@ export enum EApiProviderType {
   OPEN_AI = "OPEN_AI",
   /** 本地gemma运行 */
   LOCAL_TRANSFORMER = "LOCAL_TRANSFORMER",
+  /** Omni类型的模型运行 */
+  OMNI = "OMNI",
 }

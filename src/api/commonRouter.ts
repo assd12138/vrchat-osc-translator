@@ -18,6 +18,7 @@ import {
   translateByLongCat,
   translateByLongCatStream,
 } from "./longcat";
+import { translateAudioDirectlyFromOmni } from "./omni";
 import {
   ocrByOpenAI,
   ocrByOpenAIStream,
@@ -153,6 +154,24 @@ export const transcriptionRouter = async (data: {
       model: settings.transcription_model,
     });
     result = transcriptionRes.text;
+  } else if (settings.api_provider_type === EApiProviderType.OMNI) {
+    const base64 = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+    const transcriptionRes = await translateAudioDirectlyFromOmni({
+      token: settings.openai_api_auth,
+      audio_base64: base64,
+      template: settings.ai_template,
+      api: settings.openai_api_url,
+      model: settings.openai_model,
+      assignObj: {
+        max_tokens: 500,
+      },
+    });
+    result = transcriptionRes.choices[0].message.content;
   } else if (settings.api_provider_type === EApiProviderType.LONG_CAT) {
     const base64 = await new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
