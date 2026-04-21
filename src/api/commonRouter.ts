@@ -153,7 +153,7 @@ export const transcriptionRouter = async (data: {
       auth: settings.transcription_token,
       model: settings.transcription_model,
     });
-    result = transcriptionRes.text;
+    result = transcriptionRes.text.replace(/^[\s\S]*?<asr_text>/, "");
   } else if (settings.api_provider_type === EApiProviderType.OMNI) {
     const base64 = await new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
@@ -163,7 +163,7 @@ export const transcriptionRouter = async (data: {
     });
     const transcriptionRes = await translateAudioDirectlyFromOmni({
       token: settings.openai_api_auth,
-      audio_base64: base64,
+      audio_base64: base64.split(",")[1],
       template: settings.ai_template,
       api: settings.openai_api_url,
       model: settings.openai_model,

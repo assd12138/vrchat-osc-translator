@@ -109,7 +109,7 @@ export const translateByAIFromOmni = (data: {
           content: data.text,
         },
       ],
-      temperature: 0.3,
+      temperature: 1,
       thinking: {
         type: "disabled",
       },
@@ -154,7 +154,7 @@ export const translateByAIStreamFromOmni = async (
           content: data.text,
         },
       ],
-      temperature: 0.3,
+      temperature: 1,
       thinking: {
         type: "disabled",
       },
@@ -255,19 +255,21 @@ export const translateAudioDirectlyFromOmni = (data: {
       model: data.model,
       messages: [
         {
-          type: "input_audio",
-          input_audio: {
-            type: "base64",
-            data: data.audio_base64,
-            format: "wav",
-          },
-        },
-        {
           role: "user",
-          content: `Transcribe the audio and translate it as following template:${data.template}`,
+          content: [
+            {
+              type: "input_audio",
+              input_audio: {
+                type: "base64",
+                data: data.audio_base64,
+                format: "wav",
+              },
+            },
+            { type: "text", text: `${data.template}` },
+          ],
         },
       ],
-      temperature: 0.3,
+      temperature: 1,
       thinking: {
         type: "disabled",
       },
