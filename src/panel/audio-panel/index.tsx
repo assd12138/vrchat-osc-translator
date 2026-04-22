@@ -182,9 +182,12 @@ export default function AudioPanel() {
   }, []);
   const test = async () => {
     const settings = store.getState().settings;
-    const ask = settings.ai_template.replace("{text}", "今天天气怎么样");
+    const languages = settings.targetLanguages?.length > 0
+      ? settings.targetLanguages
+      : ["cn", "en", "jp", "kr"];
     const a = await translateByLocalTransformer({
-      text: ask,
+      text: "今天天气怎么样",
+      languages,
     });
 
     console.log(a);

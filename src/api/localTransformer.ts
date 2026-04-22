@@ -93,19 +93,24 @@ const runModel = async (config: CommonRunConfig): Promise<string> => {
 
 /**
  * 文本翻译
+ * WebGPU 本地模型不支持 JSON Schema，使用提示词方式要求 JSON 输出
  */
 export const translateByLocalTransformer = ({
   text,
+  languages,
 }: {
   text: string;
+  languages: string[];
 }): Promise<string> => {
+  const langList = languages.join("/");
+  const langKeys = languages.join(", ");
   const messages = [
     {
       role: "user",
       content: [
         {
           type: "text",
-          text: "你是一个翻译专家，当用户让你翻译的时候，严格按照翻译格式输出，不要输出其他内容",
+          text: `Translate the following text into ${langList} and return as JSON with keys: ${langKeys}. Only return the JSON object, no explanation.`,
         },
         {
           type: "text",
@@ -118,7 +123,8 @@ export const translateByLocalTransformer = ({
 };
 
 /**
- * 文本翻译（流式）
+ * @deprecated 流式翻译已弃用，使用 translateByLocalTransformer 配合 JSON 输出
+ * 此函数保留用于向后兼容，但不应在新实现中使用
  */
 export const translateByLocalTransformerStream = (
   { text }: { text: string },
@@ -221,7 +227,8 @@ export const ocrByLocalTransformer = async ({
 };
 
 /**
- * OCR识别（流式）
+ * @deprecated 流式 OCR 已弃用
+ * 此函数保留用于向后兼容，但不应在新实现中使用
  */
 export const ocrByLocalTransformerStream = async (
   { base64 }: { base64: string },

@@ -1,3 +1,7 @@
+import {
+  generateTranslationPrompt,
+  generateTranslationSchema,
+} from "@/utils";
 import { request } from "./index";
 import { streamRequest } from "./translate";
 
@@ -5,26 +9,28 @@ const url = "https://api.openai.com/v1/chat/completions";
 
 /**
  * OpenAI 翻译
- * 使用 gpt-5-nano 模型
+ * 使用 JSON Schema 结构化输出
  */
-export const translateByOpenAI = (data: { token: string; text: string }) => {
+export const translateByOpenAI = (data: {
+  token: string;
+  text: string;
+  languages: string[];
+}) => {
+  const schema = generateTranslationSchema(data.languages);
+  const prompt = generateTranslationPrompt(data.text, data.languages);
   return request(url, {
     method: "POST",
     body: JSON.stringify({
       model: "gpt-5-nano",
       messages: [
         {
-          role: "system",
-          content:
-            "你是一个翻译专家，当用户让你翻译的时候，严格按照翻译格式输出，不要输出其他内容",
-        },
-        {
           role: "user",
-          content: data.text,
+          content: prompt,
         },
       ],
-      temperature: 0.3,
+      temperature: 0.7,
       stream: false,
+      response_format: schema,
     }),
     headers: {
       Authorization: `Bearer ${data.token}`,
@@ -34,11 +40,8 @@ export const translateByOpenAI = (data: { token: string; text: string }) => {
 };
 
 /**
- * 流式翻译（OpenAI）
- * 使用 gpt-5-nano 模型
- * @param data 翻译参数
- * @param onChunk 每个增量文本块的回调
- * @param signal 可选的 AbortSignal 用于取消请求
+ * @deprecated 流式翻译已弃用，使用 translateByOpenAI 配合 JSON Schema
+ * 此函数保留用于向后兼容，但不应在新实现中使用
  */
 export const translateByOpenAIStream = async (
   data: {
@@ -153,11 +156,8 @@ export const ocrByOpenAI = (data: { token: string; base64: string }) => {
 };
 
 /**
- * 流式 OCR（OpenAI）
- * 使用 gpt-4o-mini-transcribe 模型
- * @param data OCR 参数
- * @param onChunk 每个增量文本块的回调
- * @param signal 可选的 AbortSignal 用于取消请求
+ * @deprecated 流式 OCR 已弃用
+ * 此函数保留用于向后兼容，但不应在新实现中使用
  */
 export const ocrByOpenAIStream = async (
   data: { token: string; base64: string },

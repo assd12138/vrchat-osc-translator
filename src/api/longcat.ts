@@ -1,3 +1,7 @@
+import {
+  generateTranslationPrompt,
+  generateTranslationSchema,
+} from "@/utils";
 import { request } from "./index";
 import { streamRequest } from "./translate";
 
@@ -6,24 +10,23 @@ export const translateByLongCat = (data: {
   token: string;
   text: string;
   model: string;
+  languages: string[];
 }) => {
+  const schema = generateTranslationSchema(data.languages);
+  const prompt = generateTranslationPrompt(data.text, data.languages);
   return request(url, {
     method: "POST",
     body: JSON.stringify({
       model: data.model,
       messages: [
         {
-          role: "system",
-          content:
-            "你是一个翻译专家，当用户让你翻译的时候，严格按照翻译格式输出，不要输出其他内容",
-        },
-        {
           role: "user",
-          content: data.text,
+          content: prompt,
         },
       ],
-      temperature: 0.3,
+      temperature: 0.7,
       stream: false,
+      response_format: schema,
     }),
     headers: {
       Authorization: `Bearer ${data.token}`,
@@ -33,10 +36,8 @@ export const translateByLongCat = (data: {
 };
 
 /**
- * 流式翻译（LongCat）
- * @param data 翻译参数
- * @param onChunk 每个增量文本块的回调
- * @param signal 可选的 AbortSignal 用于取消请求
+ * @deprecated 流式翻译已弃用，使用 translateByLongCat 配合 JSON Schema
+ * 此函数保留用于向后兼容，但不应在新实现中使用
  */
 export const translateByLongCatStream = async (
   data: {
@@ -149,10 +150,8 @@ export const ocrByLongCat = (data: { token: string; base64: string }) => {
 };
 
 /**
- * 流式 OCR（LongCat）
- * @param data OCR 参数
- * @param onChunk 每个增量文本块的回调
- * @param signal 可选的 AbortSignal 用于取消请求
+ * @deprecated 流式 OCR 已弃用
+ * 此函数保留用于向后兼容，但不应在新实现中使用
  */
 export const ocrByLongCatStream = async (
   data: { token: string; base64: string },

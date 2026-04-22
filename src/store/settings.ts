@@ -6,6 +6,8 @@ import {
 } from "./rehydrate/rehydrate-constant";
 import { redux_store } from "./rehydrate/rehydrate-store";
 
+export type TargetLanguage = "cn" | "en" | "jp" | "kr";
+
 export interface SettingState {
   transcription_url: string;
   transcription_model: string;
@@ -13,7 +15,10 @@ export interface SettingState {
   openai_api_url: string;
   openai_model: string;
   openai_token: string;
-  ai_template: string;
+  /** @deprecated 已改用 outputTemplate */
+  ai_template?: string;
+  outputTemplate: string;
+  targetLanguages: TargetLanguage[];
   language: string;
   api_provider_type: EApiProviderType;
   longcat_api_auth: string;
@@ -27,12 +32,12 @@ export const initialState: SettingState = {
   openai_api_url: import.meta.env.VITE_DEFAULT_OPENAI_API_URL,
   openai_model: import.meta.env.VITE_DEFAULT_OPENAI_MODEL,
   openai_token: import.meta.env.VITE_DEFAULT_OPENAI_TOKEN,
-  ai_template: `请自动检测文本原文的语言类型并按以下模板翻译：
-【中】{中文翻译}
-【En】{英文翻译}
-【日】{日文翻译}
-【한】{韩文翻译}
-文本原文：{text}`,
+  ai_template: undefined,
+  outputTemplate: `[中]#{cn}
+[En]#{en}
+[日]#{jp}
+[한]#{kr}`,
+  targetLanguages: ["cn", "en", "jp", "kr"],
   language: "auto",
   api_provider_type: EApiProviderType.LONG_CAT,
   longcat_api_auth: import.meta.env.VITE_DEFAULT_LONGCAT_API_AUTH,
@@ -68,6 +73,17 @@ const settingsSlice = createSlice({
       state.ai_template = action.payload;
       redux_store(REHYDRATE_KEYS.SETTING_AI_TEMPLATE, action.payload);
     },
+    setOutputTemplate: (state, action: PayloadAction<string>) => {
+      state.outputTemplate = action.payload;
+      redux_store(REHYDRATE_KEYS.SETTING_OUTPUT_TEMPLATE, action.payload);
+    },
+    setTargetLanguages: (
+      state,
+      action: PayloadAction<TargetLanguage[]>,
+    ) => {
+      state.targetLanguages = action.payload;
+      redux_store(REHYDRATE_KEYS.SETTING_TARGET_LANGUAGES, action.payload);
+    },
     setOpenaiApiUrl: (state, action: PayloadAction<string>) => {
       state.openai_api_url = action.payload;
       redux_store(REHYDRATE_KEYS.SETTING_OPENAI_API_URL, action.payload);
@@ -102,6 +118,8 @@ const settingsSlice = createSlice({
 export const {
   setTranscriptionUrl,
   setAiTemplate,
+  setOutputTemplate,
+  setTargetLanguages,
   setOpenaiApiUrl,
   setOpenaiModel,
   setOpenaiToken,

@@ -1,4 +1,8 @@
 import fetch from "@/cross-platform/fetch";
+import {
+  generateTranslationPrompt,
+  generateTranslationSchema,
+} from "@/utils";
 import { request } from "./index";
 
 /**
@@ -92,27 +96,23 @@ export const translateByAI = (data: {
   text: string;
   api: string;
   model: string;
+  languages: string[];
   assignObj?: object;
 }) => {
+  const schema = generateTranslationSchema(data.languages);
+  const prompt = generateTranslationPrompt(data.text, data.languages);
   return request(data.api, {
     method: "POST",
     body: JSON.stringify({
       model: data.model,
       messages: [
         {
-          role: "system",
-          content:
-            "你是一个翻译专家，当用户让你翻译的时候，严格按照翻译格式输出，不要输出其他内容",
-        },
-        {
           role: "user",
-          content: data.text,
+          content: prompt,
         },
       ],
-      temperature: 0.3,
-      thinking: {
-        type: "disabled",
-      },
+      temperature: 0.7,
+      response_format: schema,
       ...(data.assignObj || {}),
     }),
     headers: {
@@ -123,10 +123,8 @@ export const translateByAI = (data: {
 };
 
 /**
- * 流式翻译（Custom API）
- * @param data 翻译参数
- * @param onChunk 每个增量文本块的回调
- * @param signal 可选的 AbortSignal 用于取消请求
+ * @deprecated 流式翻译已弃用，使用 translateByAI 配合 JSON Schema
+ * 此函数保留用于向后兼容，但不应在新实现中使用
  */
 export const translateByAIStream = async (
   data: {
@@ -200,10 +198,8 @@ export const transformOCR = ({ base64 }: { base64: string }) => {
 };
 
 /**
- * 流式 OCR（Custom API）
- * @param base64 图片 base64
- * @param onChunk 每个增量文本块的回调
- * @param signal 可选的 AbortSignal 用于取消请求
+ * @deprecated 流式 OCR 已弃用
+ * 此函数保留用于向后兼容，但不应在新实现中使用
  */
 export const transformOCRStream = async (
   { base64 }: { base64: string },

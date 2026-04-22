@@ -5,3 +5,27 @@
   resize: vertical;
   font-size: 16px;
 }
+
+.languageCheckboxGroup {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.checkboxLabel input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+}
+
+.templateHint {
+  font-size: 12px;
+  color: #888;
+  margin-top: 4px;
+}

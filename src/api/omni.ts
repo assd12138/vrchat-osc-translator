@@ -1,4 +1,8 @@
 import fetch from "@/cross-platform/fetch";
+import {
+  generateTranslationPrompt,
+  generateTranslationSchema,
+} from "@/utils";
 import { request } from "./index";
 
 /**
@@ -92,27 +96,23 @@ export const translateByAIFromOmni = (data: {
   text: string;
   api: string;
   model: string;
+  languages: string[];
   assignObj?: object;
 }) => {
+  const schema = generateTranslationSchema(data.languages);
+  const prompt = generateTranslationPrompt(data.text, data.languages);
   return request(data.api, {
     method: "POST",
     body: JSON.stringify({
       model: data.model,
       messages: [
         {
-          role: "system",
-          content:
-            "你是一个翻译专家，当用户让你翻译的时候，严格按照翻译格式输出，不要输出其他内容",
-        },
-        {
           role: "user",
-          content: data.text,
+          content: prompt,
         },
       ],
-      temperature: 1,
-      thinking: {
-        type: "disabled",
-      },
+      temperature: 0.7,
+      response_format: schema,
       ...(data.assignObj || {}),
     }),
     headers: {
@@ -123,10 +123,8 @@ export const translateByAIFromOmni = (data: {
 };
 
 /**
- * 流式翻译（Custom API）
- * @param data 翻译参数
- * @param onChunk 每个增量文本块的回调
- * @param signal 可选的 AbortSignal 用于取消请求
+ * @deprecated 流式翻译已弃用
+ * 此函数保留用于向后兼容，但不应在新实现中使用
  */
 export const translateByAIStreamFromOmni = async (
   data: {
@@ -170,40 +168,9 @@ export const translateByAIStreamFromOmni = async (
   );
 };
 
-export const transformOCRFromOmni = ({ base64 }: { base64: string }) => {
-  return request(import.meta.env.VITE_DEFAULT_OCR_URL, {
-    method: "POST",
-    body: JSON.stringify({
-      model: import.meta.env.VITE_DEFAULT_OCR_MODEL,
-      messages: [
-        {
-          role: "user",
-          content: [
-            {
-              type: "image_url",
-              image_url: {
-                url: base64,
-              },
-            },
-            {
-              type: "text",
-              text: "Text Recognition:",
-            },
-          ],
-        },
-      ],
-    }),
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-};
-
 /**
- * 流式 OCR（Custom API）
- * @param base64 图片 base64
- * @param onChunk 每个增量文本块的回调
- * @param signal 可选的 AbortSignal 用于取消请求
+ * @deprecated 流式 OCR 已弃用
+ * 此函数保留用于向后兼容，但不应在新实现中使用
  */
 export const transformOCRStreamFromOmni = async (
   { base64 }: { base64: string },
@@ -241,14 +208,20 @@ export const transformOCRStreamFromOmni = async (
   );
 };
 
+/**
+ * 直接从音频翻译（OMNI Provider）
+ * 使用 JSON Schema 结构化输出
+ */
 export const translateAudioDirectlyFromOmni = (data: {
   token: string;
   audio_base64: string;
-  template: string;
+  languages: string[];
   api: string;
   model: string;
   assignObj?: object;
 }) => {
+  const schema = generateTranslationSchema(data.languages);
+  const langList = data.languages.join("/");
   return request(data.api, {
     method: "POST",
     body: JSON.stringify({
@@ -265,14 +238,15 @@ export const translateAudioDirectlyFromOmni = (data: {
                 format: "wav",
               },
             },
-            { type: "text", text: `${data.template}` },
+            {
+              type: "text",
+              text: `Translate into ${langList}, without additional explanation.`,
+            },
           ],
         },
       ],
-      temperature: 1,
-      thinking: {
-        type: "disabled",
-      },
+      temperature: 0.7,
+      response_format: schema,
       ...(data.assignObj || {}),
     }),
     headers: {

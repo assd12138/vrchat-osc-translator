@@ -6,9 +6,12 @@ import {
   setOpenaiApiUrl,
   setOpenaiModel,
   setOpenaiToken,
+  setOutputTemplate,
+  setTargetLanguages,
   setTranscriptionModel,
   setTranscriptionToken,
   setTranscriptionUrl,
+  type TargetLanguage,
 } from "../settings";
 import store from "../store";
 import {
@@ -20,6 +23,9 @@ import {
 
 export const rehydrateMapper = {
   [REHYDRATE_KEYS.SETTING_AI_TEMPLATE]: setAiTemplate,
+  [REHYDRATE_KEYS.SETTING_OUTPUT_TEMPLATE]: setOutputTemplate,
+  [REHYDRATE_KEYS.SETTING_TARGET_LANGUAGES]: (value: string) =>
+    setTargetLanguages(value.split(",") as TargetLanguage[]),
   [REHYDRATE_KEYS.SETTING_TRANSCRIPTION_URL]: setTranscriptionUrl,
   [REHYDRATE_KEYS.SETTING_TRANSCRIPTION_MODEL]: setTranscriptionModel,
   [REHYDRATE_KEYS.SETTING_TRANSCRIPTION_TOKEN]: setTranscriptionToken,

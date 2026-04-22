@@ -1,9 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  transformOCRRouterStream,
-  translateRouterStream,
-} from "@/api/commonRouter";
+import { transformOCRRouter, translateRouter } from "@/api/commonRouter";
 import globalStyles from "../../styles/index.module.css";
 import styles from "./index.module.css";
 
@@ -39,23 +36,12 @@ export default function OcrPanel() {
       if (!base64String) {
         console.log("剪贴板无图片");
       } else {
-        // 清空之前的内容
-        setOCR("");
-        setTrans("");
-
-        // 流式 OCR
-        let ocrContent = "";
-        await transformOCRRouterStream({ base64: base64String }, (chunk) => {
-          ocrContent += chunk;
-          setOCR(ocrContent);
+        const ocrContent = await transformOCRRouter({ base64: base64String });
+        setOCR(ocrContent);
+        const translation = await translateRouter({
+          text: ocrContent,
         });
-
-        // 流式翻译
-        let translation = "";
-        await translateRouterStream({ text: ocrContent }, (chunk) => {
-          translation += chunk;
-          setTrans(translation);
-        });
+        setTrans(translation);
       }
     } catch (error) {
       console.error("Error processing items:", error);

@@ -35,99 +35,74 @@ import {
 } from "./translate";
 
 /**
+ * 处理翻译响应 - 尝试 JSON 解析并替换模板占位符
+ * JSON 解析失败则直接返回原始内容
+ */
+const processTranslationResponse = (
+  rawContent: string,
+  template: string,
+): string => {
+  try {
+    const response = JSON.parse(rawContent);
+    let result = template;
+    for (const [lang, value] of Object.entries(response)) {
+      if (value) {
+        result = result.replace(new RegExp(`#\\{${lang}\\}`, "g"), String(value));
+      }
+    }
+    return result;
+  } catch {
+    return rawContent;
+  }
+};
+
+/**
  * 通用翻译路由
  * @param data
  * @returns
  */
 export const translateRouter = async (data: { text: string }) => {
-  let result: string = "";
   const settings = store.getState().settings;
-  const ask = settings.ai_template.replace("{text}", data.text);
+  const languages = settings.targetLanguages?.length > 0
+    ? settings.targetLanguages
+    : ["cn", "en", "jp", "kr"];
+  let rawContent = "";
+
   if (settings.api_provider_type === EApiProviderType.CUSTOM) {
     const translationRes = await translateByAI({
-      text: ask,
+      text: data.text,
       token: settings.openai_token,
       api: settings.openai_api_url,
       model: settings.openai_model,
+      languages,
       assignObj: {
         max_tokens: 500,
       },
     });
-    result = translationRes.choices[0].message.content;
+    rawContent = translationRes.choices[0].message.content;
   } else if (settings.api_provider_type === EApiProviderType.LONG_CAT) {
     const translationRes = await translateByLongCat({
-      text: ask,
+      text: data.text,
       token: settings.longcat_api_auth,
       model: "LongCat-Flash-Lite",
+      languages,
     });
-    result = translationRes.choices[0].message.content;
+    rawContent = translationRes.choices[0].message.content;
   } else if (settings.api_provider_type === EApiProviderType.OPEN_AI) {
     const translationRes = await translateByOpenAI({
-      text: ask,
+      text: data.text,
       token: settings.openai_api_auth,
+      languages,
     });
-    result = translationRes.choices[0].message.content;
-  } else if (
-    settings.api_provider_type === EApiProviderType.LOCAL_TRANSFORMER
-  ) {
-    result = (await translateByLocalTransformer({ text: ask })) || "";
+    rawContent = translationRes.choices[0].message.content;
+  } else if (settings.api_provider_type === EApiProviderType.LOCAL_TRANSFORMER) {
+    rawContent = await translateByLocalTransformer({
+      text: data.text,
+      languages,
+    }) || "";
   }
 
-  return result;
-};
-
-/**
- * 通用翻译路由（流式）
- * @param data
- * @param onChunk 每个增量文本块的回调
- * @param signal 可选的 AbortSignal 用于取消请求
- */
-export const translateRouterStream = async (
-  data: { text: string },
-  onChunk: (text: string) => void,
-  signal?: AbortSignal,
-) => {
-  const settings = store.getState().settings;
-  const ask = settings.ai_template.replace("{text}", data.text);
-
-  if (settings.api_provider_type === EApiProviderType.CUSTOM) {
-    await translateByAIStream(
-      {
-        text: ask,
-        token: settings.openai_token,
-        api: settings.openai_api_url,
-        model: settings.openai_model,
-        assignObj: {
-          max_tokens: 500,
-        },
-      },
-      onChunk,
-      signal,
-    );
-  } else if (settings.api_provider_type === EApiProviderType.LONG_CAT) {
-    await translateByLongCatStream(
-      {
-        text: ask,
-        token: settings.longcat_api_auth,
-        model: "LongCat-Flash-Lite",
-      },
-      onChunk,
-      signal,
-    );
-  } else if (settings.api_provider_type === EApiProviderType.OPEN_AI) {
-    await translateByOpenAIStream(
-      {
-        text: ask,
-        token: settings.openai_api_auth,
-      },
-      onChunk,
-      signal,
-    );
-  } else if (
-    settings.api_provider_type === EApiProviderType.LOCAL_TRANSFORMER
-  ) {
-    await translateByLocalTransformerStream({ text: ask }, onChunk);
-  }
+  return processTranslationResponse(rawContent, settings.outputTemplate);
 };
 
 /**
@@ -155,6 +130,9 @@ export const transcriptionRouter = async (data: {
     });
     result = transcriptionRes.text.replace(/^[\s\S]*?<asr_text>/, "");
   } else if (settings.api_provider_type === EApiProviderType.OMNI) {
+    const languages = settings.targetLanguages?.length > 0
+      ? settings.targetLanguages
+      : ["cn", "en", "jp", "kr"];
     const base64 = await new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
       reader.onloadend = () => resolve(reader.result as string);
@@ -164,14 +142,15 @@ export const transcriptionRouter = async (data: {
     const transcriptionRes = await translateAudioDirectlyFromOmni({
       token: settings.openai_api_auth,
       audio_base64: base64.split(",")[1],
-      template: settings.ai_template,
+      languages,
       api: settings.openai_api_url,
       model: settings.openai_model,
       assignObj: {
         max_tokens: 500,
       },
     });
-    result = transcriptionRes.choices[0].message.content;
+    const rawContent = transcriptionRes.choices[0].message.content;
+    result = processTranslationResponse(rawContent, settings.outputTemplate);
   } else if (settings.api_provider_type === EApiProviderType.LONG_CAT) {
     const base64 = await new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
@@ -237,10 +216,8 @@ export const transformOCRRouter = async ({ base64 }: { base64: string }) => {
 };
 
 /**
- * 通用OCR路由（流式）
- * @param data
- * @param onChunk 每个增量文本块的回调
- * @param signal 可选的 AbortSignal 用于取消请求
+ * @deprecated 流式 OCR 路由已弃用
+ * 此函数保留用于向后兼容，但不应在新实现中使用
  */
 export const transformOCRRouterStream = async (
   { base64 }: { base64: string },
@@ -273,5 +250,57 @@ export const transformOCRRouterStream = async (
     settings.api_provider_type === EApiProviderType.LOCAL_TRANSFORMER
   ) {
     await ocrByLocalTransformerStream({ base64 }, onChunk);
+  }
+};
+
+/**
+ * @deprecated 流式翻译路由已弃用
+ * 此函数保留用于向后兼容，但不应在新实现中使用
+ */
+export const translateRouterStream = async (
+  data: { text: string },
+  onChunk: (text: string) => void,
+  signal?: AbortSignal,
+) => {
+  const settings = store.getState().settings;
+  const ask = settings.ai_template?.replace("{text}", data.text) || data.text;
+
+  if (settings.api_provider_type === EApiProviderType.CUSTOM) {
+    await translateByAIStream(
+      {
+        text: ask,
+        token: settings.openai_token,
+        api: settings.openai_api_url,
+        model: settings.openai_model,
+        assignObj: {
+          max_tokens: 500,
+        },
+      },
+      onChunk,
+      signal,
+    );
+  } else if (settings.api_provider_type === EApiProviderType.LONG_CAT) {
+    await translateByLongCatStream(
+      {
+        text: ask,
+        token: settings.longcat_api_auth,
+        model: "LongCat-Flash-Lite",
+      },
+      onChunk,
+      signal,
+    );
+  } else if (settings.api_provider_type === EApiProviderType.OPEN_AI) {
+    await translateByOpenAIStream(
+      {
+        text: ask,
+        token: settings.openai_api_auth,
+      },
+      onChunk,
+      signal,
+    );
+  } else if (
+    settings.api_provider_type === EApiProviderType.LOCAL_TRANSFORMER
+  ) {
+    await translateByLocalTransformerStream({ text: ask }, onChunk);
   }
 };

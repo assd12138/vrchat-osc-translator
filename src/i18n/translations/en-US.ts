@@ -17,8 +17,6 @@ export default {
   未录音: "Not Recording",
   说话中: "Speaking",
   无声音: "No Sound",
-  翻译提示:
-    "Please enter a translation template. For example: Please translate the following text into English: {text}",
   开始语音识别: "🟢 Start Speech Recognition",
   停止语音识别: "🔴 Stop Speech Recognition",
   识别成功:
@@ -40,4 +38,7 @@ export default {
   加载情况: "Load Status",
   加载: "Load",
   检查中: "Checking...",
+  目标语言: "Target Languages",
+  输出模板: "Output Template",
+  模板提示: "Use #{lang} placeholders. Available: #{cn}, #{en}, #{jp}, #{kr}",
 };
