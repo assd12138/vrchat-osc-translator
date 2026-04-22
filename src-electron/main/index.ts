@@ -44,7 +44,7 @@ function registerProtocol() {
 
 function createMainWindow() {
   const options: BrowserWindowConstructorOptions = {
-    width: 400,
+    width: 450,
     height: 600,
     autoHideMenuBar: true,
     title: "VRChat-Translator",
@@ -63,7 +63,7 @@ function createMainWindow() {
   } else {
     // 生产环境使用自定义协议加载构建后的文件
     mainWindow.loadURL(`${PROTOCOL_NAME}://./index.html`);
-    mainWindow.webContents.openDevTools();
+    // mainWindow.webContents.openDevTools();
   }
 
   mainWindow.on("closed", () => {

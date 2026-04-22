@@ -2,6 +2,7 @@
  * 通过此通用路由，业务收集的信息统一在这里处理
  */
 import { encodeWAV } from "@ricky0123/vad-web/dist/utils";
+import { AVAILABLE_LANGUAGES } from "@/panel/translation-panel";
 import { EApiProviderType } from "@/store/rehydrate/rehydrate-constant";
 import store from "@/store/store";
 import {
@@ -34,7 +35,6 @@ import {
   translateByAISingleLanguage,
   translateByAIStream,
 } from "./translate";
-import { AVAILABLE_LANGUAGES } from "@/panel/translation-panel";
 
 /**
  * 处理翻译响应 - 尝试 JSON 解析并替换模板占位符
@@ -87,7 +87,12 @@ export const translateRouter = async (data: { text: string }) => {
           api: settings.openai_api_url,
           model: settings.openai_model,
           language: lang,
-          assignObj: { max_tokens: 500 },
+          assignObj: {
+            max_tokens: 500,
+            thinking: {
+              type: "disabled",
+            },
+          },
         }),
       ),
     );
@@ -114,6 +119,9 @@ export const translateRouter = async (data: { text: string }) => {
       languages,
       assignObj: {
         max_tokens: 500,
+        thinking: {
+          type: "disabled",
+        },
       },
     });
     rawContent = translationRes.choices[0].message.content;
