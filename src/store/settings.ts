@@ -6,7 +6,7 @@ import {
 } from "./rehydrate/rehydrate-constant";
 import { redux_store } from "./rehydrate/rehydrate-store";
 
-export type TargetLanguage = "cn" | "en" | "ja" | "ko";
+export type TargetLanguage = "zh" | "en" | "ja" | "ko";
 
 export interface SettingState {
   transcription_url: string;
@@ -35,11 +35,11 @@ export const initialState: SettingState = {
   openai_model: import.meta.env.VITE_DEFAULT_OPENAI_MODEL,
   openai_token: import.meta.env.VITE_DEFAULT_OPENAI_TOKEN,
   ai_template: undefined,
-  outputTemplate: `[中]#{cn}
+  outputTemplate: `[中]#{zh}
 [En]#{en}
 [日]#{ja}
 [한]#{ko}`,
-  targetLanguages: ["cn", "en", "ja", "ko"],
+  targetLanguages: ["zh", "en", "ja", "ko"],
   batchTranslate: false,
   language: "auto",
   api_provider_type: EApiProviderType.LONG_CAT,

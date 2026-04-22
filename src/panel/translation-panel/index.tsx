@@ -8,9 +8,9 @@ import {
 import globalStyles from "../../styles/index.module.css";
 import styles from "./index.module.css";
 
-const AVAILABLE_LANGUAGES: TargetLanguage[] = ["cn", "en", "ja", "ko"];
+const AVAILABLE_LANGUAGES: TargetLanguage[] = ["zh", "en", "ja", "ko"];
 const LANGUAGE_LABELS: Record<TargetLanguage, string> = {
-  cn: "中文",
+  zh: "中文",
   en: "English",
   ja: "日本語",
   ko: "한국어",
@@ -64,7 +64,7 @@ export default function TranslationPanel() {
         onChange={(e) => handleTemplateChange(e.target.value)}
         value={outputTemplate}
         className={styles.transTemplate}
-        placeholder={`[中]#{cn}\n[En]#{en}\n[日]#{ja}\n[한]#{ko}`}
+        placeholder={`[中]#{zh}\n[En]#{en}\n[日]#{ja}\n[한]#{ko}`}
       ></textarea>
       <div className={styles.templateHint}>{t("模板提示")}</div>
     </div>

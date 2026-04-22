@@ -70,7 +70,7 @@ export const translateRouter = async (data: { text: string }) => {
   const languages =
     settings.targetLanguages?.length > 0
       ? settings.targetLanguages
-      : ["cn", "en", "ja", "ko"];
+      : ["zh", "en", "ja", "ko"];
   let rawContent = "";
 
   // 批量翻译模式（仅 CUSTOM provider）
@@ -172,7 +172,7 @@ export const transcriptionRouter = async (data: {
     const languages =
       settings.targetLanguages?.length > 0
         ? settings.targetLanguages
-        : ["cn", "en", "ja", "ko"];
+        : ["zh", "en", "ja", "ko"];
     const base64 = await new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
       reader.onloadend = () => resolve(reader.result as string);

@@ -184,7 +184,7 @@ export default function AudioPanel() {
     const settings = store.getState().settings;
     const languages = settings.targetLanguages?.length > 0
       ? settings.targetLanguages
-      : ["cn", "en", "ja", "ko"];
+      : ["zh", "en", "ja", "ko"];
     const a = await translateByLocalTransformer({
       text: "今天天气怎么样",
       languages,

@@ -2,7 +2,7 @@
  * 语言描述映射
  */
 const LANGUAGE_DESCRIPTIONS: Record<string, string> = {
-  cn: "cn translate result",
+  zh: "zh translate result",
   en: "en translate result",
   ja: "ja translate result",
   ko: "ko translate result",
