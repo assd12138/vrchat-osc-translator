@@ -6,7 +6,7 @@ import {
 } from "./rehydrate/rehydrate-constant";
 import { redux_store } from "./rehydrate/rehydrate-store";
 
-export type TargetLanguage = "cn" | "en" | "jp" | "kr";
+export type TargetLanguage = "cn" | "en" | "ja" | "ko";
 
 export interface SettingState {
   transcription_url: string;
@@ -37,9 +37,9 @@ export const initialState: SettingState = {
   ai_template: undefined,
   outputTemplate: `[中]#{cn}
 [En]#{en}
-[日]#{jp}
-[한]#{kr}`,
-  targetLanguages: ["cn", "en", "jp", "kr"],
+[日]#{ja}
+[한]#{ko}`,
+  targetLanguages: ["cn", "en", "ja", "ko"],
   batchTranslate: false,
   language: "auto",
   api_provider_type: EApiProviderType.LONG_CAT,
@@ -80,10 +80,7 @@ const settingsSlice = createSlice({
       state.outputTemplate = action.payload;
       redux_store(REHYDRATE_KEYS.SETTING_OUTPUT_TEMPLATE, action.payload);
     },
-    setTargetLanguages: (
-      state,
-      action: PayloadAction<TargetLanguage[]>,
-    ) => {
+    setTargetLanguages: (state, action: PayloadAction<TargetLanguage[]>) => {
       state.targetLanguages = action.payload;
       redux_store(REHYDRATE_KEYS.SETTING_TARGET_LANGUAGES, action.payload);
     },

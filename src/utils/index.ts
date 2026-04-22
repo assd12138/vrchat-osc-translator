@@ -4,8 +4,8 @@
 const LANGUAGE_DESCRIPTIONS: Record<string, string> = {
   cn: "cn translate result",
   en: "en translate result",
-  jp: "jp translate result",
-  kr: "kr translate result",
+  ja: "ja translate result",
+  ko: "ko translate result",
 };
 
 /**

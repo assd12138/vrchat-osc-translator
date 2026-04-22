@@ -48,7 +48,10 @@ const processTranslationResponse = (
     let result = template;
     for (const [lang, value] of Object.entries(response)) {
       if (value) {
-        result = result.replace(new RegExp(`#\\{${lang}\\}`, "g"), String(value));
+        result = result.replace(
+          new RegExp(`#\\{${lang}\\}`, "g"),
+          String(value),
+        );
       }
     }
     return result;
@@ -64,13 +67,17 @@ const processTranslationResponse = (
  */
 export const translateRouter = async (data: { text: string }) => {
   const settings = store.getState().settings;
-  const languages = settings.targetLanguages?.length > 0
-    ? settings.targetLanguages
-    : ["cn", "en", "jp", "kr"];
+  const languages =
+    settings.targetLanguages?.length > 0
+      ? settings.targetLanguages
+      : ["cn", "en", "ja", "ko"];
   let rawContent = "";
 
   // 批量翻译模式（仅 CUSTOM provider）
-  if (settings.api_provider_type === EApiProviderType.CUSTOM && settings.batchTranslate) {
+  if (
+    settings.api_provider_type === EApiProviderType.CUSTOM &&
+    settings.batchTranslate
+  ) {
     const results = await Promise.all(
       languages.map((lang) =>
         translateByAISingleLanguage({
@@ -90,7 +97,10 @@ export const translateRouter = async (data: { text: string }) => {
       responseObj[lang] = results[i].choices[0].message.content;
     });
 
-    return processTranslationResponse(JSON.stringify(responseObj), settings.outputTemplate);
+    return processTranslationResponse(
+      JSON.stringify(responseObj),
+      settings.outputTemplate,
+    );
   }
 
   // 普通翻译模式（使用 JSON Schema）
@@ -121,11 +131,14 @@ export const translateRouter = async (data: { text: string }) => {
       languages,
     });
     rawContent = translationRes.choices[0].message.content;
-  } else if (settings.api_provider_type === EApiProviderType.LOCAL_TRANSFORMER) {
-    rawContent = await translateByLocalTransformer({
-      text: data.text,
-      languages,
-    }) || "";
+  } else if (
+    settings.api_provider_type === EApiProviderType.LOCAL_TRANSFORMER
+  ) {
+    rawContent =
+      (await translateByLocalTransformer({
+        text: data.text,
+        languages,
+      })) || "";
   }
 
   return processTranslationResponse(rawContent, settings.outputTemplate);
@@ -156,9 +169,10 @@ export const transcriptionRouter = async (data: {
     });
     result = transcriptionRes.text.replace(/^[\s\S]*?<asr_text>/, "");
   } else if (settings.api_provider_type === EApiProviderType.OMNI) {
-    const languages = settings.targetLanguages?.length > 0
-      ? settings.targetLanguages
-      : ["cn", "en", "jp", "kr"];
+    const languages =
+      settings.targetLanguages?.length > 0
+        ? settings.targetLanguages
+        : ["cn", "en", "ja", "ko"];
     const base64 = await new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
       reader.onloadend = () => resolve(reader.result as string);

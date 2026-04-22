@@ -40,7 +40,8 @@ export default {
   检查中: "Checking...",
   目标语言: "Target Languages",
   输出模板: "Output Template",
-  模板提示: "Use #{lang} placeholders. Available: #{cn}, #{en}, #{jp}, #{kr}",
+  模板提示: "Use #{lang} placeholders. Available: #{cn}, #{en}, #{ja}, #{ko}",
   批量翻译: "Batch Translate",
-  批量翻译提示: "Send separate requests for each language (may reduce confusion)",
+  批量翻译提示:
+    "Send separate requests for each language (may reduce confusion)",
 };

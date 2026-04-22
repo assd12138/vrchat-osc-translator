@@ -56,8 +56,8 @@ export default function AudioPanel() {
               noiseSuppression: true,
               deviceId: deviceId
                 ? {
-                    exact: deviceId,
-                  }
+                  exact: deviceId,
+                }
                 : undefined,
             },
           });
@@ -184,7 +184,7 @@ export default function AudioPanel() {
     const settings = store.getState().settings;
     const languages = settings.targetLanguages?.length > 0
       ? settings.targetLanguages
-      : ["cn", "en", "jp", "kr"];
+      : ["cn", "en", "ja", "ko"];
     const a = await translateByLocalTransformer({
       text: "今天天气怎么样",
       languages,
