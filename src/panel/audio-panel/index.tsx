@@ -14,6 +14,7 @@ import invoke, { NATIVE_COMMAND } from "../../cross-platform/invoke";
 import globalStyles from "../../styles/index.module.css";
 import eventBus, { EventBusEvent } from "../../utils/event-bus";
 import styles from "./index.module.css";
+import { AVAILABLE_LANGUAGES } from "../translation-panel";
 
 export default function AudioPanel() {
   const { t } = useTranslation();
@@ -184,7 +185,7 @@ export default function AudioPanel() {
     const settings = store.getState().settings;
     const languages = settings.targetLanguages?.length > 0
       ? settings.targetLanguages
-      : ["zh", "en", "ja", "ko"];
+      : AVAILABLE_LANGUAGES;
     const a = await translateByLocalTransformer({
       text: "今天天气怎么样",
       languages,

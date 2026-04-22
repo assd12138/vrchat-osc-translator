@@ -34,6 +34,7 @@ import {
   translateByAISingleLanguage,
   translateByAIStream,
 } from "./translate";
+import { AVAILABLE_LANGUAGES } from "@/panel/translation-panel";
 
 /**
  * 处理翻译响应 - 尝试 JSON 解析并替换模板占位符
@@ -70,7 +71,7 @@ export const translateRouter = async (data: { text: string }) => {
   const languages =
     settings.targetLanguages?.length > 0
       ? settings.targetLanguages
-      : ["zh", "en", "ja", "ko"];
+      : AVAILABLE_LANGUAGES;
   let rawContent = "";
 
   // 批量翻译模式（仅 CUSTOM provider）
@@ -172,7 +173,7 @@ export const transcriptionRouter = async (data: {
     const languages =
       settings.targetLanguages?.length > 0
         ? settings.targetLanguages
-        : ["zh", "en", "ja", "ko"];
+        : AVAILABLE_LANGUAGES;
     const base64 = await new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
       reader.onloadend = () => resolve(reader.result as string);

@@ -8,7 +8,7 @@ import {
 import globalStyles from "../../styles/index.module.css";
 import styles from "./index.module.css";
 
-const AVAILABLE_LANGUAGES: TargetLanguage[] = ["zh", "en", "ja", "ko"];
+export const AVAILABLE_LANGUAGES: TargetLanguage[] = ["zh", "en", "ja", "ko"];
 const LANGUAGE_LABELS: Record<TargetLanguage, string> = {
   zh: "中文",
   en: "English",
