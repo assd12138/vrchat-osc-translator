@@ -21,7 +21,7 @@ export default function OcrPanel() {
         ) {
           const blob = await item.getType(
             item.types.find((type) => type.startsWith("image/")) ||
-            item.types[0],
+              item.types[0],
           );
           base64String = await new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -36,6 +36,8 @@ export default function OcrPanel() {
       if (!base64String) {
         console.log("剪贴板无图片");
       } else {
+        setOCR("");
+        setTrans("");
         const ocrContent = await transformOCRRouter({ base64: base64String });
         setOCR(ocrContent);
         const translation = await translateRouter({
