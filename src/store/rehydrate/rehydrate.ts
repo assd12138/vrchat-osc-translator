@@ -1,6 +1,7 @@
 import {
   setAiTemplate,
   setApiProviderType,
+  setBatchTranslate,
   setLanguage,
   setLongcatApiAuth,
   setOpenaiApiUrl,
@@ -11,11 +12,9 @@ import {
   setTranscriptionModel,
   setTranscriptionToken,
   setTranscriptionUrl,
-  type TargetLanguage,
 } from "../settings";
 import store from "../store";
 import {
-  type EApiProviderType,
   REDUX_STORAGE_KEY,
   REHYDRATE_KEYS,
   rehydrateFlag,
@@ -25,6 +24,7 @@ export const rehydrateMapper = {
   [REHYDRATE_KEYS.SETTING_AI_TEMPLATE]: setAiTemplate,
   [REHYDRATE_KEYS.SETTING_OUTPUT_TEMPLATE]: setOutputTemplate,
   [REHYDRATE_KEYS.SETTING_TARGET_LANGUAGES]: setTargetLanguages,
+  [REHYDRATE_KEYS.SETTING_BATCH_TRANSLATE]: setBatchTranslate,
   [REHYDRATE_KEYS.SETTING_TRANSCRIPTION_URL]: setTranscriptionUrl,
   [REHYDRATE_KEYS.SETTING_TRANSCRIPTION_MODEL]: setTranscriptionModel,
   [REHYDRATE_KEYS.SETTING_TRANSCRIPTION_TOKEN]: setTranscriptionToken,
@@ -32,8 +32,7 @@ export const rehydrateMapper = {
   [REHYDRATE_KEYS.SETTING_OPENAI_MODEL]: setOpenaiModel,
   [REHYDRATE_KEYS.SETTING_OPENAI_TOKEN]: setOpenaiToken,
   [REHYDRATE_KEYS.SETTING_LANGUAGE]: setLanguage,
-  [REHYDRATE_KEYS.SETTING_API_PROVIDER_TYPE]: (value: string) =>
-    setApiProviderType(value as EApiProviderType),
+  [REHYDRATE_KEYS.SETTING_API_PROVIDER_TYPE]: setApiProviderType,
   [REHYDRATE_KEYS.SETTING_LONGCAT_API_AUTH]: setLongcatApiAuth,
 };
 

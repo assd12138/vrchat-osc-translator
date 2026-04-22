@@ -31,6 +31,7 @@ import {
   transformOCR,
   transformOCRStream,
   translateByAI,
+  translateByAISingleLanguage,
   translateByAIStream,
 } from "./translate";
 
@@ -68,6 +69,31 @@ export const translateRouter = async (data: { text: string }) => {
     : ["cn", "en", "jp", "kr"];
   let rawContent = "";
 
+  // 批量翻译模式（仅 CUSTOM provider）
+  if (settings.api_provider_type === EApiProviderType.CUSTOM && settings.batchTranslate) {
+    const results = await Promise.all(
+      languages.map((lang) =>
+        translateByAISingleLanguage({
+          text: data.text,
+          token: settings.openai_token,
+          api: settings.openai_api_url,
+          model: settings.openai_model,
+          language: lang,
+          assignObj: { max_tokens: 500 },
+        }),
+      ),
+    );
+
+    // 汇总结果为对象
+    const responseObj: Record<string, string> = {};
+    languages.forEach((lang, i) => {
+      responseObj[lang] = results[i].choices[0].message.content;
+    });
+
+    return processTranslationResponse(JSON.stringify(responseObj), settings.outputTemplate);
+  }
+
+  // 普通翻译模式（使用 JSON Schema）
   if (settings.api_provider_type === EApiProviderType.CUSTOM) {
     const translationRes = await translateByAI({
       text: data.text,

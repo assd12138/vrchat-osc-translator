@@ -1,8 +1,5 @@
 import fetch from "@/cross-platform/fetch";
-import {
-  generateTranslationPrompt,
-  generateTranslationSchema,
-} from "@/utils";
+import { generateTranslationPrompt, generateTranslationSchema } from "@/utils";
 import { request } from "./index";
 
 /**
@@ -113,6 +110,39 @@ export const translateByAI = (data: {
       ],
       temperature: 0.7,
       response_format: schema,
+      ...(data.assignObj || {}),
+    }),
+    headers: {
+      Authorization: `Bearer ${data.token}`,
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+/**
+ * 单语言翻译（用于批量翻译模式）
+ * 不使用 JSON Schema，直接返回翻译结果
+ */
+export const translateByAISingleLanguage = (data: {
+  token: string;
+  text: string;
+  api: string;
+  model: string;
+  language: string;
+  assignObj?: object;
+}) => {
+  const prompt = generateTranslationPrompt(data.text, [data.language]);
+  return request(data.api, {
+    method: "POST",
+    body: JSON.stringify({
+      model: data.model,
+      messages: [
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      temperature: 0.7,
       ...(data.assignObj || {}),
     }),
     headers: {

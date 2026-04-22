@@ -4,7 +4,10 @@ import {
   rehydrateFlag,
 } from "./rehydrate-constant";
 
-export function redux_store(module: string, data: string | EApiProviderType) {
+export function redux_store(
+  module: string,
+  data: string | EApiProviderType | boolean | string[],
+) {
   if (!rehydrateFlag.flag) return;
 
   // biome-ignore lint/suspicious/noExplicitAny: 任意存储，无需定义

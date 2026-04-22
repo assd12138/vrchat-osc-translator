@@ -8,6 +8,7 @@ import { EApiProviderType } from "../../store/rehydrate/rehydrate-constant";
 import {
   reinit,
   setApiProviderType,
+  setBatchTranslate,
   setLanguage,
   setLongcatApiAuth,
   setOpenaiApiAuth,
@@ -73,6 +74,10 @@ export default function SettingPanel() {
 
   const handleOpenaiApiAuthChange = (auth: string) => {
     dispatch(setOpenaiApiAuth(auth));
+  };
+
+  const handleBatchTranslateChange = (checked: boolean) => {
+    dispatch(setBatchTranslate(checked));
   };
 
   const loadLocalTransformer = () => {
@@ -163,6 +168,19 @@ export default function SettingPanel() {
             value={settings.openai_model}
             onChange={(e) => handleOpenAIModelChange(e.target.value)}
           />
+          {settings.api_provider_type === EApiProviderType.CUSTOM && (
+            <>
+              <label className={globalStyles.labelS}>{t("批量翻译")}</label>
+              <div className={styles.checkboxRow}>
+                <input
+                  type="checkbox"
+                  checked={settings.batchTranslate}
+                  onChange={(e) => handleBatchTranslateChange(e.target.checked)}
+                />
+                <span className={styles.checkboxHint}>{t("批量翻译提示")}</span>
+              </div>
+            </>
+          )}
         </>
       ) : settings.api_provider_type === EApiProviderType.LONG_CAT ? (
         <>

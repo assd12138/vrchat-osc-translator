@@ -19,6 +19,8 @@ export interface SettingState {
   ai_template?: string;
   outputTemplate: string;
   targetLanguages: TargetLanguage[];
+  /** 批量翻译模式 - 每个语言单独发送请求（仅 CUSTOM provider） */
+  batchTranslate: boolean;
   language: string;
   api_provider_type: EApiProviderType;
   longcat_api_auth: string;
@@ -38,6 +40,7 @@ export const initialState: SettingState = {
 [日]#{jp}
 [한]#{kr}`,
   targetLanguages: ["cn", "en", "jp", "kr"],
+  batchTranslate: false,
   language: "auto",
   api_provider_type: EApiProviderType.LONG_CAT,
   longcat_api_auth: import.meta.env.VITE_DEFAULT_LONGCAT_API_AUTH,
@@ -84,6 +87,10 @@ const settingsSlice = createSlice({
       state.targetLanguages = action.payload;
       redux_store(REHYDRATE_KEYS.SETTING_TARGET_LANGUAGES, action.payload);
     },
+    setBatchTranslate: (state, action: PayloadAction<boolean>) => {
+      state.batchTranslate = action.payload;
+      redux_store(REHYDRATE_KEYS.SETTING_BATCH_TRANSLATE, action.payload);
+    },
     setOpenaiApiUrl: (state, action: PayloadAction<string>) => {
       state.openai_api_url = action.payload;
       redux_store(REHYDRATE_KEYS.SETTING_OPENAI_API_URL, action.payload);
@@ -120,6 +127,7 @@ export const {
   setAiTemplate,
   setOutputTemplate,
   setTargetLanguages,
+  setBatchTranslate,
   setOpenaiApiUrl,
   setOpenaiModel,
   setOpenaiToken,
