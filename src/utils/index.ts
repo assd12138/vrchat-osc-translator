@@ -44,7 +44,7 @@ export const generateTranslationPrompt = (
   languages: string[],
 ): string => {
   const langList = languages.join("/");
-  return `Translate the following segment into ${langList}, without additional explanation.\n\n${text}`;
+  return `Translate the text within the brackets into ${langList}, without additional explanation.\n\n[${text}]`;
 };
 
 export async function loadMicDevices() {
