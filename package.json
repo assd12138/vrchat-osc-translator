@@ -11,6 +11,7 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "tauri": "tauri",
+    "tauri-debug:build": "tauri build -- --debug",
     "android:build": "tauri android build",
     "tauri-dev": "tauri dev",
     "tauri-build": "tauri build",
