@@ -45,4 +45,15 @@ export default {
   批量翻译: "Batch Translate",
   批量翻译提示:
     "Send separate requests for each language (may reduce confusion)",
+  关闭: "Close",
+  确定: "Confirm",
+  取消: "Cancel",
+  "ISO 639-1": "ISO 639-1",
+  英文全称: "English Name",
+  本地全称: "Native Name",
+  模板生成器: "Template Generator",
+  检测到的语言: "Detected Languages",
+  未检测到语言占位符:
+    "No language placeholders detected. Use #{lang} format in template",
+  模板placeholder: "Click template generator or manually write template",
 };

@@ -6,8 +6,6 @@ import {
 } from "./rehydrate/rehydrate-constant";
 import { redux_store } from "./rehydrate/rehydrate-store";
 
-export type TargetLanguage = "zh" | "en" | "ja" | "ko" | "ru";
-
 export interface SettingState {
   transcription_url: string;
   transcription_model: string;
@@ -15,10 +13,7 @@ export interface SettingState {
   openai_api_url: string;
   openai_model: string;
   openai_token: string;
-  /** @deprecated 已改用 outputTemplate */
-  ai_template?: string;
   outputTemplate: string;
-  targetLanguages: TargetLanguage[];
   /** 批量翻译模式 - 每个语言单独发送请求（仅 CUSTOM provider） */
   batchTranslate: boolean;
   language: string;
@@ -34,13 +29,11 @@ export const initialState: SettingState = {
   openai_api_url: import.meta.env.VITE_DEFAULT_OPENAI_API_URL,
   openai_model: import.meta.env.VITE_DEFAULT_OPENAI_MODEL,
   openai_token: import.meta.env.VITE_DEFAULT_OPENAI_TOKEN,
-  ai_template: undefined,
   outputTemplate: `[中]#{zh}
 [En]#{en}
 [日]#{ja}
 [한]#{ko}
 [ru]#{ru}`,
-  targetLanguages: ["zh", "en", "ja", "ko", "ru"],
   batchTranslate: false,
   language: "auto",
   api_provider_type: EApiProviderType.LONG_CAT,
@@ -73,17 +66,9 @@ const settingsSlice = createSlice({
       state.transcription_token = action.payload;
       redux_store(REHYDRATE_KEYS.SETTING_TRANSCRIPTION_TOKEN, action.payload);
     },
-    setAiTemplate: (state, action: PayloadAction<string>) => {
-      state.ai_template = action.payload;
-      redux_store(REHYDRATE_KEYS.SETTING_AI_TEMPLATE, action.payload);
-    },
     setOutputTemplate: (state, action: PayloadAction<string>) => {
       state.outputTemplate = action.payload;
       redux_store(REHYDRATE_KEYS.SETTING_OUTPUT_TEMPLATE, action.payload);
-    },
-    setTargetLanguages: (state, action: PayloadAction<TargetLanguage[]>) => {
-      state.targetLanguages = action.payload;
-      redux_store(REHYDRATE_KEYS.SETTING_TARGET_LANGUAGES, action.payload);
     },
     setBatchTranslate: (state, action: PayloadAction<boolean>) => {
       state.batchTranslate = action.payload;
@@ -122,9 +107,7 @@ const settingsSlice = createSlice({
 
 export const {
   setTranscriptionUrl,
-  setAiTemplate,
   setOutputTemplate,
-  setTargetLanguages,
   setBatchTranslate,
   setOpenaiApiUrl,
   setOpenaiModel,

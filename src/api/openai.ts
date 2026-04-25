@@ -1,7 +1,4 @@
-import {
-  generateTranslationPrompt,
-  generateTranslationSchema,
-} from "@/utils";
+import { generateTranslationPrompt, generateTranslationSchema } from "@/utils";
 import { request } from "./index";
 import { streamRequest } from "./translate";
 

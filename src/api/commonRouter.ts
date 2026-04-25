@@ -2,38 +2,30 @@
  * 通过此通用路由，业务收集的信息统一在这里处理
  */
 import { encodeWAV } from "@ricky0123/vad-web/dist/utils";
-import { AVAILABLE_LANGUAGES } from "@/panel/translation-panel";
 import { EApiProviderType } from "@/store/rehydrate/rehydrate-constant";
 import store from "@/store/store";
+import { extractLanguagesFromTemplate } from "@/utils";
 import {
   ocrByLocalTransformer,
-  ocrByLocalTransformerStream,
   transcribeByLocalTransformer,
   translateByLocalTransformer,
-  translateByLocalTransformerStream,
 } from "./localTransformer";
 import {
   ocrByLongCat,
-  ocrByLongCatStream,
   transcriptionByLongCat,
   translateByLongCat,
-  translateByLongCatStream,
 } from "./longcat";
 import { translateAudioDirectlyFromOmni } from "./omni";
 import {
   ocrByOpenAI,
-  ocrByOpenAIStream,
   transcriptionByOpenAI,
   translateByOpenAI,
-  translateByOpenAIStream,
 } from "./openai";
 import {
   transcriptionAudio,
   transformOCR,
-  transformOCRStream,
   translateByAI,
   translateByAISingleLanguage,
-  translateByAIStream,
 } from "./translate";
 
 /**
@@ -68,10 +60,10 @@ const processTranslationResponse = (
  */
 export const translateRouter = async (data: { text: string }) => {
   const settings = store.getState().settings;
-  const languages =
-    settings.targetLanguages?.length > 0
-      ? settings.targetLanguages
-      : AVAILABLE_LANGUAGES;
+  const extractedLanguages = extractLanguagesFromTemplate(
+    settings.outputTemplate,
+  );
+  const languages = extractedLanguages || [];
   let rawContent = "";
 
   // 批量翻译模式（仅 CUSTOM provider）
@@ -178,10 +170,10 @@ export const transcriptionRouter = async (data: {
     });
     result = transcriptionRes.text.replace(/^[\s\S]*?<asr_text>/, "");
   } else if (settings.api_provider_type === EApiProviderType.OMNI) {
-    const languages =
-      settings.targetLanguages?.length > 0
-        ? settings.targetLanguages
-        : AVAILABLE_LANGUAGES;
+    const extractedLanguages = extractLanguagesFromTemplate(
+      settings.outputTemplate,
+    );
+    const languages = extractedLanguages;
     const base64 = await new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
       reader.onloadend = () => resolve(reader.result as string);
@@ -262,94 +254,4 @@ export const transformOCRRouter = async ({ base64 }: { base64: string }) => {
     result = await ocrByLocalTransformer({ base64 });
   }
   return result;
-};
-
-/**
- * @deprecated 流式 OCR 路由已弃用
- * 此函数保留用于向后兼容，但不应在新实现中使用
- */
-export const transformOCRRouterStream = async (
-  { base64 }: { base64: string },
-  onChunk: (text: string) => void,
-  signal?: AbortSignal,
-) => {
-  const settings = store.getState().settings;
-
-  if (settings.api_provider_type === EApiProviderType.CUSTOM) {
-    await transformOCRStream({ base64 }, onChunk, signal);
-  } else if (settings.api_provider_type === EApiProviderType.LONG_CAT) {
-    await ocrByLongCatStream(
-      {
-        token: settings.longcat_api_auth,
-        base64,
-      },
-      onChunk,
-      signal,
-    );
-  } else if (settings.api_provider_type === EApiProviderType.OPEN_AI) {
-    await ocrByOpenAIStream(
-      {
-        token: settings.openai_api_auth,
-        base64,
-      },
-      onChunk,
-      signal,
-    );
-  } else if (
-    settings.api_provider_type === EApiProviderType.LOCAL_TRANSFORMER
-  ) {
-    await ocrByLocalTransformerStream({ base64 }, onChunk);
-  }
-};
-
-/**
- * @deprecated 流式翻译路由已弃用
- * 此函数保留用于向后兼容，但不应在新实现中使用
- */
-export const translateRouterStream = async (
-  data: { text: string },
-  onChunk: (text: string) => void,
-  signal?: AbortSignal,
-) => {
-  const settings = store.getState().settings;
-  const ask = settings.ai_template?.replace("{text}", data.text) || data.text;
-
-  if (settings.api_provider_type === EApiProviderType.CUSTOM) {
-    await translateByAIStream(
-      {
-        text: ask,
-        token: settings.openai_token,
-        api: settings.openai_api_url,
-        model: settings.openai_model,
-        assignObj: {
-          max_tokens: 500,
-        },
-      },
-      onChunk,
-      signal,
-    );
-  } else if (settings.api_provider_type === EApiProviderType.LONG_CAT) {
-    await translateByLongCatStream(
-      {
-        text: ask,
-        token: settings.longcat_api_auth,
-        model: "LongCat-Flash-Lite",
-      },
-      onChunk,
-      signal,
-    );
-  } else if (settings.api_provider_type === EApiProviderType.OPEN_AI) {
-    await translateByOpenAIStream(
-      {
-        text: ask,
-        token: settings.openai_api_auth,
-      },
-      onChunk,
-      signal,
-    );
-  } else if (
-    settings.api_provider_type === EApiProviderType.LOCAL_TRANSFORMER
-  ) {
-    await translateByLocalTransformerStream({ text: ask }, onChunk);
-  }
 };

@@ -9,6 +9,23 @@ const LANGUAGE_DESCRIPTIONS: Record<string, string> = {
 };
 
 /**
+ * 从输出模板中提取语言列表
+ * 例如: "[中]#{zh}\n[En]#{en}" => ["zh", "en"]
+ */
+export const extractLanguagesFromTemplate = (template: string): string[] => {
+  const regex = /#\{([a-z]{2})\}/g;
+  const languages: string[] = [];
+  let match: RegExpExecArray | null = regex.exec(template);
+  while (match !== null) {
+    if (!languages.includes(match[1])) {
+      languages.push(match[1]);
+    }
+    match = regex.exec(template);
+  }
+  return languages;
+};
+
+/**
  * 生成翻译 JSON Schema
  */
 export const generateTranslationSchema = (languages: string[]): object => {

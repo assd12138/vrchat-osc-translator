@@ -1,12 +1,7 @@
 import { MicVAD } from "@ricky0123/vad-web";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  transcriptionRouter,
-  translateRouter,
-  // translateRouterStream,
-} from "@/api/commonRouter";
-import { translateByLocalTransformer } from "@/api/localTransformer";
+import { transcriptionRouter, translateRouter } from "@/api/commonRouter";
 import { EApiProviderType } from "@/store/rehydrate/rehydrate-constant";
 import store from "@/store/store";
 import { loadMicDevices } from "@/utils";
@@ -14,7 +9,6 @@ import invoke, { NATIVE_COMMAND } from "../../cross-platform/invoke";
 import globalStyles from "../../styles/index.module.css";
 import eventBus, { EventBusEvent } from "../../utils/event-bus";
 import styles from "./index.module.css";
-import { AVAILABLE_LANGUAGES } from "../translation-panel";
 
 export default function AudioPanel() {
   const { t } = useTranslation();
@@ -57,8 +51,8 @@ export default function AudioPanel() {
               noiseSuppression: true,
               deviceId: deviceId
                 ? {
-                  exact: deviceId,
-                }
+                    exact: deviceId,
+                  }
                 : undefined,
             },
           });
@@ -181,18 +175,6 @@ export default function AudioPanel() {
     };
     load();
   }, []);
-  const test = async () => {
-    const settings = store.getState().settings;
-    const languages = settings.targetLanguages?.length > 0
-      ? settings.targetLanguages
-      : AVAILABLE_LANGUAGES;
-    const a = await translateByLocalTransformer({
-      text: "今天天气怎么样",
-      languages,
-    });
-
-    console.log(a);
-  };
 
   return (
     <div className={globalStyles.panel}>

@@ -1,14 +1,13 @@
 import {
-  setAiTemplate,
   setApiProviderType,
   setBatchTranslate,
   setLanguage,
   setLongcatApiAuth,
+  setOpenaiApiAuth,
   setOpenaiApiUrl,
   setOpenaiModel,
   setOpenaiToken,
   setOutputTemplate,
-  setTargetLanguages,
   setTranscriptionModel,
   setTranscriptionToken,
   setTranscriptionUrl,
@@ -21,9 +20,7 @@ import {
 } from "./rehydrate-constant";
 
 export const rehydrateMapper = {
-  [REHYDRATE_KEYS.SETTING_AI_TEMPLATE]: setAiTemplate,
   [REHYDRATE_KEYS.SETTING_OUTPUT_TEMPLATE]: setOutputTemplate,
-  [REHYDRATE_KEYS.SETTING_TARGET_LANGUAGES]: setTargetLanguages,
   [REHYDRATE_KEYS.SETTING_BATCH_TRANSLATE]: setBatchTranslate,
   [REHYDRATE_KEYS.SETTING_TRANSCRIPTION_URL]: setTranscriptionUrl,
   [REHYDRATE_KEYS.SETTING_TRANSCRIPTION_MODEL]: setTranscriptionModel,
@@ -34,6 +31,7 @@ export const rehydrateMapper = {
   [REHYDRATE_KEYS.SETTING_LANGUAGE]: setLanguage,
   [REHYDRATE_KEYS.SETTING_API_PROVIDER_TYPE]: setApiProviderType,
   [REHYDRATE_KEYS.SETTING_LONGCAT_API_AUTH]: setLongcatApiAuth,
+  [REHYDRATE_KEYS.SETTING_OPENAI_API_AUTH]: setOpenaiApiAuth,
 };
 
 export function rehydrate() {

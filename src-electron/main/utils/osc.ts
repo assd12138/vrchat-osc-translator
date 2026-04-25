@@ -72,7 +72,7 @@ function buildOscMessage(address: string, args: OscArg[]): Buffer {
 /**
  * 异步发送 OSC 消息
  */
-async function sendOscMessage(
+function sendOscMessage(
   host: string,
   port: number,
   address: string,

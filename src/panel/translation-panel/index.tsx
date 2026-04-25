@@ -1,67 +1,55 @@
+import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useAppDispatch, useAppSelector } from "../../store/hook";
-import {
-  setOutputTemplate,
-  setTargetLanguages,
-  type TargetLanguage,
-} from "../../store/settings";
+import { setOutputTemplate } from "../../store/settings";
 import globalStyles from "../../styles/index.module.css";
+import { extractLanguagesFromTemplate } from "../../utils";
+import TranslationTemplateHelper from "../translation-template-helper";
 import styles from "./index.module.css";
-
-export const AVAILABLE_LANGUAGES: TargetLanguage[] = [
-  "zh",
-  "en",
-  "ja",
-  "ko",
-  "ru",
-];
-const LANGUAGE_LABELS: Record<TargetLanguage, string> = {
-  zh: "中文",
-  en: "English",
-  ja: "日本語",
-  ko: "한국어",
-  ru: "Русский",
-};
 
 export default function TranslationPanel() {
   const dispatch = useAppDispatch();
   const { t } = useTranslation();
+  const dialogRef = useRef<HTMLDialogElement>(null);
   const outputTemplate = useAppSelector(
     (state) => state.settings.outputTemplate,
   );
-  const targetLanguages = useAppSelector(
-    (state) => state.settings.targetLanguages,
-  );
 
-  const handleLanguageToggle = (lang: TargetLanguage) => {
-    const current = targetLanguages || [];
-    const newLanguages = current.includes(lang)
-      ? current.filter((l) => l !== lang)
-      : [...current, lang];
-    dispatch(setTargetLanguages(newLanguages));
-  };
+  const detectedLanguages = extractLanguagesFromTemplate(outputTemplate);
 
   const handleTemplateChange = (template: string) => {
     dispatch(setOutputTemplate(template));
+  };
+
+  const openDialog = () => {
+    dialogRef.current?.showModal();
+  };
+
+  const closeDialog = () => {
+    dialogRef.current?.close();
+  };
+
+  const handleTemplateConfirm = (template: string) => {
+    dispatch(setOutputTemplate(template));
+    closeDialog();
   };
 
   return (
     <div className={globalStyles.panel}>
       <div className={globalStyles.title}>🌐 {t("翻译设置")}</div>
 
-      {/* Language Selection Section */}
-      <label className={globalStyles.labelS}>{t("目标语言")}</label>
-      <div className={styles.languageCheckboxGroup}>
-        {AVAILABLE_LANGUAGES.map((lang) => (
-          <label key={lang} className={styles.checkboxLabel}>
-            <input
-              type="checkbox"
-              checked={targetLanguages?.includes(lang) ?? false}
-              onChange={() => handleLanguageToggle(lang)}
-            />
-            {LANGUAGE_LABELS[lang]}
-          </label>
-        ))}
+      {/* Detected Languages Preview */}
+      <label className={globalStyles.labelS}>{t("检测到的语言")}</label>
+      <div className={styles.detectedLanguages}>
+        {detectedLanguages.length > 0 ? (
+          <textarea
+            disabled
+            className={styles.transTemplate}
+            value={detectedLanguages.join("|")}
+          />
+        ) : (
+          <span className={styles.warningText}>{t("未检测到语言占位符")}</span>
+        )}
       </div>
 
       {/* Output Template Section */}
@@ -71,9 +59,20 @@ export default function TranslationPanel() {
         onChange={(e) => handleTemplateChange(e.target.value)}
         value={outputTemplate}
         className={styles.transTemplate}
-        placeholder={`[中]#{zh}\n[En]#{en}\n[日]#{ja}\n[한]#{ko}\n[Ru]#{ru}`}
+        placeholder={t("模板placeholder")}
       ></textarea>
-      <div className={styles.templateHint}>{t("模板提示")}</div>
+      <button onClick={openDialog} className={styles.templateGeneratorButton}>
+        {t("模板生成器")}
+      </button>
+
+      {/* Template Helper Dialog */}
+      <dialog ref={dialogRef} className={styles.templateHelperDialog}>
+        <TranslationTemplateHelper
+          initialValue={detectedLanguages}
+          onConfirm={handleTemplateConfirm}
+          onCancel={closeDialog}
+        />
+      </dialog>
     </div>
   );
 }
