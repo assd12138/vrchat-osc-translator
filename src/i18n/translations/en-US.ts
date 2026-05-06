@@ -56,4 +56,10 @@ export default {
   未检测到语言占位符:
     "No language placeholders detected. Use #{lang} format in template",
   模板placeholder: "Click template generator or manually write template",
+  手动翻译成功:
+    "✅ Manual translation successful. Original: {{original}}, Translation: {{translation}}",
+  手动翻译失败: "❌ Manual translation failed",
+  输入文本手动翻译: "Enter text for manual translation",
+  "翻译中...": "Translating...",
+  翻译发送: "Translate & Send",
 };

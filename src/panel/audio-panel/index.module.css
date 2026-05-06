@@ -28,3 +28,13 @@
   align-items: center;
   margin-top: 10px;
 }
+
+.manualInput {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 10px;
+}
+
+.manualInput input {
+  flex: 1;
+}

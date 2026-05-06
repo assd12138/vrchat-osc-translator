@@ -51,8 +51,8 @@ export default function AudioPanel() {
               noiseSuppression: true,
               deviceId: deviceId
                 ? {
-                    exact: deviceId,
-                  }
+                  exact: deviceId,
+                }
                 : undefined,
             },
           });
@@ -176,6 +176,47 @@ export default function AudioPanel() {
     load();
   }, []);
 
+  // 手动输入的文本
+  const [manualText, setManualText] = useState("");
+  // 是否正在翻译中
+  const [translating, setTranslating] = useState(false);
+
+  const handleManualTranslate = async () => {
+    if (!manualText.trim() || translating) return;
+
+    setTranslating(true);
+    try {
+      let sendText = "";
+      if (
+        store.getState().settings.api_provider_type !== EApiProviderType.OMNI
+      ) {
+        const translationResult = await translateRouter({
+          text: manualText,
+        });
+        sendText = translationResult;
+      } else {
+        sendText = manualText;
+      }
+
+      invoke(NATIVE_COMMAND.SEND_TO_VRC_CHAT, {
+        text: sendText,
+      });
+      eventBus.emit(
+        EventBusEvent.ADD_LOG,
+        t("手动翻译成功", {
+          original: manualText,
+          translation: sendText,
+        }),
+      );
+      setManualText("");
+    } catch (e) {
+      console.error("手动翻译失败:", e);
+      eventBus.emit(EventBusEvent.ADD_LOG, t("手动翻译失败"));
+    } finally {
+      setTranslating(false);
+    }
+  };
+
   return (
     <div className={globalStyles.panel}>
       <div className={globalStyles.title}>🎙️ {t("语音识别控制")}</div>
@@ -226,6 +267,28 @@ export default function AudioPanel() {
             {!recording ? t("未录音") : speaking ? t("说话中") : t("无声音")}
           </span>
         </span>
+      </div>
+      <div className={styles.manualInput}>
+        <input
+          type="text"
+          className={globalStyles.input}
+          value={manualText}
+          onChange={(e) => setManualText(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              handleManualTranslate();
+            }
+          }}
+          placeholder={t("输入文本手动翻译")}
+          disabled={translating}
+        />
+        <button
+          onClick={handleManualTranslate}
+          className={globalStyles.button}
+          disabled={translating || !manualText.trim()}
+        >
+          {translating ? t("翻译中...") : t("翻译发送")}
+        </button>
       </div>
     </div>
   );
