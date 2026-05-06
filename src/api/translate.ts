@@ -1,5 +1,5 @@
 import fetch from "@/cross-platform/fetch";
-import { generateTranslationPrompt, generateTranslationSchema } from "@/utils";
+import { generateTranslationPrompt, generateTranslationTool } from "@/utils";
 import { request } from "./index";
 
 /**
@@ -96,7 +96,7 @@ export const translateByAI = (data: {
   languages: string[];
   assignObj?: object;
 }) => {
-  const schema = generateTranslationSchema(data.languages);
+  const translateTool = generateTranslationTool(data.languages);
   const prompt = generateTranslationPrompt(data.text, data.languages);
   return request(data.api, {
     method: "POST",
@@ -109,7 +109,7 @@ export const translateByAI = (data: {
         },
       ],
       temperature: 0.7,
-      response_format: schema,
+      tools: [translateTool],
       ...(data.assignObj || {}),
     }),
     headers: {

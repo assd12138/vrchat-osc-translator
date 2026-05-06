@@ -54,6 +54,35 @@ export const generateTranslationSchema = (languages: string[]): object => {
 };
 
 /**
+ * 生成翻译 翻译工具
+ */
+export const generateTranslationTool = (languages: string[]): object => {
+  const properties: Record<string, object> = {};
+
+  for (const lang of languages) {
+    properties[lang] = {
+      type: "string",
+      description: LANGUAGE_DESCRIPTIONS[lang] || `${lang} translate result`,
+    };
+  }
+
+  return {
+    type: "function",
+    function: {
+      name: "translateFormat",
+      description: "Format the translate result",
+      parameters: {
+        $schema: "https://json-schema.org/draft/2020-12/schema",
+        type: "object",
+        properties: properties,
+        required: languages,
+        additionalProperties: false,
+      },
+    },
+  };
+};
+
+/**
  * 生成翻译提示词
  */
 export const generateTranslationPrompt = (

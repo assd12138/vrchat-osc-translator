@@ -116,7 +116,8 @@ export const translateRouter = async (data: { text: string }) => {
         },
       },
     });
-    rawContent = translationRes.choices[0].message.content;
+    rawContent =
+      translationRes.choices[0].message.tool_calls[0].function.arguments;
   } else if (settings.api_provider_type === EApiProviderType.LONG_CAT) {
     const translationRes = await translateByLongCat({
       text: data.text,
