@@ -51,8 +51,8 @@ export default function AudioPanel() {
               noiseSuppression: true,
               deviceId: deviceId
                 ? {
-                  exact: deviceId,
-                }
+                    exact: deviceId,
+                  }
                 : undefined,
             },
           });

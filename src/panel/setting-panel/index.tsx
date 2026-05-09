@@ -1,63 +1,19 @@
 import i18next from "i18next";
-import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { checkModelCached, loadModel } from "@/api/localTransformer";
-import { openUrl } from "../../cross-platform/openUrl";
 import { useAppDispatch, useAppSelector } from "../../store/hook";
 import { EApiProviderType } from "../../store/rehydrate/rehydrate-constant";
-import {
-  reinit,
-  setApiProviderType,
-  setBatchTranslate,
-  setLanguage,
-  setLongcatApiAuth,
-  setOpenaiApiAuth,
-  setOpenaiApiUrl,
-  setOpenaiModel,
-  setOpenaiToken,
-  setTranscriptionModel,
-  setTranscriptionToken,
-  setTranscriptionUrl,
-} from "../../store/settings";
+import { reinit, setApiProviderType, setLanguage } from "../../store/settings";
 import globalStyles from "../../styles/index.module.css";
+import CustomProviderConfig from "./components/CustomProviderConfig";
+import LocalTransformerConfig from "./components/LocalTransformerConfig";
+import LongcatProviderConfig from "./components/LongcatProviderConfig";
+import OmniProviderConfig from "./components/OmniProviderConfig";
 import styles from "./index.module.css";
 
 export default function SettingPanel() {
   const settings = useAppSelector((state) => state.settings);
   const dispatch = useAppDispatch();
   const { t } = useTranslation();
-  const [localProgress, setLocalProgress] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [isCached, setIsCached] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    if (settings.api_provider_type === EApiProviderType.LOCAL_TRANSFORMER) {
-      checkModelCached().then(setIsCached);
-    }
-  }, [settings.api_provider_type]);
-
-  const handleChangeBackend = (url: string) => {
-    dispatch(setTranscriptionUrl(url));
-  };
-
-  const handleChangeTranscriptionModel = (url: string) => {
-    dispatch(setTranscriptionModel(url));
-  };
-
-  const handleChangeTranscriptionToken = (token: string) => {
-    dispatch(setTranscriptionToken(token));
-  };
-
-  const handleOpenAIApiChange = (url: string) => {
-    dispatch(setOpenaiApiUrl(url));
-  };
-
-  const handleOpenAITokenChange = (token: string) => {
-    dispatch(setOpenaiToken(token));
-  };
-  const handleOpenAIModelChange = (model: string) => {
-    dispatch(setOpenaiModel(model));
-  };
 
   const handleLanguageChange = (language: string) => {
     i18next.changeLanguage(language === "auto" ? navigator.language : language);
@@ -68,31 +24,19 @@ export default function SettingPanel() {
     dispatch(setApiProviderType(provider));
   };
 
-  const handleLongcatApiAuthChange = (auth: string) => {
-    dispatch(setLongcatApiAuth(auth));
-  };
-
-  const handleOpenaiApiAuthChange = (auth: string) => {
-    dispatch(setOpenaiApiAuth(auth));
-  };
-
-  const handleBatchTranslateChange = (checked: boolean) => {
-    dispatch(setBatchTranslate(checked));
-  };
-
-  const loadLocalTransformer = () => {
-    setLoading(true);
-    loadModel({
-      onProgress(percentNative) {
-        const percent = Math.round((percentNative * 100) / 100);
-        setLocalProgress(percent);
-        if (percent === 100) {
-          setLoading(false);
-        } else {
-          setLoading(true);
-        }
-      },
-    });
+  const renderProviderConfig = () => {
+    switch (settings.api_provider_type) {
+      case EApiProviderType.CUSTOM:
+        return <CustomProviderConfig />;
+      case EApiProviderType.OMNI:
+        return <OmniProviderConfig />;
+      case EApiProviderType.LONG_CAT:
+        return <LongcatProviderConfig />;
+      case EApiProviderType.LOCAL_TRANSFORMER:
+        return <LocalTransformerConfig />;
+      default:
+        return null;
+    }
   };
 
   return (
@@ -128,140 +72,7 @@ export default function SettingPanel() {
         <option value={EApiProviderType.LONG_CAT}>LongCat</option>
         <option value={EApiProviderType.OMNI}>Omni</option>
       </select>
-      {settings.api_provider_type === EApiProviderType.CUSTOM ||
-        settings.api_provider_type === EApiProviderType.OMNI ? (
-        <>
-          {settings.api_provider_type === EApiProviderType.CUSTOM &&
-            <>
-              <label className={globalStyles.labelS}>{t("转译地址")}</label>
-              <input
-                className={globalStyles.inputS}
-                value={settings.transcription_url}
-                onChange={(e) => handleChangeBackend(e.target.value)}
-              />
-              <label className={globalStyles.labelS}>{t("转译模型")}</label>
-              <input
-                className={globalStyles.inputS}
-                value={settings.transcription_model}
-                onChange={(e) => handleChangeTranscriptionModel(e.target.value)}
-              />
-              <label className={globalStyles.labelS}>{t("转译Token")}</label>
-              <input
-                className={globalStyles.inputS}
-                value={settings.transcription_token}
-                onChange={(e) => handleChangeTranscriptionToken(e.target.value)}
-              />
-            </>
-          }
-          <label className={globalStyles.labelS}>{t("openai地址")}</label>
-          <input
-            className={globalStyles.inputS}
-            value={settings.openai_api_url}
-            onChange={(e) => handleOpenAIApiChange(e.target.value)}
-          />
-          <label className={globalStyles.labelS}>OpenAI token</label>
-          <input
-            className={globalStyles.inputS}
-            value={settings.openai_token}
-            onChange={(e) => handleOpenAITokenChange(e.target.value)}
-          />
-          <label className={globalStyles.labelS}>{t("模型名称")}</label>
-          <input
-            className={globalStyles.inputS}
-            value={settings.openai_model}
-            onChange={(e) => handleOpenAIModelChange(e.target.value)}
-          />
-          {settings.api_provider_type === EApiProviderType.CUSTOM && (
-            <>
-              <label className={globalStyles.labelS}>{t("批量翻译")}</label>
-              <div className={styles.checkboxRow}>
-                <input
-                  type="checkbox"
-                  checked={settings.batchTranslate}
-                  onChange={(e) => handleBatchTranslateChange(e.target.checked)}
-                />
-                <span className={styles.checkboxHint}>{t("批量翻译提示")}</span>
-              </div>
-            </>
-          )}
-        </>
-      ) : settings.api_provider_type === EApiProviderType.LONG_CAT ? (
-        <>
-          <label className={globalStyles.labelS}>
-            Authorization
-            <a
-              className={styles.initBtn}
-              onClick={() => openUrl("https://longcat.chat/login")}
-            >
-              {t("去申请")}
-            </a>
-          </label>
-          <input
-            className={globalStyles.inputS}
-            value={settings.longcat_api_auth}
-            onChange={(e) => handleLongcatApiAuthChange(e.target.value)}
-          />
-        </>
-      ) : settings.api_provider_type === EApiProviderType.LOCAL_TRANSFORMER ? (
-        <>
-          <label className={globalStyles.labelS}>{t("本地模型")}</label>
-          <table className={styles.localModelTable}>
-            <thead>
-              <tr>
-                <th className={styles.localModelTh}>{t("缓存情况")}</th>
-                <th className={styles.localModelTh}>{t("加载情况")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td className={styles.localModelTd}>
-                  {isCached === null
-                    ? t("检查中")
-                    : t(isCached ? "已缓存" : "未缓存")}
-                </td>
-                <td className={styles.localModelTd}>
-                  {t(localProgress === 100 ? "已加载" : "未加载")}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          {loading && (
-            <div>
-              <progress value={localProgress} max={100}></progress>
-              <span style={{ fontSize: "12px", marginLeft: "10px" }}>
-                {localProgress}%
-              </span>
-            </div>
-          )}
-          <div>
-            <button
-              disabled={localProgress === 100}
-              onClick={loadLocalTransformer}
-              className={globalStyles.button}
-            >
-              {t("加载")}
-            </button>
-          </div>
-        </>
-      ) : (
-        <>
-          <label className={globalStyles.labelS}>
-            API Key
-            <a
-              className={styles.initBtn}
-              onClick={() => openUrl("https://platform.openai.com/api-keys")}
-            >
-              {t("去申请")}
-            </a>
-          </label>
-          <input
-            className={globalStyles.inputS}
-            type="password"
-            value={settings.openai_api_auth}
-            onChange={(e) => handleOpenaiApiAuthChange(e.target.value)}
-          />
-        </>
-      )}
+      {renderProviderConfig()}
     </div>
   );
 }
