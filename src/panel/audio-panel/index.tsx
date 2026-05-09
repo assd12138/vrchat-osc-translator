@@ -51,8 +51,8 @@ export default function AudioPanel() {
               noiseSuppression: true,
               deviceId: deviceId
                 ? {
-                    exact: deviceId,
-                  }
+                  exact: deviceId,
+                }
                 : undefined,
             },
           });
@@ -188,16 +188,11 @@ export default function AudioPanel() {
     setTranslating(true);
     try {
       let sendText = "";
-      if (
-        store.getState().settings.api_provider_type !== EApiProviderType.OMNI
-      ) {
-        const translationResult = await translateRouter({
-          text: manualText,
-        });
-        sendText = translationResult;
-      } else {
-        sendText = manualText;
-      }
+
+      const translationResult = await translateRouter({
+        text: manualText,
+      });
+      sendText = translationResult;
 
       invoke(NATIVE_COMMAND.SEND_TO_VRC_CHAT, {
         text: sendText,

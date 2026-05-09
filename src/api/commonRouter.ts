@@ -96,7 +96,11 @@ export const translateRouter = async (data: { text: string }) => {
   }
 
   // 普通翻译模式（使用 JSON Schema）
-  if (settings.api_provider_type === EApiProviderType.CUSTOM) {
+  if (
+    [EApiProviderType.CUSTOM, EApiProviderType.OMNI].includes(
+      settings.api_provider_type,
+    )
+  ) {
     const translationRes = await translateByAI({
       text: data.text,
       token: settings.openai_token,
