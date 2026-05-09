@@ -130,9 +130,9 @@ export default function SettingPanel() {
         <option value={EApiProviderType.OMNI}>Omni</option>
       </select>
       {settings.api_provider_type === EApiProviderType.CUSTOM ||
-      settings.api_provider_type === EApiProviderType.OMNI ? (
+        settings.api_provider_type === EApiProviderType.OMNI ? (
         <>
-          <label className={globalStyles.labelS}>{t("转译地址")}</label>
+          {/* <label className={globalStyles.labelS}>{t("转译地址")}</label>
           <input
             className={globalStyles.inputS}
             value={settings.transcription_url}
@@ -149,7 +149,7 @@ export default function SettingPanel() {
             className={globalStyles.inputS}
             value={settings.transcription_token}
             onChange={(e) => handleChangeTranscriptionToken(e.target.value)}
-          />
+          /> */}
           <label className={globalStyles.labelS}>{t("openai地址")}</label>
           <input
             className={globalStyles.inputS}

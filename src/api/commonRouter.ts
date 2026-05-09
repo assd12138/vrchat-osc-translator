@@ -80,7 +80,6 @@ export const translateRouter = async (data: { text: string }) => {
           model: settings.openai_model,
           language: lang,
           assignObj: {
-            max_tokens: 500,
             thinking: {
               type: "disabled",
             },
@@ -110,7 +109,6 @@ export const translateRouter = async (data: { text: string }) => {
       model: settings.openai_model,
       languages,
       assignObj: {
-        max_tokens: 500,
         thinking: {
           type: "disabled",
         },
@@ -187,11 +185,9 @@ export const transcriptionRouter = async (data: {
       languages,
       api: settings.openai_api_url,
       model: settings.openai_model,
-      assignObj: {
-        max_tokens: 500,
-      },
     });
-    const rawContent = transcriptionRes.choices[0].message.content;
+    const rawContent =
+      transcriptionRes.choices[0].message.tool_calls[0].function.arguments;
     result = processTranslationResponse(rawContent, settings.outputTemplate);
   } else if (settings.api_provider_type === EApiProviderType.LONG_CAT) {
     const base64 = await new Promise<string>((resolve, reject) => {

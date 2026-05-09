@@ -62,6 +62,7 @@ export default function AudioPanel() {
           setSpeaking(false);
           let sendText = "";
           const transcriptionResult = await transcriptionRouter({ audio });
+          // 如果是多模态，那么可以直接把输出当做翻译结果了
           if (
             store.getState().settings.api_provider_type !==
             EApiProviderType.OMNI
