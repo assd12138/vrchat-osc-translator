@@ -3,7 +3,6 @@ import {
   setBatchTranslate,
   setLanguage,
   setLongcatApiAuth,
-  setOpenaiApiAuth,
   setOpenaiApiUrl,
   setOpenaiModel,
   setOpenaiToken,
@@ -31,7 +30,6 @@ export const rehydrateMapper = {
   [REHYDRATE_KEYS.SETTING_LANGUAGE]: setLanguage,
   [REHYDRATE_KEYS.SETTING_API_PROVIDER_TYPE]: setApiProviderType,
   [REHYDRATE_KEYS.SETTING_LONGCAT_API_AUTH]: setLongcatApiAuth,
-  [REHYDRATE_KEYS.SETTING_OPENAI_API_AUTH]: setOpenaiApiAuth,
 };
 
 export function rehydrate() {

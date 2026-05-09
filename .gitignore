@@ -25,6 +25,7 @@ release
 *.njsproj
 *.sln
 *.sw?
+.env
 
 # Claude Code
 .claude/

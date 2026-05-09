@@ -19,7 +19,6 @@ export interface SettingState {
   language: string;
   api_provider_type: EApiProviderType;
   longcat_api_auth: string;
-  openai_api_auth: string;
 }
 
 export const initialState: SettingState = {
@@ -38,7 +37,6 @@ export const initialState: SettingState = {
   language: "auto",
   api_provider_type: EApiProviderType.LONG_CAT,
   longcat_api_auth: import.meta.env.VITE_DEFAULT_LONGCAT_API_AUTH,
-  openai_api_auth: import.meta.env.VITE_DEFAULT_OPENAI_API_AUTH || "",
 };
 
 const settingsSlice = createSlice({
@@ -98,10 +96,6 @@ const settingsSlice = createSlice({
       state.longcat_api_auth = action.payload;
       redux_store(REHYDRATE_KEYS.SETTING_LONGCAT_API_AUTH, action.payload);
     },
-    setOpenaiApiAuth: (state, action: PayloadAction<string>) => {
-      state.openai_api_auth = action.payload;
-      redux_store(REHYDRATE_KEYS.SETTING_OPENAI_API_AUTH, action.payload);
-    },
   },
 });
 
@@ -117,7 +111,6 @@ export const {
   setTranscriptionToken,
   setApiProviderType,
   setLongcatApiAuth,
-  setOpenaiApiAuth,
   reinit,
 } = settingsSlice.actions;
 

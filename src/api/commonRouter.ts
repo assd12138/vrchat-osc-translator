@@ -15,10 +15,9 @@ import {
   transcriptionByLongCat,
   translateByLongCat,
 } from "./longcat";
-import { translateAudioDirectlyFromOmni } from "./omni";
+import { ocrByOmni, translateAudioDirectlyFromOmni } from "./omni";
 import {
   transcriptionAudio,
-  transformOCR,
   translateByAI,
   translateByAISingleLanguage,
 } from "./translate";
@@ -172,7 +171,7 @@ export const transcriptionRouter = async (data: {
       reader.readAsDataURL(file);
     });
     const transcriptionRes = await translateAudioDirectlyFromOmni({
-      token: settings.openai_api_auth,
+      token: settings.openai_token,
       audio_base64: base64.split(",")[1],
       languages,
       api: settings.openai_api_url,
@@ -210,13 +209,18 @@ export const transcriptionRouter = async (data: {
 export const transformOCRRouter = async ({ base64 }: { base64: string }) => {
   const settings = store.getState().settings;
   let result: string = "";
-  if (settings.api_provider_type === EApiProviderType.CUSTOM) {
-    const ocrRes = await transformOCR({ base64 });
-    result = ocrRes.choices[0].message.content;
-  } else if (settings.api_provider_type === EApiProviderType.LONG_CAT) {
+  if (settings.api_provider_type === EApiProviderType.LONG_CAT) {
     const ocrRes = await ocrByLongCat({
       token: settings.longcat_api_auth,
       base64,
+    });
+    result = ocrRes.choices[0].message.content;
+  } else if (settings.api_provider_type === EApiProviderType.OMNI) {
+    const ocrRes = await ocrByOmni({
+      token: settings.openai_token,
+      base64,
+      api: settings.openai_api_url,
+      model: settings.openai_model,
     });
     result = ocrRes.choices[0].message.content;
   } else if (

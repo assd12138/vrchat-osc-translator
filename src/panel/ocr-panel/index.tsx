@@ -1,13 +1,22 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { transformOCRRouter, translateRouter } from "@/api/commonRouter";
+import { useAppSelector } from "../../store/hook";
+import { EApiProviderType } from "../../store/rehydrate/rehydrate-constant";
 import globalStyles from "../../styles/index.module.css";
 import styles from "./index.module.css";
 
 export default function OcrPanel() {
   const { t } = useTranslation();
+  const settings = useAppSelector((state) => state.settings);
   const [ocr, setOCR] = useState("");
   const [trans, setTrans] = useState("");
+
+  // CUSTOM provider 不支持 OCR，隐藏面板
+  if (settings.api_provider_type === EApiProviderType.CUSTOM) {
+    return null;
+  }
+
   const ocrRecogonition = async () => {
     const items = await navigator.clipboard.read();
     console.log(items);

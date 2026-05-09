@@ -48,3 +48,42 @@ export const translateAudioDirectlyFromOmni = (data: {
     },
   });
 };
+
+/**
+ * OCR图片识别（OMNI Provider）
+ */
+export const ocrByOmni = (data: {
+  token: string;
+  base64: string;
+  api: string;
+  model: string;
+}) => {
+  return request(data.api, {
+    method: "POST",
+    body: JSON.stringify({
+      model: data.model,
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "image_url",
+              image_url: {
+                url: data.base64,
+              },
+            },
+            {
+              type: "text",
+              text: "Text Recognition:",
+            },
+          ],
+        },
+      ],
+      temperature: 0.3,
+    }),
+    headers: {
+      Authorization: `Bearer ${data.token}`,
+      "Content-Type": "application/json",
+    },
+  });
+};
