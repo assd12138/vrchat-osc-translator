@@ -9,11 +9,11 @@ export default function Root() {
   return (
     <div className="container">
       <Audiopanel />
-      <Ocrpanel />
-      <FileSharePanel />
       <Translationpanel />
       <Settingpanel />
       <Systemlog />
+      <Ocrpanel />
+      <FileSharePanel />
     </div>
   );
 }

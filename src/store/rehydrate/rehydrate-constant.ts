@@ -29,8 +29,6 @@ export enum EApiProviderType {
   Z_AI = "Z_AI",
   /** 小米MIMO */
   MIMO = "MIMO",
-  /** OpenAI */
-  OPEN_AI = "OPEN_AI",
   /** 本地gemma运行 */
   LOCAL_TRANSFORMER = "LOCAL_TRANSFORMER",
   /** Omni类型的模型运行 */

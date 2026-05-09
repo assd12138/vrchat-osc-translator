@@ -126,30 +126,33 @@ export default function SettingPanel() {
         <option value={EApiProviderType.CUSTOM}>Custom</option>
         <option value={EApiProviderType.LOCAL_TRANSFORMER}>Local</option>
         <option value={EApiProviderType.LONG_CAT}>LongCat</option>
-        <option value={EApiProviderType.OPEN_AI}>OpenAI</option>
         <option value={EApiProviderType.OMNI}>Omni</option>
       </select>
       {settings.api_provider_type === EApiProviderType.CUSTOM ||
         settings.api_provider_type === EApiProviderType.OMNI ? (
         <>
-          {/* <label className={globalStyles.labelS}>{t("转译地址")}</label>
-          <input
-            className={globalStyles.inputS}
-            value={settings.transcription_url}
-            onChange={(e) => handleChangeBackend(e.target.value)}
-          />
-          <label className={globalStyles.labelS}>{t("转译模型")}</label>
-          <input
-            className={globalStyles.inputS}
-            value={settings.transcription_model}
-            onChange={(e) => handleChangeTranscriptionModel(e.target.value)}
-          />
-          <label className={globalStyles.labelS}>{t("转译Token")}</label>
-          <input
-            className={globalStyles.inputS}
-            value={settings.transcription_token}
-            onChange={(e) => handleChangeTranscriptionToken(e.target.value)}
-          /> */}
+          {settings.api_provider_type === EApiProviderType.CUSTOM &&
+            <>
+              <label className={globalStyles.labelS}>{t("转译地址")}</label>
+              <input
+                className={globalStyles.inputS}
+                value={settings.transcription_url}
+                onChange={(e) => handleChangeBackend(e.target.value)}
+              />
+              <label className={globalStyles.labelS}>{t("转译模型")}</label>
+              <input
+                className={globalStyles.inputS}
+                value={settings.transcription_model}
+                onChange={(e) => handleChangeTranscriptionModel(e.target.value)}
+              />
+              <label className={globalStyles.labelS}>{t("转译Token")}</label>
+              <input
+                className={globalStyles.inputS}
+                value={settings.transcription_token}
+                onChange={(e) => handleChangeTranscriptionToken(e.target.value)}
+              />
+            </>
+          }
           <label className={globalStyles.labelS}>{t("openai地址")}</label>
           <input
             className={globalStyles.inputS}
