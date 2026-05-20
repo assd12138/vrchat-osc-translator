@@ -29,4 +29,12 @@ Basically, it's easy to develop the frontend part by using nodejs, to run the ta
 
 1. [Rust](https://www.rust-lang.org/)
 2. [Tauri](https://tauri.app/)
-3. For openvr library, you also need to install MSVC/cmake/llvm to support the openvr-sys crates compile and static link openvr to application on windows. See also [openvr-sys](https://github.com/rust-openvr/rust-openvr?tab=readme-ov-file#requirements)
+## Dual Stack Support
+This project supports both Tauri and Electron runtime stacks:
+- **Tauri Stack (Default)**: Lightweight, low memory usage, better performance, recommended for most users
+- **Electron Stack**: Better compatibility with older systems, more complete web API support, suitable for users encountering compatibility issues with Tauri
+
+To use Electron stack:
+1. No need to switch branches, Electron support is already included in the main branch
+2. Run `npm run electron-dev` to start the development server for Electron
+3. Run `npm run electron-build` to build the Electron version of the application
