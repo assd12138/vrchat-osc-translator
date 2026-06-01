@@ -18,6 +18,8 @@ export interface SettingState {
   batchTranslate: boolean;
   language: string;
   api_provider_type: EApiProviderType;
+  /** Omni模式下是否保留音频base64类型信息 */
+  omni_keep_audio_type: boolean;
 }
 
 export const initialState: SettingState = {
@@ -35,6 +37,7 @@ export const initialState: SettingState = {
   batchTranslate: false,
   language: "auto",
   api_provider_type: EApiProviderType.CUSTOM,
+  omni_keep_audio_type: false,
 };
 
 const settingsSlice = createSlice({
@@ -90,6 +93,10 @@ const settingsSlice = createSlice({
       state.api_provider_type = action.payload;
       redux_store(REHYDRATE_KEYS.SETTING_API_PROVIDER_TYPE, action.payload);
     },
+    setOmniKeepAudioType: (state, action: PayloadAction<boolean>) => {
+      state.omni_keep_audio_type = action.payload;
+      redux_store(REHYDRATE_KEYS.SETTING_OMNI_KEEP_AUDIO_TYPE, action.payload);
+    },
   },
 });
 
@@ -104,6 +111,7 @@ export const {
   setTranscriptionModel,
   setTranscriptionToken,
   setApiProviderType,
+  setOmniKeepAudioType,
   reinit,
 } = settingsSlice.actions;
 

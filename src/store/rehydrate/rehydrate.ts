@@ -2,6 +2,7 @@ import {
   setApiProviderType,
   setBatchTranslate,
   setLanguage,
+  setOmniKeepAudioType,
   setOpenaiApiUrl,
   setOpenaiModel,
   setOpenaiToken,
@@ -28,6 +29,7 @@ export const rehydrateMapper = {
   [REHYDRATE_KEYS.SETTING_OPENAI_TOKEN]: setOpenaiToken,
   [REHYDRATE_KEYS.SETTING_LANGUAGE]: setLanguage,
   [REHYDRATE_KEYS.SETTING_API_PROVIDER_TYPE]: setApiProviderType,
+  [REHYDRATE_KEYS.SETTING_OMNI_KEEP_AUDIO_TYPE]: setOmniKeepAudioType,
 };
 
 export function rehydrate() {

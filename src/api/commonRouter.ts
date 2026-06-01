@@ -146,7 +146,7 @@ export const transcriptionRouter = async (data: {
     });
     const transcriptionRes = await translateAudioDirectlyFromOmni({
       token: settings.openai_token,
-      audio_base64: base64.split(",")[1],
+      audio_base64: settings.omni_keep_audio_type ? base64 : base64.split(",")[1],
       languages,
       api: settings.openai_api_url,
       model: settings.openai_model,

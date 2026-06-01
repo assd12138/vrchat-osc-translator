@@ -4,6 +4,7 @@ import {
   setOpenaiApiUrl,
   setOpenaiModel,
   setOpenaiToken,
+  setOmniKeepAudioType,
 } from "../../../store/settings";
 import globalStyles from "../../../styles/index.module.css";
 
@@ -22,6 +23,10 @@ export default function OmniProviderConfig() {
 
   const handleOpenAIModelChange = (model: string) => {
     dispatch(setOpenaiModel(model));
+  };
+
+  const handleOmniKeepAudioTypeChange = (checked: boolean) => {
+    dispatch(setOmniKeepAudioType(checked));
   };
 
   return (
@@ -44,6 +49,15 @@ export default function OmniProviderConfig() {
         value={settings.openai_model}
         onChange={(e) => handleOpenAIModelChange(e.target.value)}
       />
+      <div className={globalStyles.checkboxRow}>
+        <input
+          type="checkbox"
+          id="omniKeepAudioType"
+          checked={settings.omni_keep_audio_type}
+          onChange={(e) => handleOmniKeepAudioTypeChange(e.target.checked)}
+        />
+        <label htmlFor="omniKeepAudioType">{t("携带音频类型信息")}</label>
+      </div>
     </>
   );
 }
