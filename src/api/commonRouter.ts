@@ -5,16 +5,6 @@ import { encodeWAV } from "@ricky0123/vad-web/dist/utils";
 import { EApiProviderType } from "@/store/rehydrate/rehydrate-constant";
 import store from "@/store/store";
 import { extractLanguagesFromTemplate } from "@/utils";
-import {
-  ocrByLocalTransformer,
-  transcribeByLocalTransformer,
-  translateByLocalTransformer,
-} from "./localTransformer";
-import {
-  ocrByLongCat,
-  transcriptionByLongCat,
-  translateByLongCat,
-} from "./longcat";
 import { ocrByOmni, translateAudioDirectlyFromOmni } from "./omni";
 import {
   transcriptionAudio,
@@ -114,22 +104,6 @@ export const translateRouter = async (data: { text: string }) => {
     });
     rawContent =
       translationRes.choices[0].message.tool_calls[0].function.arguments;
-  } else if (settings.api_provider_type === EApiProviderType.LONG_CAT) {
-    const translationRes = await translateByLongCat({
-      text: data.text,
-      token: settings.longcat_api_auth,
-      model: "LongCat-Flash-Lite",
-      languages,
-    });
-    rawContent = translationRes.choices[0].message.content;
-  } else if (
-    settings.api_provider_type === EApiProviderType.LOCAL_TRANSFORMER
-  ) {
-    rawContent =
-      (await translateByLocalTransformer({
-        text: data.text,
-        languages,
-      })) || "";
   }
 
   return processTranslationResponse(rawContent, settings.outputTemplate);
@@ -180,23 +154,6 @@ export const transcriptionRouter = async (data: {
     const rawContent =
       transcriptionRes.choices[0].message.tool_calls[0].function.arguments;
     result = processTranslationResponse(rawContent, settings.outputTemplate);
-  } else if (settings.api_provider_type === EApiProviderType.LONG_CAT) {
-    const base64 = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-    const transcriptionRes = await transcriptionByLongCat({
-      token: settings.longcat_api_auth,
-      model: "LongCat-Flash-Omni-2603",
-      audio_base64: base64,
-    });
-    result = transcriptionRes.choices[0].message.content;
-  } else if (
-    settings.api_provider_type === EApiProviderType.LOCAL_TRANSFORMER
-  ) {
-    result = await transcribeByLocalTransformer({ audioData: file });
   }
   return result;
 };
@@ -209,13 +166,7 @@ export const transcriptionRouter = async (data: {
 export const transformOCRRouter = async ({ base64 }: { base64: string }) => {
   const settings = store.getState().settings;
   let result: string = "";
-  if (settings.api_provider_type === EApiProviderType.LONG_CAT) {
-    const ocrRes = await ocrByLongCat({
-      token: settings.longcat_api_auth,
-      base64,
-    });
-    result = ocrRes.choices[0].message.content;
-  } else if (settings.api_provider_type === EApiProviderType.OMNI) {
+  if (settings.api_provider_type === EApiProviderType.OMNI) {
     const ocrRes = await ocrByOmni({
       token: settings.openai_token,
       base64,
@@ -223,10 +174,6 @@ export const transformOCRRouter = async ({ base64 }: { base64: string }) => {
       model: settings.openai_model,
     });
     result = ocrRes.choices[0].message.content;
-  } else if (
-    settings.api_provider_type === EApiProviderType.LOCAL_TRANSFORMER
-  ) {
-    result = await ocrByLocalTransformer({ base64 });
   }
   return result;
 };

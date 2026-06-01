@@ -5,8 +5,6 @@ import { EApiProviderType } from "../../store/rehydrate/rehydrate-constant";
 import { reinit, setApiProviderType, setLanguage } from "../../store/settings";
 import globalStyles from "../../styles/index.module.css";
 import CustomProviderConfig from "./components/CustomProviderConfig";
-import LocalTransformerConfig from "./components/LocalTransformerConfig";
-import LongcatProviderConfig from "./components/LongcatProviderConfig";
 import OmniProviderConfig from "./components/OmniProviderConfig";
 import styles from "./index.module.css";
 
@@ -30,10 +28,6 @@ export default function SettingPanel() {
         return <CustomProviderConfig />;
       case EApiProviderType.OMNI:
         return <OmniProviderConfig />;
-      case EApiProviderType.LONG_CAT:
-        return <LongcatProviderConfig />;
-      case EApiProviderType.LOCAL_TRANSFORMER:
-        return <LocalTransformerConfig />;
       default:
         return null;
     }
@@ -68,8 +62,6 @@ export default function SettingPanel() {
         }
       >
         <option value={EApiProviderType.CUSTOM}>Custom</option>
-        <option value={EApiProviderType.LOCAL_TRANSFORMER}>Local</option>
-        <option value={EApiProviderType.LONG_CAT}>LongCat</option>
         <option value={EApiProviderType.OMNI}>Omni</option>
       </select>
       {renderProviderConfig()}

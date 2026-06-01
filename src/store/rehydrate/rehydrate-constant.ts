@@ -15,21 +15,10 @@ export const REHYDRATE_KEYS = {
   SETTING_BATCH_TRANSLATE: "SETTING_BATCH_TRANSLATE",
   SETTING_LANGUAGE: "SETTING_LANGUAGE",
   SETTING_API_PROVIDER_TYPE: "SETTING_API_PROVIDER_TYPE",
-  SETTING_LONGCAT_API_AUTH: "SETTING_LONGCAT_API_AUTH",
 };
 
 export enum EApiProviderType {
   CUSTOM = "custom",
-  /** 龙猫 */
-  LONG_CAT = "longcat",
-  /** 智谱国内站 https://bigmodel.cn/console/overview */
-  ZHIPU_CN = "ZHIPU_CN",
-  /** 智谱国际站  */
-  Z_AI = "Z_AI",
-  /** 小米MIMO */
-  MIMO = "MIMO",
-  /** 本地gemma运行 */
-  LOCAL_TRANSFORMER = "LOCAL_TRANSFORMER",
   /** Omni类型的模型运行 */
   OMNI = "OMNI",
 }

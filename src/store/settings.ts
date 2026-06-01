@@ -18,7 +18,6 @@ export interface SettingState {
   batchTranslate: boolean;
   language: string;
   api_provider_type: EApiProviderType;
-  longcat_api_auth: string;
 }
 
 export const initialState: SettingState = {
@@ -35,8 +34,7 @@ export const initialState: SettingState = {
 [ru]#{ru}`,
   batchTranslate: false,
   language: "auto",
-  api_provider_type: EApiProviderType.LONG_CAT,
-  longcat_api_auth: import.meta.env.VITE_DEFAULT_LONGCAT_API_AUTH,
+  api_provider_type: EApiProviderType.CUSTOM,
 };
 
 const settingsSlice = createSlice({
@@ -92,10 +90,6 @@ const settingsSlice = createSlice({
       state.api_provider_type = action.payload;
       redux_store(REHYDRATE_KEYS.SETTING_API_PROVIDER_TYPE, action.payload);
     },
-    setLongcatApiAuth: (state, action: PayloadAction<string>) => {
-      state.longcat_api_auth = action.payload;
-      redux_store(REHYDRATE_KEYS.SETTING_LONGCAT_API_AUTH, action.payload);
-    },
   },
 });
 
@@ -110,7 +104,6 @@ export const {
   setTranscriptionModel,
   setTranscriptionToken,
   setApiProviderType,
-  setLongcatApiAuth,
   reinit,
 } = settingsSlice.actions;
 

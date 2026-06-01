@@ -26,8 +26,6 @@ interface ImportMetaEnv {
 	readonly VITE_DEFAULT_OPENAI_MODEL: string;
 	/** 默认openai兼容鉴权 */
 	readonly VITE_DEFAULT_OPENAI_TOKEN: string;
-	/** 默认龙猫秘钥 */
-	readonly VITE_DEFAULT_LONGCAT_API_AUTH: string;
 }
 
 interface ImportMeta {
