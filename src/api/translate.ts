@@ -186,6 +186,7 @@ export const translateByAIStream = async (
       thinking: {
         type: "disabled",
       },
+      reasoning_effort: "none",
       stream: true,
       ...(data.assignObj || {}),
     }),
