@@ -16,9 +16,9 @@
   --lg-bg-2: #111726;
 
   /* Glass surface tokens */
-  --glass-tint: 255, 255, 255;        /* white tint */
-  --glass-alpha: 0.06;                /* base fill */
-  --glass-alpha-hi: 0.12;             /* hover/elevated */
+  --glass-tint: 255, 255, 255; /* white tint */
+  --glass-alpha: 0.06; /* base fill */
+  --glass-alpha-hi: 0.12; /* hover/elevated */
   --glass-border: 255, 255, 255;
   --glass-border-alpha: 0.18;
   --glass-highlight: 255, 255, 255;
@@ -26,12 +26,12 @@
   /* Text scale */
   --lg-text: rgba(240, 244, 255, 0.96);
   --lg-text-muted: rgba(214, 222, 240, 0.62);
-  --lg-text-faint: rgba(200, 210, 232, 0.40);
+  --lg-text-faint: rgba(200, 210, 232, 0.4);
 
   /* Accent (a soft cyan→violet gradient is reused across UI) */
-  --lg-accent-1: #5eead4;   /* teal */
-  --lg-accent-2: #818cf8;   /* indigo */
-  --lg-accent-3: #c084fc;   /* violet */
+  --lg-accent-1: #5eead4; /* teal */
+  --lg-accent-2: #818cf8; /* indigo */
+  --lg-accent-3: #c084fc; /* violet */
 
   /* Status */
   --lg-ok: #34d399;
@@ -44,10 +44,12 @@
   --lg-radius-pill: 999px;
 
   /* Shadow */
-  --lg-shadow-soft: 0 1px 0 rgba(255, 255, 255, 0.06) inset,
-                    0 10px 30px -12px rgba(0, 0, 0, 0.65);
-  --lg-shadow-pop: 0 1px 0 rgba(255, 255, 255, 0.10) inset,
-                   0 20px 50px -15px rgba(0, 0, 0, 0.75);
+  --lg-shadow-soft:
+    0 1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 10px 30px -12px rgba(0, 0, 0, 0.65);
+  --lg-shadow-pop:
+    0 1px 0 rgba(255, 255, 255, 0.1) inset,
+    0 20px 50px -15px rgba(0, 0, 0, 0.75);
 
   /* Motion */
   --lg-ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -74,11 +76,16 @@ html body {
 
   /* Base vertical wash */
   background-color: var(--lg-bg-0);
-  background-image:
-    linear-gradient(180deg, var(--lg-bg-1) 0%, var(--lg-bg-0) 55%, var(--lg-bg-2) 100%);
+  background-image: linear-gradient(
+    180deg,
+    var(--lg-bg-1) 0%,
+    var(--lg-bg-0) 55%,
+    var(--lg-bg-2) 100%
+  );
 
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI",
-    "PingFang SC", "Hiragino Sans", "Microsoft YaHei", system-ui, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", "PingFang SC",
+    "Hiragino Sans", "Microsoft YaHei", system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -91,10 +98,26 @@ body::before {
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(38vmax 38vmax at 18% 22%, rgba(94, 234, 212, 0.18), transparent 60%),
-    radial-gradient(42vmax 42vmax at 82% 18%, rgba(129, 140, 248, 0.20), transparent 62%),
-    radial-gradient(46vmax 46vmax at 70% 88%, rgba(192, 132, 252, 0.16), transparent 64%),
-    radial-gradient(30vmax 30vmax at 12% 78%, rgba(56, 189, 248, 0.12), transparent 60%);
+    radial-gradient(
+      38vmax 38vmax at 18% 22%,
+      rgba(94, 234, 212, 0.18),
+      transparent 60%
+    ),
+    radial-gradient(
+      42vmax 42vmax at 82% 18%,
+      rgba(129, 140, 248, 0.2),
+      transparent 62%
+    ),
+    radial-gradient(
+      46vmax 46vmax at 70% 88%,
+      rgba(192, 132, 252, 0.16),
+      transparent 64%
+    ),
+    radial-gradient(
+      30vmax 30vmax at 12% 78%,
+      rgba(56, 189, 248, 0.12),
+      transparent 60%
+    );
   filter: saturate(120%) blur(8px);
   animation: lg-aurora 28s var(--lg-ease) infinite alternate;
 }
@@ -108,19 +131,27 @@ body::after {
   pointer-events: none;
   background-image:
     linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, transparent 12%),
-    repeating-linear-gradient(45deg,
+    repeating-linear-gradient(
+      45deg,
       rgba(255, 255, 255, 0.012) 0px,
       rgba(255, 255, 255, 0.012) 1px,
       transparent 1px,
-      transparent 3px);
+      transparent 3px
+    );
   mix-blend-mode: overlay;
   opacity: 0.55;
 }
 
 @keyframes lg-aurora {
-  0%   { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
-  50%  { transform: translate3d(-2%, 1.5%, 0) rotate(2deg) scale(1.04); }
-  100% { transform: translate3d(2.5%, -2%, 0) rotate(-2deg) scale(1.02); }
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+  }
+  50% {
+    transform: translate3d(-2%, 1.5%, 0) rotate(2deg) scale(1.04);
+  }
+  100% {
+    transform: translate3d(2.5%, -2%, 0) rotate(-2deg) scale(1.02);
+  }
 }
 
 /* ---- Stage container: keeps panels above the aurora ---- */
@@ -148,17 +179,21 @@ body::after {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg,
+  background: linear-gradient(
+    180deg,
     rgba(255, 255, 255, 0.28),
-    rgba(255, 255, 255, 0.12));
+    rgba(255, 255, 255, 0.12)
+  );
   border-radius: var(--lg-radius-pill);
   border: 2px solid transparent;
   background-clip: padding-box;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg,
+  background: linear-gradient(
+    180deg,
     rgba(255, 255, 255, 0.42),
-    rgba(255, 255, 255, 0.20));
+    rgba(255, 255, 255, 0.2)
+  );
   background-clip: padding-box;
 }
 
@@ -175,9 +210,10 @@ select {
   background-color: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--lg-radius-sm);
-  transition: border-color var(--lg-fast) var(--lg-ease),
-              box-shadow var(--lg-fast) var(--lg-ease),
-              background-color var(--lg-fast) var(--lg-ease);
+  transition:
+    border-color var(--lg-fast) var(--lg-ease),
+    box-shadow var(--lg-fast) var(--lg-ease),
+    background-color var(--lg-fast) var(--lg-ease);
 }
 
 input::placeholder,
@@ -238,8 +274,9 @@ input[type="checkbox"] {
   cursor: pointer;
   background-color: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.22);
-  transition: background-color var(--lg-fast) var(--lg-ease),
-              border-color var(--lg-fast) var(--lg-ease);
+  transition:
+    background-color var(--lg-fast) var(--lg-ease),
+    border-color var(--lg-fast) var(--lg-ease);
 }
 input[type="checkbox"]::before {
   content: "";
@@ -286,9 +323,12 @@ a {
    Fallback: if backdrop-filter is unsupported, lift the opacity
    so glass surfaces remain readable.
    ============================================================ */
-@supports not ((backdrop-filter: blur(10px)) or (-webkit-backdrop-filter: blur(10px))) {
+@supports not (
+    (backdrop-filter: blur(10px)) or
+    (-webkit-backdrop-filter: blur(10px))
+  ) {
   :root {
-    --glass-alpha: 0.20;
-    --glass-alpha-hi: 0.30;
+    --glass-alpha: 0.2;
+    --glass-alpha-hi: 0.3;
   }
 }

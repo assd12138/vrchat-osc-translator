@@ -10,8 +10,9 @@
   text-underline-offset: 3px;
   cursor: pointer;
   opacity: 0.85;
-  transition: opacity var(--lg-fast) var(--lg-ease),
-              color var(--lg-fast) var(--lg-ease);
+  transition:
+    opacity var(--lg-fast) var(--lg-ease),
+    color var(--lg-fast) var(--lg-ease);
 }
 .initBtn:hover {
   opacity: 1;
@@ -44,9 +45,11 @@
 .localModelTh {
   font-weight: 700;
   color: var(--lg-text);
-  background: linear-gradient(180deg,
-      rgba(129, 140, 248, 0.16),
-      rgba(129, 140, 248, 0.04));
+  background: linear-gradient(
+    180deg,
+    rgba(129, 140, 248, 0.16),
+    rgba(129, 140, 248, 0.04)
+  );
   text-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
 }
 .localModelTable tbody tr:last-child .localModelTd {

@@ -13,10 +13,10 @@
   margin: 0 auto 22px;
   border-radius: var(--lg-radius);
   background: linear-gradient(
-      135deg,
-      rgba(var(--glass-tint), var(--glass-alpha-hi)) 0%,
-      rgba(var(--glass-tint), var(--glass-alpha)) 100%
-    );
+    135deg,
+    rgba(var(--glass-tint), var(--glass-alpha-hi)) 0%,
+    rgba(var(--glass-tint), var(--glass-alpha)) 100%
+  );
   border: 1px solid rgba(var(--glass-border), var(--glass-border-alpha));
   box-shadow: var(--lg-shadow-soft);
 
@@ -35,14 +35,17 @@
   inset: 0;
   border-radius: inherit;
   padding: 1px;
-  background: linear-gradient(
+  background:
+    linear-gradient(
       180deg,
       rgba(var(--glass-highlight), 0.55),
       rgba(var(--glass-highlight), 0.06) 18%,
       transparent 35%
     ),
     linear-gradient(180deg, transparent 65%, rgba(0, 0, 0, 0.25));
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
@@ -60,7 +63,7 @@
   background: linear-gradient(
     100deg,
     transparent,
-    rgba(255, 255, 255, 0.10) 50%,
+    rgba(255, 255, 255, 0.1) 50%,
     transparent
   );
   transform: translateX(-120%) rotate(8deg);
@@ -85,10 +88,12 @@
   align-items: baseline;
   gap: 6px;
   /* faint accent underline that reads as "etched" */
-  background: linear-gradient(90deg,
-      rgba(255, 255, 255, 0.9),
-      rgba(214, 222, 240, 0.6) 60%,
-      transparent);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.9),
+    rgba(214, 222, 240, 0.6) 60%,
+    transparent
+  );
   -webkit-background-clip: text;
   background-clip: text;
 }
@@ -108,17 +113,21 @@
   cursor: pointer;
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: var(--lg-radius-pill);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04));
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.14),
+    rgba(255, 255, 255, 0.04)
+  );
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.22) inset,
     0 -1px 0 rgba(0, 0, 0, 0.25) inset,
     0 6px 16px -8px rgba(0, 0, 0, 0.6);
-  transition: transform var(--lg-fast) var(--lg-ease),
-              border-color var(--lg-fast) var(--lg-ease),
-              background-color var(--lg-fast) var(--lg-ease),
-              box-shadow var(--lg-fast) var(--lg-ease),
-              filter var(--lg-fast) var(--lg-ease);
+  transition:
+    transform var(--lg-fast) var(--lg-ease),
+    border-color var(--lg-fast) var(--lg-ease),
+    background-color var(--lg-fast) var(--lg-ease),
+    box-shadow var(--lg-fast) var(--lg-ease),
+    filter var(--lg-fast) var(--lg-ease);
   overflow: hidden;
 }
 
@@ -140,8 +149,11 @@
 
 .button:hover {
   border-color: rgba(255, 255, 255, 0.34);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.08));
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.22),
+    rgba(255, 255, 255, 0.08)
+  );
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.3) inset,
     0 -1px 0 rgba(0, 0, 0, 0.3) inset,
@@ -233,7 +245,16 @@
 
 /* ---- Responsive guard: prevent control crush on narrow widths ---- */
 @media (max-width: 360px) {
-  .panel { padding: 16px; }
-  .button { padding: 8px 14px; font-size: 13px; }
-  .selectS, .inputS, .input { font-size: 13px; }
+  .panel {
+    padding: 16px;
+  }
+  .button {
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+  .selectS,
+  .inputS,
+  .input {
+    font-size: 13px;
+  }
 }

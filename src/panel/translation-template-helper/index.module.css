@@ -15,9 +15,11 @@
 
   /* helper sits inside dialog; wrap its own glass so table scrolls */
   border-radius: var(--lg-radius);
-  background: linear-gradient(135deg,
-      rgba(var(--glass-tint), var(--glass-alpha-hi)),
-      rgba(var(--glass-tint), var(--glass-alpha)));
+  background: linear-gradient(
+    135deg,
+    rgba(var(--glass-tint), var(--glass-alpha-hi)),
+    rgba(var(--glass-tint), var(--glass-alpha))
+  );
   border: 1px solid rgba(var(--glass-border), var(--glass-border-alpha));
   box-shadow: var(--lg-shadow-soft);
   -webkit-backdrop-filter: blur(26px) saturate(160%);
@@ -33,38 +35,44 @@
   font-weight: 600;
   cursor: pointer;
   border-radius: var(--lg-radius-pill);
-  transition: transform var(--lg-fast) var(--lg-ease),
-              box-shadow var(--lg-fast) var(--lg-ease),
-              filter var(--lg-fast) var(--lg-ease);
+  transition:
+    transform var(--lg-fast) var(--lg-ease),
+    box-shadow var(--lg-fast) var(--lg-ease),
+    filter var(--lg-fast) var(--lg-ease);
 }
 .closeButton,
 .cancelButton {
   color: #fff;
   border: 1px solid rgba(248, 113, 113, 0.5);
-  background: linear-gradient(180deg,
-      rgba(248, 113, 113, 0.32),
-      rgba(248, 113, 113, 0.14));
+  background: linear-gradient(
+    180deg,
+    rgba(248, 113, 113, 0.32),
+    rgba(248, 113, 113, 0.14)
+  );
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.18) inset;
 }
 .closeButton:hover,
 .cancelButton:hover {
   transform: translateY(-1px);
   filter: brightness(1.1);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.25) inset,
-              0 10px 22px -10px rgba(248, 113, 113, 0.6);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.25) inset,
+    0 10px 22px -10px rgba(248, 113, 113, 0.6);
 }
 .confirmButton {
   color: #04110d;
   border: 1px solid rgba(94, 234, 212, 0.6);
   background: linear-gradient(135deg, var(--lg-accent-1), var(--lg-accent-2));
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.4) inset,
-              0 10px 22px -10px rgba(94, 234, 212, 0.6);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.4) inset,
+    0 10px 22px -10px rgba(94, 234, 212, 0.6);
 }
 .confirmButton:hover {
   transform: translateY(-1px);
   filter: brightness(1.08);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset,
-              0 14px 28px -10px rgba(129, 140, 248, 0.7);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.5) inset,
+    0 14px 28px -10px rgba(129, 140, 248, 0.7);
 }
 .confirmButton:focus-visible,
 .cancelButton:focus-visible,
@@ -85,10 +93,13 @@
   background: rgba(0, 0, 0, 0.18);
 }
 
-.headerRow { /* applied on <tr> */
-  background: linear-gradient(180deg,
-      rgba(129, 140, 248, 0.20),
-      rgba(129, 140, 248, 0.06));
+.headerRow {
+  /* applied on <tr> */
+  background: linear-gradient(
+    180deg,
+    rgba(129, 140, 248, 0.2),
+    rgba(129, 140, 248, 0.06)
+  );
 }
 
 .checkboxCell,
@@ -102,9 +113,18 @@
   color: var(--lg-text-muted);
 }
 
-.checkboxCell { width: 50px; text-align: center; }
-.codeCell { width: 110px; font-family: ui-monospace, Menlo, monospace; color: var(--lg-text); }
-.centerCell { text-align: center; }
+.checkboxCell {
+  width: 50px;
+  text-align: center;
+}
+.codeCell {
+  width: 110px;
+  font-family: ui-monospace, Menlo, monospace;
+  color: var(--lg-text);
+}
+.centerCell {
+  text-align: center;
+}
 
 .headerCell {
   font-weight: 700;
@@ -112,7 +132,9 @@
   text-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
 }
 
-.table tbody tr:last-child td { border-bottom: none; }
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
 
 /* Row states */
 .rowEven,
@@ -120,8 +142,12 @@
   cursor: pointer;
   transition: background-color var(--lg-fast) var(--lg-ease);
 }
-.rowEven { background: rgba(255, 255, 255, 0.015); }
-.rowOdd  { background: rgba(255, 255, 255, 0.04); }
+.rowEven {
+  background: rgba(255, 255, 255, 0.015);
+}
+.rowOdd {
+  background: rgba(255, 255, 255, 0.04);
+}
 
 .rowEven:hover,
 .rowOdd:hover {
@@ -130,33 +156,37 @@
 
 .rowSelected {
   cursor: pointer;
-  background: linear-gradient(180deg,
-      rgba(94, 234, 212, 0.20),
-      rgba(129, 140, 248, 0.14));
+  background: linear-gradient(
+    180deg,
+    rgba(94, 234, 212, 0.2),
+    rgba(129, 140, 248, 0.14)
+  );
   box-shadow: inset 3px 0 0 var(--lg-accent-1);
 }
 .rowSelected:hover {
-  background: linear-gradient(180deg,
-      rgba(94, 234, 212, 0.26),
-      rgba(129, 140, 248, 0.18));
+  background: linear-gradient(
+    180deg,
+    rgba(94, 234, 212, 0.26),
+    rgba(129, 140, 248, 0.18)
+  );
 }
 
 /* ---- Footer button group ---- */
 .buttonGroup {
+  margin-top: 16px;
   display: flex;
   gap: 10px;
-  margin-top: 14px;
-  position: sticky;
-  bottom: -16px;
-  padding: 10px 0;
-  background: linear-gradient(180deg,
-      transparent,
-      rgba(10, 14, 26, 0.6) 40%);
-  backdrop-filter: blur(4px);
 }
 
-.closeButton { margin-bottom: 14px; align-self: flex-start; }
+.closeButton {
+  margin-bottom: 14px;
+  align-self: flex-start;
+}
 
 @media (prefers-reduced-motion: reduce) {
-  .rowEven, .rowOdd, .rowSelected { transition: none; }
+  .rowEven,
+  .rowOdd,
+  .rowSelected {
+    transition: none;
+  }
 }

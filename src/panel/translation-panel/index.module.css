@@ -16,9 +16,10 @@
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: var(--lg-radius-sm);
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05) inset;
-  transition: border-color var(--lg-fast) var(--lg-ease),
-              box-shadow var(--lg-fast) var(--lg-ease),
-              background-color var(--lg-fast) var(--lg-ease);
+  transition:
+    border-color var(--lg-fast) var(--lg-ease),
+    box-shadow var(--lg-fast) var(--lg-ease),
+    background-color var(--lg-fast) var(--lg-ease);
 }
 .transTemplate:focus {
   outline: none;
@@ -48,9 +49,11 @@
   letter-spacing: 0.02em;
   color: var(--lg-text);
   border-radius: var(--lg-radius-pill);
-  background: linear-gradient(180deg,
-      rgba(129, 140, 248, 0.22),
-      rgba(129, 140, 248, 0.08));
+  background: linear-gradient(
+    180deg,
+    rgba(129, 140, 248, 0.22),
+    rgba(129, 140, 248, 0.08)
+  );
   border: 1px solid rgba(129, 140, 248, 0.35);
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.18) inset;
 }
@@ -72,23 +75,29 @@
   border: 1px solid rgba(94, 234, 212, 0.6);
   border-radius: var(--lg-radius-pill);
   background: linear-gradient(135deg, var(--lg-accent-1), var(--lg-accent-2));
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.4) inset,
-              0 10px 24px -10px rgba(94, 234, 212, 0.6);
-  transition: transform var(--lg-fast) var(--lg-ease),
-              box-shadow var(--lg-fast) var(--lg-ease),
-              filter var(--lg-fast) var(--lg-ease);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.4) inset,
+    0 10px 24px -10px rgba(94, 234, 212, 0.6);
+  transition:
+    transform var(--lg-fast) var(--lg-ease),
+    box-shadow var(--lg-fast) var(--lg-ease),
+    filter var(--lg-fast) var(--lg-ease);
 }
 .templateGeneratorButton:hover {
   transform: translateY(-1px);
   filter: brightness(1.08);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset,
-              0 14px 30px -10px rgba(129, 140, 248, 0.7);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.5) inset,
+    0 14px 30px -10px rgba(129, 140, 248, 0.7);
 }
-.templateGeneratorButton:active { transform: translateY(0) scale(0.98); }
+.templateGeneratorButton:active {
+  transform: translateY(0) scale(0.98);
+}
 .templateGeneratorButton:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(94, 234, 212, 0.35),
-              0 1px 0 rgba(255, 255, 255, 0.4) inset;
+  box-shadow:
+    0 0 0 3px rgba(94, 234, 212, 0.35),
+    0 1px 0 rgba(255, 255, 255, 0.4) inset;
 }
 
 /* ---- Native <dialog> turned into a liquid glass modal ---- */
