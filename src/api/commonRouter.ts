@@ -67,7 +67,7 @@ export const translateRouter = async (data: { text: string }) => {
             thinking: {
               type: "disabled",
             },
-            reasoning_effort: "none",
+            // reasoning_effort: "none",
           },
         }),
       ),
@@ -101,7 +101,7 @@ export const translateRouter = async (data: { text: string }) => {
         thinking: {
           type: "disabled",
         },
-        reasoning_effort: "none",
+        // reasoning_effort: "none",
       },
     });
     rawContent =
@@ -158,7 +158,7 @@ export const transcriptionRouter = async (data: {
         thinking: {
           type: "disabled",
         },
-        reasoning_effort: "none",
+        // reasoning_effort: "none",
       },
     });
     const rawContent =
