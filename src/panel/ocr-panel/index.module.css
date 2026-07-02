@@ -1,8 +1,24 @@
+/* ============================================================
+   ocr-panel
+   ============================================================ */
+
 .btnCon {
-  margin-bottom: 10px;
+  position: relative;
+  z-index: 2;
+  margin-bottom: 12px;
 }
+
 .logContainer {
+  position: relative;
+  z-index: 2;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 10px 12px;
+  border-radius: var(--lg-radius-sm);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  color: var(--lg-text-muted);
+  font-size: 13px;
 }

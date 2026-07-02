@@ -1,5 +1,13 @@
+/* ============================================================
+   file-share-panel
+   ============================================================ */
+
 .btnCon {
-  margin-bottom: 10px;
+  position: relative;
+  z-index: 2;
+  margin-bottom: 12px;
   display: flex;
-  gap: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
 }

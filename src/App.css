@@ -1,11 +1,294 @@
-.container {
-  /* width: 450px; */
-  padding: 0 5px;
-  margin: 0 auto;
+/* ============================================================
+   Liquid Glass · Global Stage
+   ------------------------------------------------------------
+   Pure CSS (no external assets). Layers:
+   1. Base dark canvas
+   2. Slowly drifting aurora light-blobs (animated radial gradients)
+   3. Fine grain/noise via layered subtle gradients
+   4. Scrollbar + form-control polish for native elements
+   5. prefers-reduced-motion safety net
+   ============================================================ */
+
+:root {
+  /* ---- Core palette (cool midnight) ---- */
+  --lg-bg-0: #05070d;
+  --lg-bg-1: #0a0e1a;
+  --lg-bg-2: #111726;
+
+  /* Glass surface tokens */
+  --glass-tint: 255, 255, 255;        /* white tint */
+  --glass-alpha: 0.06;                /* base fill */
+  --glass-alpha-hi: 0.12;             /* hover/elevated */
+  --glass-border: 255, 255, 255;
+  --glass-border-alpha: 0.18;
+  --glass-highlight: 255, 255, 255;
+
+  /* Text scale */
+  --lg-text: rgba(240, 244, 255, 0.96);
+  --lg-text-muted: rgba(214, 222, 240, 0.62);
+  --lg-text-faint: rgba(200, 210, 232, 0.40);
+
+  /* Accent (a soft cyan→violet gradient is reused across UI) */
+  --lg-accent-1: #5eead4;   /* teal */
+  --lg-accent-2: #818cf8;   /* indigo */
+  --lg-accent-3: #c084fc;   /* violet */
+
+  /* Status */
+  --lg-ok: #34d399;
+  --lg-warn: #fbbf24;
+  --lg-err: #f87171;
+
+  /* Radii */
+  --lg-radius: 18px;
+  --lg-radius-sm: 12px;
+  --lg-radius-pill: 999px;
+
+  /* Shadow */
+  --lg-shadow-soft: 0 1px 0 rgba(255, 255, 255, 0.06) inset,
+                    0 10px 30px -12px rgba(0, 0, 0, 0.65);
+  --lg-shadow-pop: 0 1px 0 rgba(255, 255, 255, 0.10) inset,
+                   0 20px 50px -15px rgba(0, 0, 0, 0.75);
+
+  /* Motion */
+  --lg-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --lg-fast: 160ms;
+  --lg-med: 280ms;
+  --lg-slow: 900ms;
+
+  color-scheme: dark;
 }
+
+html,
+body {
+  height: 100%;
+}
+
 html body {
-  /* background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); */
   margin: env(safe-area-inset-top) env(safe-area-inset-right)
     env(safe-area-inset-bottom) env(safe-area-inset-left);
-  height: 100vh;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+
+  color: var(--lg-text);
+
+  /* Base vertical wash */
+  background-color: var(--lg-bg-0);
+  background-image:
+    linear-gradient(180deg, var(--lg-bg-1) 0%, var(--lg-bg-0) 55%, var(--lg-bg-2) 100%);
+
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI",
+    "PingFang SC", "Hiragino Sans", "Microsoft YaHei", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* ---- Drifting aurora light-blobs (the "liquid" atmosphere) ---- */
+body::before {
+  content: "";
+  position: fixed;
+  inset: -20vmax;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(38vmax 38vmax at 18% 22%, rgba(94, 234, 212, 0.18), transparent 60%),
+    radial-gradient(42vmax 42vmax at 82% 18%, rgba(129, 140, 248, 0.20), transparent 62%),
+    radial-gradient(46vmax 46vmax at 70% 88%, rgba(192, 132, 252, 0.16), transparent 64%),
+    radial-gradient(30vmax 30vmax at 12% 78%, rgba(56, 189, 248, 0.12), transparent 60%);
+  filter: saturate(120%) blur(8px);
+  animation: lg-aurora 28s var(--lg-ease) infinite alternate;
+}
+
+/* ---- Fine grain/sheen overlay ---- */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, transparent 12%),
+    repeating-linear-gradient(45deg,
+      rgba(255, 255, 255, 0.012) 0px,
+      rgba(255, 255, 255, 0.012) 1px,
+      transparent 1px,
+      transparent 3px);
+  mix-blend-mode: overlay;
+  opacity: 0.55;
+}
+
+@keyframes lg-aurora {
+  0%   { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
+  50%  { transform: translate3d(-2%, 1.5%, 0) rotate(2deg) scale(1.04); }
+  100% { transform: translate3d(2.5%, -2%, 0) rotate(-2deg) scale(1.02); }
+}
+
+/* ---- Stage container: keeps panels above the aurora ---- */
+.container {
+  position: relative;
+  z-index: 1;
+  padding: 0 6px;
+  margin: 0 auto;
+  max-width: 560px;
+}
+
+/* ============================================================
+   Scrollbars — thin, frosted, macOS-like
+   ============================================================ */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, 0.28),
+    rgba(255, 255, 255, 0.12));
+  border-radius: var(--lg-radius-pill);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, 0.42),
+    rgba(255, 255, 255, 0.20));
+  background-clip: padding-box;
+}
+
+/* ============================================================
+   Global native form-control polish (selects, inputs, textareas)
+   These complement the CSS-module classes; they target elements
+   so panels without explicit classes still inherit the look.
+   ============================================================ */
+input,
+textarea,
+select {
+  font-family: inherit;
+  color: var(--lg-text);
+  background-color: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--lg-radius-sm);
+  transition: border-color var(--lg-fast) var(--lg-ease),
+              box-shadow var(--lg-fast) var(--lg-ease),
+              background-color var(--lg-fast) var(--lg-ease);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--lg-text-faint);
+}
+
+input:hover,
+textarea:hover,
+select:hover {
+  border-color: rgba(255, 255, 255, 0.24);
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: rgba(129, 140, 248, 0.65);
+  background-color: rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 0 0 3px rgba(129, 140, 248, 0.18),
+    0 0 0 1px rgba(129, 140, 248, 0.35) inset;
+}
+
+input:disabled,
+textarea:disabled,
+select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: saturate(0.6);
+}
+
+/* Native select arrow: a subtle frosted chevron via SVG data-uri */
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23cdd6f4' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 34px;
+}
+
+select option {
+  background-color: var(--lg-bg-2);
+  color: var(--lg-text);
+}
+
+/* Checkboxes: a quiet glass pill, accent-tinted when checked */
+input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+  display: inline-grid;
+  place-content: center;
+  cursor: pointer;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  transition: background-color var(--lg-fast) var(--lg-ease),
+              border-color var(--lg-fast) var(--lg-ease);
+}
+input[type="checkbox"]::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  transform: scale(0);
+  transition: transform var(--lg-fast) var(--lg-ease);
+  border-radius: 3px;
+  background: linear-gradient(135deg, var(--lg-accent-1), var(--lg-accent-2));
+  box-shadow: 0 0 8px rgba(94, 234, 212, 0.6);
+}
+input[type="checkbox"]:checked {
+  background-color: rgba(129, 140, 248, 0.18);
+  border-color: rgba(129, 140, 248, 0.55);
+}
+input[type="checkbox"]:checked::before {
+  transform: scale(1);
+}
+
+/* ---- Global anchor/link touch-up (e.g. initBtn uses <a>) ---- */
+a {
+  color: var(--lg-accent-1);
+  transition: color var(--lg-fast) var(--lg-ease);
+}
+
+/* ============================================================
+   Reduced motion: freeze the aurora, keep everything legible
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  body::before {
+    animation: none;
+  }
+}
+
+/* ============================================================
+   Fallback: if backdrop-filter is unsupported, lift the opacity
+   so glass surfaces remain readable.
+   ============================================================ */
+@supports not ((backdrop-filter: blur(10px)) or (-webkit-backdrop-filter: blur(10px))) {
+  :root {
+    --glass-alpha: 0.20;
+    --glass-alpha-hi: 0.30;
+  }
 }

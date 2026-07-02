@@ -1,40 +1,100 @@
+/* ============================================================
+   audio-panel — glass buttons, glowing status orb, manual input
+   ============================================================ */
+
 .buttongroup {
+  position: relative;
+  z-index: 2;
   display: flex;
-  /* justify-content: space-between; */
-  gap: 1rem;
-  margin-bottom: 15px;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 16px;
 }
 
+/* ---- Status orb: pulsing glow that changes hue per state ---- */
 .statusIndicator {
   display: inline-block;
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  margin-right: 8px;
+  margin-right: 10px;
+  position: relative;
+  background: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25) inset;
+  transition: background-color var(--lg-med) var(--lg-ease),
+              box-shadow var(--lg-med) var(--lg-ease);
+}
+
+/* the soft halo behind the orb */
+.statusIndicator::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  background: inherit;
+  opacity: 0.55;
+  filter: blur(6px);
+  z-index: -1;
+  animation: lg-breathe 2.4s var(--lg-ease) infinite;
 }
 
 .statusSpeaking {
-  background-color: #23d441;
+  background: radial-gradient(circle at 30% 30%, #6ee7b7, var(--lg-ok));
+  box-shadow: 0 0 0 1px rgba(52, 211, 153, 0.5) inset,
+              0 0 10px rgba(52, 211, 153, 0.7);
 }
 .statusPausing {
-  background-color: #f6c23e;
+  background: radial-gradient(circle at 30% 30%, #fde68a, var(--lg-warn));
+  box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.5) inset,
+              0 0 8px rgba(251, 191, 36, 0.55);
+}
+.statusInactive {
+  background: radial-gradient(circle at 30% 30%, #fca5a5, var(--lg-err));
+  box-shadow: 0 0 0 1px rgba(248, 113, 113, 0.45) inset,
+              0 0 8px rgba(248, 113, 113, 0.5);
+  animation: none;
+}
+.statusInactive::after { animation: none; opacity: 0.35; }
+
+@keyframes lg-breathe {
+  0%, 100% { transform: scale(1);    opacity: 0.55; }
+  50%      { transform: scale(1.35); opacity: 0.2; }
 }
 
-.statusInactive {
-  background-color: #e53e3e;
-}
 .recordingStatus {
+  position: relative;
+  z-index: 2;
   display: flex;
   align-items: center;
-  margin-top: 10px;
+  margin-top: 12px;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--lg-text-muted);
+  border-radius: var(--lg-radius-sm);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
+/* ---- Manual input row ---- */
 .manualInput {
+  position: relative;
+  z-index: 2;
   display: flex;
   gap: 0.5rem;
-  margin-top: 10px;
+  margin-top: 12px;
+  flex-wrap: wrap;
 }
 
 .manualInput input {
-  flex: 1;
+  flex: 1 1 160px;
+  min-width: 0;
+}
+
+.manualInput button {
+  flex: 0 0 auto;
+}
+
+/* ---- Narrow screens ---- */
+@media (max-width: 360px) {
+  .buttongroup .button { flex: 1 1 auto; }
 }

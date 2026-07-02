@@ -1,35 +1,85 @@
+/* ============================================================
+   setting-panel — table, checkbox rows, init link
+   ============================================================ */
+
 .initBtn {
-  font-size: xx-small;
-  color: blue;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--lg-accent-1);
   text-decoration: underline;
+  text-underline-offset: 3px;
   cursor: pointer;
+  opacity: 0.85;
+  transition: opacity var(--lg-fast) var(--lg-ease),
+              color var(--lg-fast) var(--lg-ease);
+}
+.initBtn:hover {
+  opacity: 1;
+  color: var(--lg-accent-2);
 }
 
+/* ---- Local model table: dark glass grid ---- */
 .localModelTable {
-  border-collapse: collapse;
-  font-size: small;
-  margin-bottom: 12px;
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 12px;
+  margin: 10px 0 14px;
+  border-radius: var(--lg-radius-sm);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .localModelTh,
 .localModelTd {
-  border: 1px solid #ccc;
-  padding: 4px 8px;
+  padding: 6px 10px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  color: var(--lg-text-muted);
 }
 
+.localModelTh {
+  font-weight: 700;
+  color: var(--lg-text);
+  background: linear-gradient(180deg,
+      rgba(129, 140, 248, 0.16),
+      rgba(129, 140, 248, 0.04));
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
+}
+.localModelTable tbody tr:last-child .localModelTd {
+  border-bottom: none;
+}
+.localModelTable tbody tr:hover .localModelTd {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* ---- Checkbox rows ---- */
 .checkboxRow {
+  position: relative;
+  z-index: 2;
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding: 6px 8px;
+  border-radius: var(--lg-radius-sm);
+  transition: background-color var(--lg-fast) var(--lg-ease);
+}
+.checkboxRow:hover {
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .checkboxRow input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
 }
 
 .checkboxHint {
   font-size: 12px;
-  color: #666;
+  color: var(--lg-text-faint);
+  line-height: 1.4;
 }

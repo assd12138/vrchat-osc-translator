@@ -1,53 +1,239 @@
+/* ============================================================
+   styles/index.module.css — shared Liquid Glass primitives
+   Exports (must stay identical for TSX consumers):
+     .panel  .title  .button  .labelS  .selectS  .inputS  .input
+   (.input is an alias added for audio-panel which references
+    globalStyles.input; pure CSS, no TSX change required.)
+   ============================================================ */
+
+/* ---- Reusable glass surface ---- */
 .panel {
-  padding: 20px 20px;
-  margin: 0 auto;
-  background: #f7fafc;
-  border-radius: 15px;
-  border: 1px solid #e2e8f0;
-  margin-bottom: 25px;
-  /* margin-top: 8px; */
+  position: relative;
+  padding: 20px;
+  margin: 0 auto 22px;
+  border-radius: var(--lg-radius);
+  background: linear-gradient(
+      135deg,
+      rgba(var(--glass-tint), var(--glass-alpha-hi)) 0%,
+      rgba(var(--glass-tint), var(--glass-alpha)) 100%
+    );
+  border: 1px solid rgba(var(--glass-border), var(--glass-border-alpha));
+  box-shadow: var(--lg-shadow-soft);
+
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  backdrop-filter: blur(22px) saturate(160%);
+
+  /* subtle top inner-highlight to sell the glass */
+  isolation: isolate;
+  overflow: hidden;
 }
 
+/* Specular sheen across the top edge + moving shine on hover */
+.panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+      180deg,
+      rgba(var(--glass-highlight), 0.55),
+      rgba(var(--glass-highlight), 0.06) 18%,
+      transparent 35%
+    ),
+    linear-gradient(180deg, transparent 65%, rgba(0, 0, 0, 0.25));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Diagonal moving highlight, only on hover */
+.panel::after {
+  content: "";
+  position: absolute;
+  top: -60%;
+  left: -40%;
+  width: 60%;
+  height: 220%;
+  background: linear-gradient(
+    100deg,
+    transparent,
+    rgba(255, 255, 255, 0.10) 50%,
+    transparent
+  );
+  transform: translateX(-120%) rotate(8deg);
+  transition: transform var(--lg-slow) var(--lg-ease);
+  pointer-events: none;
+  z-index: 0;
+}
+.panel:hover::after {
+  transform: translateX(320%) rotate(8deg);
+}
+
+/* ---- Title ---- */
 .title {
-  font-weight: bold;
-  margin-bottom: 10px;
+  position: relative;
+  z-index: 2;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.01em;
+  margin: 0 0 14px;
+  color: var(--lg-text);
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  /* faint accent underline that reads as "etched" */
+  background: linear-gradient(90deg,
+      rgba(255, 255, 255, 0.9),
+      rgba(214, 222, 240, 0.6) 60%,
+      transparent);
+  -webkit-background-clip: text;
+  background-clip: text;
 }
 
+/* ---- Button (liquid glass pill) ---- */
 .button {
-  background: #fff;
-  /* color: white; */
-  border: 1px solid rgb(192, 194, 199);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   padding: 8px 20px;
-  border-radius: 4px;
-  cursor: pointer;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--lg-text);
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: var(--lg-radius-pill);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04));
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.22) inset,
+    0 -1px 0 rgba(0, 0, 0, 0.25) inset,
+    0 6px 16px -8px rgba(0, 0, 0, 0.6);
+  transition: transform var(--lg-fast) var(--lg-ease),
+              border-color var(--lg-fast) var(--lg-ease),
+              background-color var(--lg-fast) var(--lg-ease),
+              box-shadow var(--lg-fast) var(--lg-ease),
+              filter var(--lg-fast) var(--lg-ease);
+  overflow: hidden;
+}
+
+/* moving specular shine */
+.button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.35) 50%,
+    transparent 70%
+  );
+  transform: translateX(-130%);
+  transition: transform var(--lg-med) var(--lg-ease);
+  pointer-events: none;
 }
 
 .button:hover {
-  border-color: #111;
+  border-color: rgba(255, 255, 255, 0.34);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.08));
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.3) inset,
+    0 -1px 0 rgba(0, 0, 0, 0.3) inset,
+    0 10px 22px -10px rgba(129, 140, 248, 0.55);
+  transform: translateY(-1px);
+}
+.button:hover::before {
+  transform: translateX(130%);
 }
 
+.button:active {
+  transform: translateY(0) scale(0.985);
+  box-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.3) inset,
+    0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+}
+
+.button:focus-visible {
+  outline: none;
+  border-color: rgba(129, 140, 248, 0.75);
+  box-shadow:
+    0 0 0 3px rgba(129, 140, 248, 0.28),
+    0 1px 0 rgba(255, 255, 255, 0.22) inset;
+}
+
+.button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  filter: saturate(0.4) brightness(0.85);
+  transform: none;
+  box-shadow: none;
+}
+.button:disabled::before {
+  display: none;
+}
+
+/* ---- Label ---- */
 .labelS {
   display: block;
-  margin-bottom: 5px;
+  margin: 6px 0 6px;
   font-weight: 600;
-  color: #4a5568;
-  font-size: 16px;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  color: var(--lg-text-muted);
+  text-transform: none;
 }
 
+/* ---- Select ---- */
 .selectS {
-  margin-bottom: 10px;
+  position: relative;
+  z-index: 2;
   width: 100%;
-  height: 30px;
-  font-size: 16px;
+  height: 38px;
+  margin-bottom: 12px;
+  padding: 0 34px 0 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--lg-text);
   box-sizing: border-box;
+  border-radius: var(--lg-radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background-color: rgba(255, 255, 255, 0.05);
+  /* arrow handled globally in App.css */
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset;
 }
 
-.inputS {
+/* ---- Inputs ---- */
+.inputS,
+.input {
+  position: relative;
+  z-index: 2;
   width: 100%;
-  height: 30px;
-  margin-bottom: 10px;
-  font-size: 16px;
+  height: 38px;
+  margin-bottom: 12px;
+  padding: 0 12px;
+  font-size: 14px;
+  color: var(--lg-text);
   box-sizing: border-box;
+  border-radius: var(--lg-radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background-color: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset;
+}
+
+/* .input = explicit alias so audio-panel's globalStyles.input resolves */
+.input {
+  margin-bottom: 0;
+}
+
+/* ---- Responsive guard: prevent control crush on narrow widths ---- */
+@media (max-width: 360px) {
+  .panel { padding: 16px; }
+  .button { padding: 8px 14px; font-size: 13px; }
+  .selectS, .inputS, .input { font-size: 13px; }
 }
