@@ -11,7 +11,6 @@ declare global {
 
 export enum NATIVE_COMMAND {
   SEND_TO_VRC_CHAT = "send_to_vrc_chat",
-  UPLOAD_OSS = "upload_oss",
   /** 仅electron */
   OPEN_EXTERNAL = "open_external",
 }
@@ -20,22 +19,12 @@ export enum NATIVE_COMMAND {
 interface CommandArgsMap {
   [NATIVE_COMMAND.SEND_TO_VRC_CHAT]: SEND_TO_VRC_CHAT_REQUEST;
   [NATIVE_COMMAND.OPEN_EXTERNAL]: OPEN_EXTERNAL_REQUEST;
-  [NATIVE_COMMAND.UPLOAD_OSS]: OSS_UPLOAD_REQUEST;
 }
 
 // 命令返回值类型映射
 interface CommandReturnMap {
   [NATIVE_COMMAND.SEND_TO_VRC_CHAT]: undefined;
   [NATIVE_COMMAND.OPEN_EXTERNAL]: undefined;
-  [NATIVE_COMMAND.UPLOAD_OSS]: string;
-}
-
-interface OSS_UPLOAD_REQUEST extends Record<string, string> {
-  region: string;
-  endpoint: string;
-  ak: string;
-  sk: string;
-  bucket: string;
 }
 
 interface SEND_TO_VRC_CHAT_REQUEST extends Record<string, string> {

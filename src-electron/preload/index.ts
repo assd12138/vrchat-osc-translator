@@ -5,7 +5,7 @@ import { camelToSnake } from "../shared/utils";
 const ipcApi: Record<string, any> = {};
 
 // 定义要暴露的 API 函数名列表 (驼峰式)
-const apiFunctions = ["open_external", "send_to_vrc_chat", "upload_oss"];
+const apiFunctions = ["open_external", "send_to_vrc_chat"];
 
 // 动态生成 API 对象
 apiFunctions.forEach((funcName) => {

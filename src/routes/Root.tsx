@@ -1,5 +1,4 @@
 import Audiopanel from "@/panel/audio-panel";
-import FileSharePanel from "@/panel/file-share-panel";
 import Ocrpanel from "@/panel/ocr-panel";
 import Settingpanel from "@/panel/setting-panel";
 import Systemlog from "@/panel/system-log";
@@ -13,7 +12,6 @@ export default function Root() {
       <Settingpanel />
       <Systemlog />
       <Ocrpanel />
-      <FileSharePanel />
     </div>
   );
 }
