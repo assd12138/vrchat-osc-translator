@@ -28,7 +28,7 @@
   overflow: hidden;
 }
 
-/* Specular sheen across the top edge + moving shine on hover */
+/* Specular sheen across the top edge */
 .panel::before {
   content: "";
   position: absolute;
@@ -50,29 +50,6 @@
   mask-composite: exclude;
   pointer-events: none;
   z-index: 1;
-}
-
-/* Diagonal moving highlight, only on hover */
-.panel::after {
-  content: "";
-  position: absolute;
-  top: -60%;
-  left: -40%;
-  width: 60%;
-  height: 220%;
-  background: linear-gradient(
-    100deg,
-    transparent,
-    rgba(255, 255, 255, 0.1) 50%,
-    transparent
-  );
-  transform: translateX(-120%) rotate(8deg);
-  transition: transform var(--lg-slow) var(--lg-ease);
-  pointer-events: none;
-  z-index: 0;
-}
-.panel:hover::after {
-  transform: translateX(320%) rotate(8deg);
 }
 
 /* ---- Title ---- */
@@ -128,23 +105,6 @@
     background-color var(--lg-fast) var(--lg-ease),
     box-shadow var(--lg-fast) var(--lg-ease),
     filter var(--lg-fast) var(--lg-ease);
-  overflow: hidden;
-}
-
-/* moving specular shine */
-.button::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    100deg,
-    transparent 30%,
-    rgba(255, 255, 255, 0.35) 50%,
-    transparent 70%
-  );
-  transform: translateX(-130%);
-  transition: transform var(--lg-med) var(--lg-ease);
-  pointer-events: none;
 }
 
 .button:hover {
@@ -159,9 +119,6 @@
     0 -1px 0 rgba(0, 0, 0, 0.3) inset,
     0 10px 22px -10px rgba(129, 140, 248, 0.55);
   transform: translateY(-1px);
-}
-.button:hover::before {
-  transform: translateX(130%);
 }
 
 .button:active {
@@ -185,9 +142,6 @@
   filter: saturate(0.4) brightness(0.85);
   transform: none;
   box-shadow: none;
-}
-.button:disabled::before {
-  display: none;
 }
 
 /* ---- Label ---- */
