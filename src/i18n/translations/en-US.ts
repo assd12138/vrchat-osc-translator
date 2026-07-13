@@ -60,4 +60,5 @@ export default {
   "翻译中...": "Translating...",
   翻译发送: "Translate & Send",
   携带音频类型信息: "Include audio type information",
+  获取麦克风: "Get Microphone",
 };

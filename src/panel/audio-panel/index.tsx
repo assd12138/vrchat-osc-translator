@@ -166,22 +166,30 @@ export default function AudioPanel() {
     window.location.reload();
   };
 
-  useEffect(() => {
-    const load = async () => {
-      const devices = await loadMicDevices();
-      setDeviceId(
-        devices.find((item) => item.deviceId === "default")?.deviceId || "",
-      );
-      setMicDevices(devices);
-    };
-    load();
-  }, []);
+  // useEffect(() => {
+  //   const load = async () => {
+  //     const devices = await loadMicDevices();
+  //     setDeviceId(
+  //       devices.find((item) => item.deviceId === "default")?.deviceId || "",
+  //     );
+  //     setMicDevices(devices);
+  //   };
+  //   load();
+  // }, []);
 
   // 手动输入的文本
   const [manualText, setManualText] = useState("");
   // 是否正在翻译中
   const [translating, setTranslating] = useState(false);
 
+  const getDeviceManually = async () => {
+    await navigator.mediaDevices.getUserMedia({ audio: true });
+    const devices = await loadMicDevices();
+    setDeviceId(
+      devices.find((item) => item.deviceId === "default")?.deviceId || "",
+    );
+    setMicDevices(devices);
+  };
   const handleManualTranslate = async () => {
     if (!manualText.trim() || translating) return;
 
@@ -226,7 +234,9 @@ export default function AudioPanel() {
         <button onClick={refresh} className={globalStyles.button}>
           {t("刷新")}
         </button>
-        {/* <button onClick={test}>test</button> */}
+        <button onClick={getDeviceManually} className={globalStyles.button}>
+          {t("获取麦克风")}
+        </button>
       </div>
       <div>
         <select
