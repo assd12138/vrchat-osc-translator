@@ -2,6 +2,7 @@ import { MicVAD } from "@ricky0123/vad-web";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { transcriptionRouter, translateRouter } from "@/api/commonRouter";
+import { RUNTIME, runtime } from "@/cross-platform/environmentDetect";
 import { EApiProviderType } from "@/store/rehydrate/rehydrate-constant";
 import store from "@/store/store";
 import { loadMicDevices } from "@/utils";
@@ -166,16 +167,18 @@ export default function AudioPanel() {
     window.location.reload();
   };
 
-  // useEffect(() => {
-  //   const load = async () => {
-  //     const devices = await loadMicDevices();
-  //     setDeviceId(
-  //       devices.find((item) => item.deviceId === "default")?.deviceId || "",
-  //     );
-  //     setMicDevices(devices);
-  //   };
-  //   load();
-  // }, []);
+  useEffect(() => {
+    const load = async () => {
+      const devices = await loadMicDevices();
+      setDeviceId(
+        devices.find((item) => item.deviceId === "default")?.deviceId || "",
+      );
+      setMicDevices(devices);
+    };
+    if (runtime === RUNTIME.ELECTRON) {
+      load();
+    }
+  }, []);
 
   // 手动输入的文本
   const [manualText, setManualText] = useState("");
@@ -234,9 +237,11 @@ export default function AudioPanel() {
         <button onClick={refresh} className={globalStyles.button}>
           {t("刷新")}
         </button>
-        <button onClick={getDeviceManually} className={globalStyles.button}>
-          {t("获取麦克风")}
-        </button>
+        {[RUNTIME.TAURI, RUNTIME.WEB].includes(runtime) && (
+          <button onClick={getDeviceManually} className={globalStyles.button}>
+            {t("获取麦克风")}
+          </button>
+        )}
       </div>
       <div>
         <select

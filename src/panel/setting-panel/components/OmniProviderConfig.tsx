@@ -1,10 +1,10 @@
 import { useTranslation } from "react-i18next";
 import { useAppDispatch, useAppSelector } from "../../../store/hook";
 import {
+  setOmniKeepAudioType,
   setOpenaiApiUrl,
   setOpenaiModel,
   setOpenaiToken,
-  setOmniKeepAudioType,
 } from "../../../store/settings";
 import globalStyles from "../../../styles/index.module.css";
 
