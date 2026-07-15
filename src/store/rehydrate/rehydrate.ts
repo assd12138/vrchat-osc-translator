@@ -7,6 +7,7 @@ import {
   setOpenaiModel,
   setOpenaiToken,
   setOutputTemplate,
+  setTheme,
   setTranscriptionModel,
   setTranscriptionToken,
   setTranscriptionUrl,
@@ -28,6 +29,7 @@ export const rehydrateMapper = {
   [REHYDRATE_KEYS.SETTING_OPENAI_MODEL]: setOpenaiModel,
   [REHYDRATE_KEYS.SETTING_OPENAI_TOKEN]: setOpenaiToken,
   [REHYDRATE_KEYS.SETTING_LANGUAGE]: setLanguage,
+  [REHYDRATE_KEYS.SETTING_THEME]: setTheme,
   [REHYDRATE_KEYS.SETTING_API_PROVIDER_TYPE]: setApiProviderType,
   [REHYDRATE_KEYS.SETTING_OMNI_KEEP_AUDIO_TYPE]: setOmniKeepAudioType,
 };
@@ -40,7 +42,7 @@ export function rehydrate() {
   for (const key in rehydrateMapper) {
     const setter = rehydrateMapper[key];
     if (obj[key]) {
-      store.dispatch(setter(obj[key]));
+      store.dispatch(setter(obj[key] as never));
     }
   }
   // 初始化已完成

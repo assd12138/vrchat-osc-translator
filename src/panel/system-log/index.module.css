@@ -38,3 +38,36 @@
 .logItem:last-child {
   border-bottom: none;
 }
+
+/* ---- Default theme ---- */
+[data-theme="default"] .logContainer {
+  color: #344255;
+  background: #f6f8fa;
+  border-color: #d4dce5;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+[data-theme="default"] .logItem {
+  border-bottom-color: #e1e6ec;
+}
+
+/* ---- Hand-drawn theme ---- */
+[data-theme="hand-drawn"] .logContainer {
+  color: var(--ink-medium);
+  background: var(--lg-bg-1);
+  border: 1px solid var(--ink-light);
+  border-radius: 7px 9px 6px 8px;
+  box-shadow: 3px 4px 0 -2px rgba(45, 58, 71, 0.08);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+[data-theme="hand-drawn"] .logItem {
+  border-bottom: 1px dashed rgba(107, 122, 136, 0.2);
+}
+
+[data-theme="hand-drawn"] .logItem:last-child {
+  border-bottom: none;
+}

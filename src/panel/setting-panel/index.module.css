@@ -86,3 +86,103 @@
   color: var(--lg-text-faint);
   line-height: 1.4;
 }
+
+/* ---- Default theme ---- */
+[data-theme="default"] .initBtn {
+  color: var(--lg-accent-1);
+}
+
+[data-theme="default"] .initBtn:hover {
+  color: #115aa7;
+}
+
+[data-theme="default"] .localModelTable {
+  border-color: #d1d9e3;
+  background: #ffffff;
+}
+
+[data-theme="default"] .localModelTh,
+[data-theme="default"] .localModelTd {
+  color: var(--lg-text-muted);
+  border-bottom-color: #e0e6ed;
+}
+
+[data-theme="default"] .localModelTh {
+  color: var(--lg-text);
+  background: #edf3f8;
+  text-shadow: none;
+}
+
+[data-theme="default"] .localModelTable tbody tr:hover .localModelTd {
+  background: #f3f7fa;
+}
+
+[data-theme="default"] .checkboxRow:hover {
+  background: #f3f6f9;
+}
+
+[data-theme="default"] .checkboxRow {
+  transition: none;
+}
+
+[data-theme="default"] .checkboxHint {
+  color: var(--lg-text-faint);
+}
+
+/* ---- Hand-drawn theme ---- */
+[data-theme="hand-drawn"] .initBtn {
+  color: var(--lg-accent-1);
+  text-decoration-color: var(--ink-light);
+}
+
+[data-theme="hand-drawn"] .initBtn:hover {
+  color: var(--lg-accent-2);
+  text-decoration-color: var(--ink-medium);
+}
+
+[data-theme="hand-drawn"] .localModelTable {
+  border: 1.5px solid var(--ink-medium);
+  border-radius: 6px 8px 5px 7px;
+  background: var(--lg-bg-1);
+  box-shadow: 2px 3px 0 -1px rgba(45, 58, 71, 0.08);
+}
+
+[data-theme="hand-drawn"] .localModelTh,
+[data-theme="hand-drawn"] .localModelTd {
+  color: var(--lg-text-muted);
+  border-bottom: 1px dashed rgba(107, 122, 136, 0.3);
+  padding: 6px 10px;
+}
+
+[data-theme="hand-drawn"] .localModelTh {
+  color: var(--ink-dark);
+  background: linear-gradient(90deg, var(--lg-bg-2), var(--lg-bg-1));
+  border-bottom: 1.5px solid var(--ink-light);
+  font-weight: 600;
+}
+
+[data-theme="hand-drawn"] .localModelTable tbody tr:last-child .localModelTd {
+  border-bottom: none;
+}
+
+[data-theme="hand-drawn"] .localModelTable tbody tr:hover .localModelTd {
+  background: rgba(245, 241, 235, 0.5);
+}
+
+[data-theme="hand-drawn"] .checkboxRow {
+  background: var(--lg-bg-1);
+  border: 1px solid var(--ink-light);
+  border-radius: 5px 7px 4px 6px;
+  box-shadow: 1px 2px 0 0 rgba(45, 58, 71, 0.04);
+  transition: none;
+}
+
+[data-theme="hand-drawn"] .checkboxRow:hover {
+  background: var(--lg-bg-0);
+  border-color: var(--ink-medium);
+}
+
+[data-theme="hand-drawn"] .checkboxHint {
+  color: var(--lg-text-faint);
+  font-style: italic;
+}

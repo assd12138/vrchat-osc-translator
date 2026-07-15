@@ -197,6 +197,191 @@
   margin-bottom: 0;
 }
 
+/* ---- Default theme: solid, familiar utility controls ---- */
+[data-theme="default"] .panel {
+  background: #ffffff;
+  border-color: #d5dce5;
+  box-shadow: var(--lg-shadow-soft);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+[data-theme="default"] .panel::before {
+  display: none;
+}
+
+[data-theme="default"] .title {
+  color: var(--lg-text);
+  background: none;
+}
+
+[data-theme="default"] .button {
+  color: #263445;
+  border-color: #bec9d6;
+  background: #f7f9fb;
+  box-shadow: none;
+  transition: none;
+}
+
+[data-theme="default"] .button:hover {
+  border-color: #8da4bd;
+  background: #eef4fa;
+  box-shadow: none;
+  transform: none;
+}
+
+[data-theme="default"] .button:active {
+  background: #e4edf6;
+  box-shadow: none;
+  transform: none;
+}
+
+[data-theme="default"] .button:focus-visible {
+  border-color: var(--lg-accent-1);
+  box-shadow: 0 0 0 3px rgba(23, 105, 194, 0.16);
+}
+
+[data-theme="default"] .button:disabled {
+  color: #7d8794;
+  background: #f0f2f5;
+  border-color: #d7dde5;
+  filter: none;
+}
+
+[data-theme="default"] .labelS {
+  color: var(--lg-text-muted);
+}
+
+[data-theme="default"] .selectS,
+[data-theme="default"] .inputS,
+[data-theme="default"] .input {
+  color: var(--lg-text);
+  background-color: #ffffff;
+  border-color: #c8d1dc;
+  box-shadow: none;
+}
+
+/* ---- Hand-drawn theme: warm paper + ink sketch ---- */
+[data-theme="hand-drawn"] .panel {
+  background: var(--lg-bg-1);
+  border: 1.5px solid var(--ink-medium);
+  border-radius: var(--lg-radius);
+  box-shadow: var(--lg-shadow-soft);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  position: relative;
+}
+
+/* Paper edge texture */
+[data-theme="hand-drawn"] .panel::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background:
+/* Top edge ink line */
+    linear-gradient(
+      90deg,
+      transparent 2%,
+      rgba(45, 58, 71, 0.03) 5%,
+      transparent 8%,
+      rgba(45, 58, 71, 0.02) 15%,
+      transparent 20%
+    ),
+    /* Right edge ink line */
+    linear-gradient(
+      0deg,
+      transparent 85%,
+      rgba(45, 58, 71, 0.04) 90%,
+      transparent 95%
+    );
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.6;
+}
+
+[data-theme="hand-drawn"] .title {
+  color: var(--ink-dark);
+  background: none;
+  font-weight: 600;
+  position: relative;
+  z-index: 2;
+}
+
+[data-theme="hand-drawn"] .title::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: 40%;
+  height: 1.5px;
+  background: var(--ink-medium);
+  border-radius: 2px 3px 1px 4px;
+}
+
+[data-theme="hand-drawn"] .button {
+  color: var(--ink-dark);
+  border: 1.5px solid var(--ink-medium);
+  border-radius: 10px 12px 8px 11px;
+  background: var(--lg-bg-1);
+  box-shadow: 2px 3px 0 -1px rgba(45, 58, 71, 0.1);
+  transition: none;
+}
+
+[data-theme="hand-drawn"] .button:hover {
+  border-color: var(--ink-dark);
+  background: var(--lg-bg-0);
+  box-shadow: 3px 4px 0 -1px rgba(45, 58, 71, 0.15);
+  transform: none;
+}
+
+[data-theme="hand-drawn"] .button:active {
+  background: var(--lg-bg-2);
+  box-shadow: 1px 2px 0 0 rgba(45, 58, 71, 0.1);
+  transform: none;
+}
+
+[data-theme="hand-drawn"] .button:focus-visible {
+  border-color: var(--lg-accent-1);
+  box-shadow: 2px 2px 0 0 rgba(107, 91, 60, 0.2);
+}
+
+[data-theme="hand-drawn"] .button:disabled {
+  color: var(--lg-text-faint);
+  background: var(--lg-bg-2);
+  border-color: var(--ink-light);
+  box-shadow: none;
+  filter: none;
+}
+
+[data-theme="hand-drawn"] .labelS {
+  color: var(--lg-text-muted);
+  font-weight: 600;
+}
+
+[data-theme="hand-drawn"] .selectS,
+[data-theme="hand-drawn"] .inputS,
+[data-theme="hand-drawn"] .input {
+  color: var(--lg-text);
+  background-color: var(--lg-bg-1);
+  border: 1.5px solid var(--ink-medium);
+  border-radius: 6px 8px 5px 7px;
+  box-shadow: none;
+}
+
+[data-theme="hand-drawn"] .selectS:hover,
+[data-theme="hand-drawn"] .inputS:hover,
+[data-theme="hand-drawn"] .input:hover {
+  border-color: var(--ink-dark);
+}
+
+[data-theme="hand-drawn"] .selectS:focus,
+[data-theme="hand-drawn"] .inputS:focus,
+[data-theme="hand-drawn"] .input:focus {
+  border-color: var(--ink-dark);
+  box-shadow: 2px 2px 0 -1px rgba(45, 58, 71, 0.08);
+}
+
 /* ---- Responsive guard: prevent control crush on narrow widths ---- */
 @media (max-width: 360px) {
   .panel {

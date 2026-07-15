@@ -183,6 +183,218 @@
   align-self: flex-start;
 }
 
+/* ---- Default theme ---- */
+[data-theme="default"] .container {
+  background: #ffffff;
+  border-color: #cfd7e1;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+[data-theme="default"] .closeButton,
+[data-theme="default"] .cancelButton,
+[data-theme="default"] .confirmButton {
+  box-shadow: none;
+  transition: none;
+}
+
+[data-theme="default"] .closeButton,
+[data-theme="default"] .cancelButton {
+  color: #ffffff;
+  background: #bd3636;
+  border-color: #bd3636;
+}
+
+[data-theme="default"] .closeButton:hover,
+[data-theme="default"] .cancelButton:hover {
+  background: #a92e2e;
+  border-color: #a92e2e;
+  box-shadow: none;
+  filter: none;
+  transform: none;
+}
+
+[data-theme="default"] .confirmButton {
+  color: #ffffff;
+  background: var(--lg-accent-1);
+  border-color: var(--lg-accent-1);
+}
+
+[data-theme="default"] .confirmButton:hover {
+  background: #115aa7;
+  border-color: #115aa7;
+  box-shadow: none;
+  filter: none;
+  transform: none;
+}
+
+[data-theme="default"] .confirmButton:focus-visible,
+[data-theme="default"] .cancelButton:focus-visible,
+[data-theme="default"] .closeButton:focus-visible {
+  box-shadow: 0 0 0 3px rgba(23, 105, 194, 0.2);
+}
+
+[data-theme="default"] .table {
+  border-color: #d1d9e3;
+  background: #ffffff;
+}
+
+[data-theme="default"] .headerRow {
+  background: #edf3f8;
+}
+
+[data-theme="default"] .checkboxCell,
+[data-theme="default"] .headerCell,
+[data-theme="default"] .codeCell,
+[data-theme="default"] .dataCell,
+[data-theme="default"] .centerCell {
+  color: var(--lg-text-muted);
+  border-bottom-color: #e0e6ed;
+}
+
+[data-theme="default"] .codeCell,
+[data-theme="default"] .headerCell {
+  color: var(--lg-text);
+  text-shadow: none;
+}
+
+[data-theme="default"] .rowEven {
+  background: #ffffff;
+}
+
+[data-theme="default"] .rowOdd {
+  background: #f7f9fb;
+}
+
+[data-theme="default"] .rowEven:hover,
+[data-theme="default"] .rowOdd:hover {
+  background: #eef5fc;
+}
+
+[data-theme="default"] .rowEven,
+[data-theme="default"] .rowOdd,
+[data-theme="default"] .rowSelected {
+  transition: none;
+}
+
+[data-theme="default"] .rowSelected,
+[data-theme="default"] .rowSelected:hover {
+  background: #e3f0fc;
+  box-shadow: inset 3px 0 0 var(--lg-accent-1);
+}
+
+/* ---- Hand-drawn theme ---- */
+[data-theme="hand-drawn"] .container {
+  background: var(--lg-bg-1);
+  border: 1.5px solid var(--ink-medium);
+  border-radius: 10px 12px 8px 11px;
+  box-shadow: 4px 5px 0 -2px rgba(45, 58, 71, 0.1);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+[data-theme="hand-drawn"] .closeButton,
+[data-theme="hand-drawn"] .cancelButton,
+[data-theme="hand-drawn"] .confirmButton {
+  box-shadow: 2px 3px 0 -1px rgba(45, 58, 71, 0.1);
+  transition: none;
+}
+
+[data-theme="hand-drawn"] .closeButton,
+[data-theme="hand-drawn"] .cancelButton {
+  color: var(--lg-bg-1);
+  background: var(--lg-err);
+  border: 1.5px solid #8a3535;
+  border-radius: 8px 10px 7px 9px;
+}
+
+[data-theme="hand-drawn"] .closeButton:hover,
+[data-theme="hand-drawn"] .cancelButton:hover {
+  background: #8a3535;
+  border-color: #7a2525;
+  box-shadow: 3px 4px 0 -1px rgba(160, 69, 69, 0.2);
+  filter: none;
+  transform: none;
+}
+
+[data-theme="hand-drawn"] .confirmButton {
+  color: var(--lg-bg-1);
+  background: var(--lg-accent-1);
+  border: 1.5px solid var(--lg-accent-2);
+  border-radius: 10px 12px 9px 11px;
+}
+
+[data-theme="hand-drawn"] .confirmButton:hover {
+  background: var(--lg-accent-2);
+  border-color: var(--lg-accent-3);
+  box-shadow: 3px 4px 0 -1px rgba(107, 91, 60, 0.2);
+  filter: none;
+  transform: none;
+}
+
+[data-theme="hand-drawn"] .confirmButton:focus-visible,
+[data-theme="hand-drawn"] .cancelButton:focus-visible,
+[data-theme="hand-drawn"] .closeButton:focus-visible {
+  box-shadow: 2px 2px 0 0 rgba(45, 58, 71, 0.15);
+}
+
+[data-theme="hand-drawn"] .table {
+  border: 1.5px solid var(--ink-medium);
+  border-radius: 6px 8px 5px 7px;
+  background: var(--lg-bg-1);
+  box-shadow: 2px 3px 0 -1px rgba(45, 58, 71, 0.08);
+}
+
+[data-theme="hand-drawn"] .headerRow {
+  background: linear-gradient(90deg, var(--lg-bg-2), var(--lg-bg-1));
+  border-bottom: 1.5px solid var(--ink-light);
+}
+
+[data-theme="hand-drawn"] .checkboxCell,
+[data-theme="hand-drawn"] .headerCell,
+[data-theme="hand-drawn"] .codeCell,
+[data-theme="hand-drawn"] .dataCell,
+[data-theme="hand-drawn"] .centerCell {
+  color: var(--lg-text-muted);
+  border-bottom: 1px dashed rgba(107, 122, 136, 0.25);
+}
+
+[data-theme="hand-drawn"] .checkboxCell {
+  border-radius: 4px 6px 3px 5px;
+}
+
+[data-theme="hand-drawn"] .codeCell,
+[data-theme="hand-drawn"] .headerCell {
+  color: var(--ink-dark);
+  font-weight: 600;
+}
+
+[data-theme="hand-drawn"] .rowEven {
+  background: var(--lg-bg-1);
+}
+
+[data-theme="hand-drawn"] .rowOdd {
+  background: rgba(245, 241, 235, 0.6);
+}
+
+[data-theme="hand-drawn"] .rowEven:hover,
+[data-theme="hand-drawn"] .rowOdd:hover {
+  background: rgba(245, 241, 235, 0.85);
+}
+
+[data-theme="hand-drawn"] .rowEven,
+[data-theme="hand-drawn"] .rowOdd,
+[data-theme="hand-drawn"] .rowSelected {
+  transition: none;
+}
+
+[data-theme="hand-drawn"] .rowSelected,
+[data-theme="hand-drawn"] .rowSelected:hover {
+  background: rgba(235, 231, 225, 0.9);
+  box-shadow: inset 3px 0 0 var(--lg-accent-1);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .rowEven,
   .rowOdd,

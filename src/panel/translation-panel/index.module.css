@@ -116,3 +116,135 @@
   -webkit-backdrop-filter: blur(6px) saturate(140%);
   backdrop-filter: blur(6px) saturate(140%);
 }
+
+/* ---- Default theme ---- */
+[data-theme="default"] .transTemplate {
+  color: var(--lg-text);
+  background-color: #ffffff;
+  border-color: #c8d1dc;
+  box-shadow: none;
+}
+
+[data-theme="default"] .transTemplate:focus {
+  border-color: var(--lg-accent-1);
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(23, 105, 194, 0.16);
+}
+
+[data-theme="default"] .languageTag {
+  color: #245187;
+  background: #eaf2fb;
+  border-color: #b9d0ea;
+  box-shadow: none;
+}
+
+[data-theme="default"] .warningText {
+  color: var(--lg-err);
+  text-shadow: none;
+}
+
+[data-theme="default"] .templateGeneratorButton {
+  color: #ffffff;
+  background: var(--lg-accent-1);
+  border-color: var(--lg-accent-1);
+  box-shadow: none;
+  transition: none;
+}
+
+[data-theme="default"] .templateGeneratorButton:hover {
+  background: #115aa7;
+  border-color: #115aa7;
+  box-shadow: none;
+  filter: none;
+  transform: none;
+}
+
+[data-theme="default"] .templateGeneratorButton:active {
+  background: #0f4e91;
+  transform: none;
+}
+
+[data-theme="default"] .templateGeneratorButton:focus-visible {
+  box-shadow: 0 0 0 3px rgba(23, 105, 194, 0.2);
+}
+
+[data-theme="default"] .templateHelperDialog {
+  color: var(--lg-text);
+  background: #ffffff;
+  border: 1px solid #cfd7e1;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.18);
+}
+
+[data-theme="default"] .templateHelperDialog::backdrop {
+  background: rgba(31, 41, 55, 0.34);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+/* ---- Hand-drawn theme ---- */
+[data-theme="hand-drawn"] .transTemplate {
+  color: var(--ink-dark);
+  background-color: var(--lg-bg-1);
+  border: 1.5px solid var(--ink-medium);
+  border-radius: 7px 9px 6px 8px;
+  box-shadow: 2px 3px 0 -1px rgba(45, 58, 71, 0.06);
+}
+
+[data-theme="hand-drawn"] .transTemplate:focus {
+  border-color: var(--ink-dark);
+  box-shadow: 3px 4px 0 -1px rgba(45, 58, 71, 0.1);
+}
+
+[data-theme="hand-drawn"] .languageTag {
+  color: var(--lg-accent-1);
+  background: var(--lg-bg-0);
+  border: 1px solid var(--ink-light);
+  border-radius: 12px 14px 11px 13px;
+  box-shadow: 1px 2px 0 0 rgba(45, 58, 71, 0.04);
+}
+
+[data-theme="hand-drawn"] .warningText {
+  color: var(--lg-err);
+  font-style: italic;
+}
+
+[data-theme="hand-drawn"] .templateGeneratorButton {
+  color: var(--lg-bg-1);
+  background: var(--lg-accent-1);
+  border: 1.5px solid var(--lg-accent-2);
+  border-radius: 10px 12px 9px 11px;
+  box-shadow: 2px 3px 0 -1px rgba(107, 91, 60, 0.15);
+  transition: none;
+}
+
+[data-theme="hand-drawn"] .templateGeneratorButton:hover {
+  background: var(--lg-accent-2);
+  border-color: var(--lg-accent-3);
+  box-shadow: 3px 4px 0 -1px rgba(107, 91, 60, 0.2);
+  filter: none;
+  transform: none;
+}
+
+[data-theme="hand-drawn"] .templateGeneratorButton:active {
+  background: var(--lg-accent-3);
+  box-shadow: 1px 2px 0 0 rgba(107, 91, 60, 0.1);
+  transform: none;
+}
+
+[data-theme="hand-drawn"] .templateGeneratorButton:focus-visible {
+  box-shadow: 2px 2px 0 0 rgba(107, 91, 60, 0.25);
+}
+
+[data-theme="hand-drawn"] .templateHelperDialog {
+  color: var(--ink-dark);
+  background: var(--lg-bg-1);
+  border: 1.5px solid var(--ink-medium);
+  border-radius: 10px 12px 8px 11px;
+  box-shadow: 4px 5px 0 -2px rgba(45, 58, 71, 0.12);
+}
+
+[data-theme="hand-drawn"] .templateHelperDialog::backdrop {
+  background: rgba(245, 241, 235, 0.85);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}

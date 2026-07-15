@@ -60,6 +60,76 @@
   color-scheme: dark;
 }
 
+/* ============================================================
+   Default theme — a quiet, opaque desktop utility surface
+   ============================================================ */
+:root[data-theme="default"] {
+  --lg-bg-0: #f4f6f8;
+  --lg-bg-1: #ffffff;
+  --lg-bg-2: #e9edf2;
+  --glass-tint: 255, 255, 255;
+  --glass-alpha: 1;
+  --glass-alpha-hi: 1;
+  --glass-border: 213, 220, 229;
+  --glass-border-alpha: 1;
+  --glass-highlight: 255, 255, 255;
+  --lg-text: #1f2937;
+  --lg-text-muted: #526174;
+  --lg-text-faint: #7b8796;
+  --lg-accent-1: #1769c2;
+  --lg-accent-2: #315fbd;
+  --lg-accent-3: #6755b8;
+  --lg-ok: #16835d;
+  --lg-warn: #a86600;
+  --lg-err: #bd3636;
+  --lg-shadow-soft: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --lg-shadow-pop: 0 6px 18px rgba(15, 23, 42, 0.1);
+  color-scheme: light;
+}
+
+/* ============================================================
+   Hand-drawn theme — warm paper + ink sketch lines
+   ============================================================ */
+:root[data-theme="hand-drawn"] {
+  /* Warm paper palette */
+  --lg-bg-0: #f5f1eb;
+  --lg-bg-1: #faf8f4;
+  --lg-bg-2: #efe9e1;
+  --paper-tint: 245, 241, 235;
+  --paper-alpha: 1;
+
+  /* Ink lines */
+  --ink-dark: #2d3a47;
+  --ink-medium: #4a5662;
+  --ink-light: #6b7a88;
+  --lg-text: #2d3a47;
+  --lg-text-muted: #4a5662;
+  --lg-text-faint: #6b7a88;
+
+  /* Hand-drawn accents (warm earth tones) */
+  --lg-accent-1: #6b5b3c;
+  --lg-accent-2: #8b7355;
+  --lg-accent-3: #a08968;
+  --lg-ok: #5a7a4a;
+  --lg-warn: #9b7038;
+  --lg-err: #a04545;
+
+  /* Irregular radii (slightly uneven) */
+  --lg-radius: 15px 17px 14px 16px;
+  --lg-radius-sm: 8px 10px 7px 9px;
+  --lg-radius-pill: 999px;
+
+  /* Paper shadows (lifted, slightly off-center) */
+  --lg-shadow-soft:
+    3px 4px 0 -1px rgba(45, 58, 71, 0.08), 5px 6px 0 -2px rgba(45, 58, 71, 0.05);
+  --lg-shadow-pop:
+    4px 5px 0 -1px rgba(45, 58, 71, 0.12),
+    7px 8px 0 -2px rgba(45, 58, 71, 0.08),
+    10px 11px 0 -3px rgba(45, 58, 71, 0.04);
+
+  color-scheme: light;
+}
+
 html,
 body {
   height: 100%;
@@ -88,6 +158,34 @@ html body {
     "Hiragino Sans", "Microsoft YaHei", system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+
+:root[data-theme="default"] body {
+  color: var(--lg-text);
+  background-color: var(--lg-bg-0);
+  background-image: none;
+}
+
+:root[data-theme="hand-drawn"] body {
+  color: var(--lg-text);
+  background-color: var(--lg-bg-0);
+  background-image:
+/* Paper grain texture via subtle diagonal lines */
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 2px,
+      rgba(255, 252, 245, 0.02) 2px,
+      rgba(255, 252, 245, 0.02) 4px
+    ),
+    /* Subtle horizontal paper lines */
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 18px,
+      rgba(45, 58, 71, 0.015) 18px,
+      rgba(45, 58, 71, 0.015) 19px
+    );
 }
 
 /* ---- Drifting aurora light-blobs (the "liquid" atmosphere) ---- */
@@ -142,6 +240,18 @@ body::after {
   opacity: 0.55;
 }
 
+:root[data-theme="default"] body::before,
+:root[data-theme="default"] body::after {
+  content: none;
+  display: none;
+}
+
+:root[data-theme="hand-drawn"] body::before,
+:root[data-theme="hand-drawn"] body::after {
+  content: none;
+  display: none;
+}
+
 @keyframes lg-aurora {
   0% {
     transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
@@ -194,6 +304,37 @@ body::after {
     rgba(255, 255, 255, 0.42),
     rgba(255, 255, 255, 0.2)
   );
+  background-clip: padding-box;
+}
+
+:root[data-theme="default"] * {
+  scrollbar-color: #aeb8c5 #eef1f5;
+}
+
+:root[data-theme="default"] ::-webkit-scrollbar-track {
+  background: #eef1f5;
+}
+
+:root[data-theme="default"] ::-webkit-scrollbar-thumb,
+:root[data-theme="default"] ::-webkit-scrollbar-thumb:hover {
+  background: #aeb8c5;
+  border: 2px solid #eef1f5;
+  background-clip: padding-box;
+}
+
+:root[data-theme="hand-drawn"] * {
+  scrollbar-color: var(--ink-medium) var(--lg-bg-1);
+}
+
+:root[data-theme="hand-drawn"] ::-webkit-scrollbar-track {
+  background: var(--lg-bg-1);
+}
+
+:root[data-theme="hand-drawn"] ::-webkit-scrollbar-thumb,
+:root[data-theme="hand-drawn"] ::-webkit-scrollbar-thumb:hover {
+  background: var(--ink-medium);
+  border: 2px solid var(--lg-bg-1);
+  border-radius: 6px 8px 5px 7px;
   background-clip: padding-box;
 }
 
@@ -302,6 +443,147 @@ a {
   transition: color var(--lg-fast) var(--lg-ease);
 }
 
+:root[data-theme="default"] input,
+:root[data-theme="default"] textarea,
+:root[data-theme="default"] select {
+  color: var(--lg-text);
+  background-color: #ffffff;
+  border-color: #c8d1dc;
+  box-shadow: none;
+  transition: none;
+}
+
+:root[data-theme="default"] input::placeholder,
+:root[data-theme="default"] textarea::placeholder {
+  color: #8792a1;
+}
+
+:root[data-theme="default"] input:hover,
+:root[data-theme="default"] textarea:hover,
+:root[data-theme="default"] select:hover {
+  background-color: #ffffff;
+  border-color: #9facbb;
+}
+
+:root[data-theme="default"] input:focus,
+:root[data-theme="default"] textarea:focus,
+:root[data-theme="default"] select:focus {
+  background-color: #ffffff;
+  border-color: var(--lg-accent-1);
+  box-shadow: 0 0 0 3px rgba(23, 105, 194, 0.16);
+}
+
+:root[data-theme="default"] select {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23526174' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+}
+
+:root[data-theme="default"] select option {
+  color: var(--lg-text);
+  background-color: #ffffff;
+}
+
+:root[data-theme="default"] input[type="checkbox"] {
+  background-color: #ffffff;
+  border-color: #aeb9c7;
+  box-shadow: none;
+  transition: none;
+}
+
+:root[data-theme="default"] input[type="checkbox"]::before {
+  background: var(--lg-accent-1);
+  box-shadow: none;
+  transition: none;
+}
+
+:root[data-theme="default"] input[type="checkbox"]:checked {
+  background-color: #e8f1fc;
+  border-color: var(--lg-accent-1);
+}
+
+:root[data-theme="default"] a {
+  color: var(--lg-accent-1);
+  transition: none;
+}
+
+/* ---- Hand-drawn form controls ---- */
+:root[data-theme="hand-drawn"] input,
+:root[data-theme="hand-drawn"] textarea,
+:root[data-theme="hand-drawn"] select {
+  color: var(--lg-text);
+  background-color: var(--lg-bg-1);
+  border: 1.5px solid var(--ink-medium);
+  border-radius: 5px 7px 6px 8px;
+  box-shadow: none;
+  transition: none;
+}
+
+:root[data-theme="hand-drawn"] input::placeholder,
+:root[data-theme="hand-drawn"] textarea::placeholder {
+  color: var(--lg-text-faint);
+}
+
+:root[data-theme="hand-drawn"] input:hover,
+:root[data-theme="hand-drawn"] textarea:hover,
+:root[data-theme="hand-drawn"] select:hover {
+  background-color: var(--lg-bg-1);
+  border-color: var(--ink-dark);
+}
+
+:root[data-theme="hand-drawn"] input:focus,
+:root[data-theme="hand-drawn"] textarea:focus,
+:root[data-theme="hand-drawn"] select:focus {
+  background-color: var(--lg-bg-1);
+  border-color: var(--ink-dark);
+  box-shadow: 2px 2px 0 -1px rgba(45, 58, 71, 0.1);
+}
+
+:root[data-theme="hand-drawn"] select {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%234a5662' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9c1.5 2 4.5 2 6 0'/><path d='M12 9c1.5 2 4.5 2 6 0' stroke-dasharray='2 1'/></svg>");
+  border-radius: 5px 7px 6px 8px;
+}
+
+:root[data-theme="hand-drawn"] select option {
+  color: var(--lg-text);
+  background-color: var(--lg-bg-1);
+}
+
+:root[data-theme="hand-drawn"] input[type="checkbox"] {
+  background-color: var(--lg-bg-1);
+  border: 1.5px solid var(--ink-medium);
+  border-radius: 4px 6px 3px 5px;
+  box-shadow: none;
+  transition: none;
+}
+
+:root[data-theme="hand-drawn"] input[type="checkbox"]::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  transform: scale(0);
+  transition: none;
+  border-radius: 1px;
+  background: var(--lg-accent-1);
+  box-shadow: none;
+}
+
+:root[data-theme="hand-drawn"] input[type="checkbox"]:checked {
+  background-color: var(--lg-bg-1);
+  border-color: var(--ink-dark);
+}
+
+:root[data-theme="hand-drawn"] input[type="checkbox"]:checked::before {
+  transform: scale(1);
+  /* Hand-drawn checkmark via SVG */
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 12 12'><path d='M2 6c1 1.5 3 3 5 4' stroke='%236b5b3c' stroke-width='2' stroke-linecap='round' fill='none'/><path d='M7 4c1 1.5 2 3 3 4' stroke='%236b5b3c' stroke-width='2' stroke-linecap='round' fill='none' stroke-dasharray='1 1'/></svg>");
+}
+
+:root[data-theme="hand-drawn"] a {
+  color: var(--lg-accent-1);
+  text-decoration-color: var(--ink-light);
+  text-underline-offset: 2px;
+  transition: none;
+}
+
 /* ============================================================
    Reduced motion: freeze the aurora, keep everything legible
    ============================================================ */
@@ -327,7 +609,7 @@ a {
     (backdrop-filter: blur(10px)) or
     (-webkit-backdrop-filter: blur(10px))
   ) {
-  :root {
+  :root:not([data-theme="default"]) {
     --glass-alpha: 0.2;
     --glass-alpha-hi: 0.3;
   }

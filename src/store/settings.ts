@@ -6,6 +6,8 @@ import {
 } from "./rehydrate/rehydrate-constant";
 import { redux_store } from "./rehydrate/rehydrate-store";
 
+export type ThemePreference = "default" | "liquid-glass" | "hand-drawn";
+
 export interface SettingState {
   transcription_url: string;
   transcription_model: string;
@@ -17,6 +19,7 @@ export interface SettingState {
   /** 批量翻译模式 - 每个语言单独发送请求（仅 CUSTOM provider） */
   batchTranslate: boolean;
   language: string;
+  theme: ThemePreference;
   api_provider_type: EApiProviderType;
   /** Omni模式下是否保留音频base64类型信息 */
   omni_keep_audio_type: boolean;
@@ -36,6 +39,7 @@ export const initialState: SettingState = {
 [ru]#{ru}`,
   batchTranslate: false,
   language: "auto",
+  theme: "default",
   api_provider_type: EApiProviderType.CUSTOM,
   omni_keep_audio_type: false,
 };
@@ -89,6 +93,10 @@ const settingsSlice = createSlice({
       state.language = action.payload;
       redux_store(REHYDRATE_KEYS.SETTING_LANGUAGE, action.payload);
     },
+    setTheme: (state, action: PayloadAction<ThemePreference>) => {
+      state.theme = action.payload;
+      redux_store(REHYDRATE_KEYS.SETTING_THEME, action.payload);
+    },
     setApiProviderType: (state, action: PayloadAction<EApiProviderType>) => {
       state.api_provider_type = action.payload;
       redux_store(REHYDRATE_KEYS.SETTING_API_PROVIDER_TYPE, action.payload);
@@ -108,6 +116,7 @@ export const {
   setOpenaiModel,
   setOpenaiToken,
   setLanguage,
+  setTheme,
   setTranscriptionModel,
   setTranscriptionToken,
   setApiProviderType,

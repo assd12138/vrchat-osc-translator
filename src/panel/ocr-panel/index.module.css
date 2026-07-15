@@ -22,3 +22,23 @@
   color: var(--lg-text-muted);
   font-size: 13px;
 }
+
+/* ---- Default theme ---- */
+[data-theme="default"] .logContainer {
+  color: var(--lg-text-muted);
+  background: #f5f7f9;
+  border-color: #d9e0e8;
+}
+
+/* ---- Hand-drawn theme ---- */
+[data-theme="hand-drawn"] .logContainer {
+  color: var(--lg-text-muted);
+  background: var(--lg-bg-1);
+  border: 1px solid var(--ink-light);
+  border-radius: 6px 8px 5px 7px;
+  box-shadow: 2px 3px 0 -1px rgba(45, 58, 71, 0.06);
+}
+
+[data-theme="hand-drawn"] .btnCon .button {
+  /* inherits from shared button */
+}
