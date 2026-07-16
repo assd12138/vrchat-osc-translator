@@ -16,7 +16,11 @@ const request = async (url: string, options: RequestInit = {}) => {
     const response = await fetch(url, config);
     clearTimeout(timeoutId);
 
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    if (!response.ok) {
+      // 尝试解析错误信息（支持 JSON 或文本）
+      const errorData = await response.text(); // 或 response.json()
+      throw new Error(`HTTP ${response.status}: ${errorData}`);
+    }
     return await response.json();
   } catch (error) {
     if (!(error instanceof Error)) return;

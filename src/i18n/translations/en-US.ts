@@ -60,6 +60,7 @@ export default {
   手动翻译成功:
     "✅ Manual translation successful. Original: {{original}}, Translation: {{translation}}",
   手动翻译失败: "❌ Manual translation failed",
+  翻译失败: "❌ Translation failed",
   输入文本手动翻译: "Enter text for manual translation",
   "翻译中...": "Translating...",
   翻译发送: "Translate & Send",
