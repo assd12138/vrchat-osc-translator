@@ -8,6 +8,55 @@
   margin-bottom: 12px;
 }
 
+.targetLanguage {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.actions {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.actions > button {
+  flex: 1 1 auto;
+}
+
+.fileInput {
+  display: none;
+}
+
+.targetLanguageLabel {
+  flex: 0 0 auto;
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--lg-text-muted);
+  white-space: nowrap;
+}
+
+.targetLanguageSelect {
+  flex: 1 1 0;
+  min-width: 0;
+  width: auto;
+  margin-bottom: 0;
+}
+
+@media (max-width: 360px) {
+  .actions > button {
+    flex-basis: 100%;
+  }
+}
+
 .logContainer {
   position: relative;
   z-index: 2;

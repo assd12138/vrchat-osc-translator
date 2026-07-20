@@ -112,6 +112,34 @@ export const translateRouter = async (data: { text: string }) => {
 };
 
 /**
+ * Translate text into one language without applying the configured template.
+ */
+export const translateSingleLanguageRouter = async ({
+  text,
+  language,
+}: {
+  text: string;
+  language: string;
+}) => {
+  const settings = store.getState().settings;
+  const translationRes = await translateByAISingleLanguage({
+    text,
+    token: settings.openai_token,
+    api: settings.openai_api_url,
+    model: settings.openai_model,
+    language,
+    assignObj: {
+      thinking: {
+        type: "disabled",
+      },
+      // reasoning_effort: "none",
+    },
+  });
+
+  return translationRes.choices[0].message.content;
+};
+
+/**
  * 通用转录路由
  * @param data
  * @returns

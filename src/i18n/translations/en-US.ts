@@ -26,6 +26,9 @@ export default {
   识别成功:
     "✅ Recognition successful. Original: {{transcription}}, Translation: {{translation}}",
   剪贴板图片翻译: "Clipboard Image Translation",
+  图片翻译: "Image Translation",
+  剪贴板: "Clipboard",
+  文件选择: "Select File",
   恢复默认: "Restore Default",
   API供应商: "API Provider",
   去申请: "Apply For Key",

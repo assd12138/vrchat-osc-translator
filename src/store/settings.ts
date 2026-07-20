@@ -1,4 +1,5 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import { languages } from "@/constants/language";
 import {
   EApiProviderType,
   REDUX_STORAGE_KEY,
@@ -7,6 +8,16 @@ import {
 import { redux_store } from "./rehydrate/rehydrate-store";
 
 export type ThemePreference = "default" | "liquid-glass" | "hand-drawn";
+
+const getInitialOcrTargetLanguage = () => {
+  const browserLanguage =
+    typeof navigator === "undefined" ? undefined : navigator.language;
+  const primarySubtag = browserLanguage?.split("-")[0].toLowerCase();
+
+  return primarySubtag && languages.some(({ code }) => code === primarySubtag)
+    ? primarySubtag
+    : "zh";
+};
 
 export interface PanelExpansionState {
   audio: boolean;
@@ -27,6 +38,7 @@ export interface SettingState {
   /** 批量翻译模式 - 每个语言单独发送请求（仅 CUSTOM provider） */
   batchTranslate: boolean;
   language: string;
+  ocrTargetLanguage: string;
   theme: ThemePreference;
   panelExpansion: PanelExpansionState;
   api_provider_type: EApiProviderType;
@@ -48,6 +60,7 @@ export const initialState: SettingState = {
 [ru]#{ru}`,
   batchTranslate: false,
   language: "auto",
+  ocrTargetLanguage: getInitialOcrTargetLanguage(),
   theme: "default",
   panelExpansion: {
     audio: true,
@@ -109,6 +122,10 @@ const settingsSlice = createSlice({
       state.language = action.payload;
       redux_store(REHYDRATE_KEYS.SETTING_LANGUAGE, action.payload);
     },
+    setOcrTargetLanguage: (state, action: PayloadAction<string>) => {
+      state.ocrTargetLanguage = action.payload;
+      redux_store(REHYDRATE_KEYS.SETTING_OCR_TARGET_LANGUAGE, action.payload);
+    },
     setTheme: (state, action: PayloadAction<ThemePreference>) => {
       state.theme = action.payload;
       redux_store(REHYDRATE_KEYS.SETTING_THEME, action.payload);
@@ -144,6 +161,7 @@ export const {
   setOpenaiModel,
   setOpenaiToken,
   setLanguage,
+  setOcrTargetLanguage,
   setTheme,
   setPanelExpansion,
   togglePanelExpansion,
