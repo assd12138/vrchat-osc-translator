@@ -1,14 +1,17 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { transformOCRRouter, translateRouter } from "@/api/commonRouter";
-import { useAppSelector } from "../../store/hook";
+import { useAppDispatch, useAppSelector } from "../../store/hook";
 import { EApiProviderType } from "../../store/rehydrate/rehydrate-constant";
+import { togglePanelExpansion } from "../../store/settings";
 import globalStyles from "../../styles/index.module.css";
 import styles from "./index.module.css";
 
 export default function OcrPanel() {
   const { t } = useTranslation();
   const settings = useAppSelector((state) => state.settings);
+  const dispatch = useAppDispatch();
+  const isExpanded = settings.panelExpansion.ocr;
   const [ocr, setOCR] = useState("");
   const [trans, setTrans] = useState("");
 
@@ -60,26 +63,40 @@ export default function OcrPanel() {
   };
   return (
     <div className={globalStyles.panel}>
-      <div className={globalStyles.title}>📷 OCR </div>
-      <div className={styles.btnCon}>
+      <div className={globalStyles.title}>
+        📷 OCR
         <button
           type="button"
-          onClick={ocrRecogonition}
-          className={globalStyles.button}
+          className={globalStyles.panelToggle}
+          onClick={() => dispatch(togglePanelExpansion("ocr"))}
+          aria-expanded={isExpanded}
+          aria-controls="ocr-panel-content"
+          aria-label={`${isExpanded ? "Collapse" : "Expand"} OCR`}
         >
-          {t("剪贴板图片翻译")}
+          <span aria-hidden="true">{isExpanded ? "−" : "+"}</span>
         </button>
       </div>
-      <div className={styles.logContainer}>
-        <textarea
-          style={{ width: "42%", height: "200px" }}
-          value={ocr}
-        ></textarea>
-        ➡
-        <textarea
-          style={{ width: "42%", height: "200px" }}
-          value={trans}
-        ></textarea>
+      <div id="ocr-panel-content" hidden={!isExpanded}>
+        <div className={styles.btnCon}>
+          <button
+            type="button"
+            onClick={ocrRecogonition}
+            className={globalStyles.button}
+          >
+            {t("剪贴板图片翻译")}
+          </button>
+        </div>
+        <div className={styles.logContainer}>
+          <textarea
+            style={{ width: "42%", height: "200px" }}
+            value={ocr}
+          ></textarea>
+          ➡
+          <textarea
+            style={{ width: "42%", height: "200px" }}
+            value={trans}
+          ></textarea>
+        </div>
       </div>
     </div>
   );

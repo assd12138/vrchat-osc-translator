@@ -2,6 +2,7 @@
    styles/index.module.css — shared Liquid Glass primitives
    Exports (must stay identical for TSX consumers):
      .panel  .title  .button  .labelS  .selectS  .inputS  .input
+     .panelToggle  .panelHeaderAction
    (.input is an alias added for audio-panel which references
     globalStyles.input; pure CSS, no TSX change required.)
    ============================================================ */
@@ -73,6 +74,73 @@
   );
   -webkit-background-clip: text;
   background-clip: text;
+}
+
+/* ---- Panel title actions ----
+   The title itself remains the header. The compact toggle sits at its
+   logical end without introducing another card or animated disclosure. */
+.panelToggle {
+  position: relative;
+  z-index: 2;
+  display: inline-grid;
+  flex: 0 0 30px;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  margin-inline-start: auto;
+  color: var(--lg-text-muted);
+  font: inherit;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: var(--lg-radius-pill);
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.16) inset;
+  transition: none;
+  transform: none;
+}
+
+.panelToggle:hover {
+  color: var(--lg-text);
+  border-color: rgba(255, 255, 255, 0.34);
+  background: rgba(255, 255, 255, 0.13);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.2) inset;
+  transform: none;
+}
+
+.panelToggle:active {
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2) inset;
+  transform: none;
+}
+
+.panelToggle:focus-visible,
+.panelHeaderAction:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.28);
+}
+
+.panelToggle:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
+.panelHeaderAction {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 0;
+  color: inherit;
+  font: inherit;
+  line-height: inherit;
+  cursor: pointer;
+  border: 0;
+  background: transparent;
+  white-space: nowrap;
 }
 
 /* ---- Button (liquid glass pill) ---- */
@@ -215,6 +283,38 @@
   background: none;
 }
 
+[data-theme="default"] .panelToggle {
+  color: #526174;
+  border-color: #bec9d6;
+  background: #f7f9fb;
+  box-shadow: none;
+}
+
+[data-theme="default"] .panelToggle:hover {
+  color: #263445;
+  border-color: #8da4bd;
+  background: #eef4fa;
+  box-shadow: none;
+  transform: none;
+}
+
+[data-theme="default"] .panelToggle:active {
+  background: #e4edf6;
+  box-shadow: none;
+  transform: none;
+}
+
+[data-theme="default"] .panelToggle:focus-visible,
+[data-theme="default"] .panelHeaderAction:focus-visible {
+  box-shadow: 0 0 0 3px rgba(23, 105, 194, 0.16);
+}
+
+[data-theme="default"] .panelToggle:disabled {
+  color: #7d8794;
+  border-color: #d7dde5;
+  background: #f0f2f5;
+}
+
 [data-theme="default"] .button {
   color: #263445;
   border-color: #bec9d6;
@@ -317,6 +417,39 @@
   height: 1.5px;
   background: var(--ink-medium);
   border-radius: 2px 3px 1px 4px;
+}
+
+[data-theme="hand-drawn"] .panelToggle {
+  color: var(--ink-dark);
+  border: 1.5px solid var(--ink-medium);
+  border-radius: 8px 10px 7px 9px;
+  background: var(--lg-bg-1);
+  box-shadow: 2px 2px 0 -1px rgba(45, 58, 71, 0.08);
+}
+
+[data-theme="hand-drawn"] .panelToggle:hover {
+  border-color: var(--ink-dark);
+  background: var(--lg-bg-0);
+  box-shadow: 2px 2px 0 -1px rgba(45, 58, 71, 0.12);
+  transform: none;
+}
+
+[data-theme="hand-drawn"] .panelToggle:active {
+  background: var(--lg-bg-2);
+  box-shadow: 1px 1px 0 0 rgba(45, 58, 71, 0.08);
+  transform: none;
+}
+
+[data-theme="hand-drawn"] .panelToggle:focus-visible,
+[data-theme="hand-drawn"] .panelHeaderAction:focus-visible {
+  box-shadow: 2px 2px 0 0 rgba(107, 91, 60, 0.2);
+}
+
+[data-theme="hand-drawn"] .panelToggle:disabled {
+  color: var(--lg-text-faint);
+  border-color: var(--ink-light);
+  background: var(--lg-bg-2);
+  box-shadow: none;
 }
 
 [data-theme="hand-drawn"] .button {

@@ -1,32 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { languages } from "@/constants/language";
 import styles from "./index.module.css";
-
-interface Language {
-  code: string;
-  englishName: string;
-  nativeName: string;
-}
-
-const languages: Language[] = [
-  { code: "zh", englishName: "Chinese", nativeName: "中文" },
-  { code: "en", englishName: "English", nativeName: "English" },
-  { code: "ja", englishName: "Japanese", nativeName: "日本語" },
-  { code: "ko", englishName: "Korean", nativeName: "한국어" },
-  { code: "ru", englishName: "Russian", nativeName: "Русский" },
-  { code: "ms", englishName: "Malay", nativeName: "Bahasa Melayu" },
-  { code: "es", englishName: "Spanish", nativeName: "Español" },
-  { code: "fr", englishName: "French", nativeName: "Français" },
-  { code: "de", englishName: "German", nativeName: "Deutsch" },
-  { code: "pt", englishName: "Portuguese", nativeName: "Português" },
-  { code: "it", englishName: "Italian", nativeName: "Italiano" },
-  { code: "ar", englishName: "Arabic", nativeName: "العربية" },
-  { code: "th", englishName: "Thai", nativeName: "ไทย" },
-  { code: "vi", englishName: "Vietnamese", nativeName: "Tiếng Việt" },
-  { code: "nl", englishName: "Dutch", nativeName: "Nederlands" },
-  { code: "pl", englishName: "Polish", nativeName: "Polski" },
-  { code: "tr", englishName: "Turkish", nativeName: "Türkçe" },
-];
 
 const languageCodeSet = new Set(languages.map((l) => l.code));
 

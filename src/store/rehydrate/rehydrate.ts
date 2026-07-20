@@ -7,6 +7,7 @@ import {
   setOpenaiModel,
   setOpenaiToken,
   setOutputTemplate,
+  setPanelExpansion,
   setTheme,
   setTranscriptionModel,
   setTranscriptionToken,
@@ -30,6 +31,7 @@ export const rehydrateMapper = {
   [REHYDRATE_KEYS.SETTING_OPENAI_TOKEN]: setOpenaiToken,
   [REHYDRATE_KEYS.SETTING_LANGUAGE]: setLanguage,
   [REHYDRATE_KEYS.SETTING_THEME]: setTheme,
+  [REHYDRATE_KEYS.SETTING_PANEL_EXPANSION]: setPanelExpansion,
   [REHYDRATE_KEYS.SETTING_API_PROVIDER_TYPE]: setApiProviderType,
   [REHYDRATE_KEYS.SETTING_OMNI_KEEP_AUDIO_TYPE]: setOmniKeepAudioType,
 };

@@ -1,3 +1,4 @@
+import type { PanelExpansionState } from "../settings";
 import {
   type EApiProviderType,
   REDUX_STORAGE_KEY,
@@ -6,7 +7,7 @@ import {
 
 export function redux_store(
   module: string,
-  data: string | EApiProviderType | boolean | string[],
+  data: string | EApiProviderType | boolean | string[] | PanelExpansionState,
 ) {
   if (!rehydrateFlag.flag) return;
 

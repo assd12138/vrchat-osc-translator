@@ -8,6 +8,14 @@ import { redux_store } from "./rehydrate/rehydrate-store";
 
 export type ThemePreference = "default" | "liquid-glass" | "hand-drawn";
 
+export interface PanelExpansionState {
+  audio: boolean;
+  translation: boolean;
+  settings: boolean;
+  systemLog: boolean;
+  ocr: boolean;
+}
+
 export interface SettingState {
   transcription_url: string;
   transcription_model: string;
@@ -20,6 +28,7 @@ export interface SettingState {
   batchTranslate: boolean;
   language: string;
   theme: ThemePreference;
+  panelExpansion: PanelExpansionState;
   api_provider_type: EApiProviderType;
   /** Omni模式下是否保留音频base64类型信息 */
   omni_keep_audio_type: boolean;
@@ -40,6 +49,13 @@ export const initialState: SettingState = {
   batchTranslate: false,
   language: "auto",
   theme: "default",
+  panelExpansion: {
+    audio: true,
+    translation: true,
+    settings: true,
+    systemLog: true,
+    ocr: true,
+  },
   api_provider_type: EApiProviderType.CUSTOM,
   omni_keep_audio_type: false,
 };
@@ -97,6 +113,18 @@ const settingsSlice = createSlice({
       state.theme = action.payload;
       redux_store(REHYDRATE_KEYS.SETTING_THEME, action.payload);
     },
+    setPanelExpansion: (state, action: PayloadAction<PanelExpansionState>) => {
+      state.panelExpansion = action.payload;
+      redux_store(REHYDRATE_KEYS.SETTING_PANEL_EXPANSION, action.payload);
+    },
+    togglePanelExpansion: (
+      state,
+      action: PayloadAction<keyof PanelExpansionState>,
+    ) => {
+      const panel = action.payload;
+      state.panelExpansion[panel] = !state.panelExpansion[panel];
+      redux_store(REHYDRATE_KEYS.SETTING_PANEL_EXPANSION, state.panelExpansion);
+    },
     setApiProviderType: (state, action: PayloadAction<EApiProviderType>) => {
       state.api_provider_type = action.payload;
       redux_store(REHYDRATE_KEYS.SETTING_API_PROVIDER_TYPE, action.payload);
@@ -117,6 +145,8 @@ export const {
   setOpenaiToken,
   setLanguage,
   setTheme,
+  setPanelExpansion,
+  togglePanelExpansion,
   setTranscriptionModel,
   setTranscriptionToken,
   setApiProviderType,
