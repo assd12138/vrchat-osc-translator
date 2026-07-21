@@ -72,11 +72,42 @@
   font-size: 13px;
 }
 
+/* ---- Native <dialog> crop modal ---- */
+.cropDialog {
+  padding: 0;
+  border: none;
+  border-radius: var(--lg-radius);
+  width: min(920px, 94vw);
+  height: min(720px, 88vh);
+  background: transparent;
+  color: var(--lg-text);
+  overflow: hidden;
+}
+
+.cropDialog::backdrop {
+  background: rgba(5, 7, 13, 0.55);
+  -webkit-backdrop-filter: blur(6px) saturate(140%);
+  backdrop-filter: blur(6px) saturate(140%);
+}
+
 /* ---- Default theme ---- */
 [data-theme="default"] .logContainer {
   color: var(--lg-text-muted);
   background: #f5f7f9;
   border-color: #d9e0e8;
+}
+
+[data-theme="default"] .cropDialog {
+  color: var(--lg-text);
+  background: #ffffff;
+  border: 1px solid #cfd7e1;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.18);
+}
+
+[data-theme="default"] .cropDialog::backdrop {
+  background: rgba(31, 41, 55, 0.34);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 
 /* ---- Hand-drawn theme ---- */
@@ -86,6 +117,20 @@
   border: 1px solid var(--ink-light);
   border-radius: 6px 8px 5px 7px;
   box-shadow: 2px 3px 0 -1px rgba(45, 58, 71, 0.06);
+}
+
+[data-theme="hand-drawn"] .cropDialog {
+  color: var(--ink-dark);
+  background: var(--lg-bg-1);
+  border: 1.5px solid var(--ink-medium);
+  border-radius: 10px 12px 8px 11px;
+  box-shadow: 4px 5px 0 -2px rgba(45, 58, 71, 0.12);
+}
+
+[data-theme="hand-drawn"] .cropDialog::backdrop {
+  background: rgba(245, 241, 235, 0.85);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 
 [data-theme="hand-drawn"] .btnCon .button {

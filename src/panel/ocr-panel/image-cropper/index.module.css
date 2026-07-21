@@ -1,0 +1,255 @@
+/* ============================================================
+   image-cropper — glass panel inside OCR crop dialog
+   ============================================================ */
+
+.container {
+  position: relative;
+  height: 100%;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 18px 18px 16px;
+  box-sizing: border-box;
+  overflow: hidden;
+
+  border-radius: var(--lg-radius);
+  background: linear-gradient(
+    135deg,
+    rgba(var(--glass-tint), var(--glass-alpha-hi)),
+    rgba(var(--glass-tint), var(--glass-alpha))
+  );
+  border: 1px solid rgba(var(--glass-border), var(--glass-border-alpha));
+  box-shadow: var(--lg-shadow-soft);
+  -webkit-backdrop-filter: blur(26px) saturate(160%);
+  backdrop-filter: blur(26px) saturate(160%);
+}
+
+.header {
+  flex: 0 0 auto;
+  margin-bottom: 12px;
+}
+
+.title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--lg-text);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
+}
+
+.stage {
+  flex: 1 1 auto;
+  min-height: 280px;
+  height: min(60vh, 480px);
+  overflow: hidden;
+  position: relative;
+  border-radius: var(--lg-radius-sm);
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.image {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+/* Cropper v2 custom elements fill the stage (type selectors are not hashed) */
+.stage cropper-canvas {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.actions {
+  flex: 0 0 auto;
+  margin-top: 16px;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.cancelButton,
+.confirmButton {
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: var(--lg-radius-pill);
+  transition:
+    transform var(--lg-fast) var(--lg-ease),
+    box-shadow var(--lg-fast) var(--lg-ease),
+    filter var(--lg-fast) var(--lg-ease);
+}
+
+.cancelButton:disabled,
+.confirmButton:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  filter: none;
+}
+
+.cancelButton {
+  color: #fff;
+  border: 1px solid rgba(248, 113, 113, 0.5);
+  background: linear-gradient(
+    180deg,
+    rgba(248, 113, 113, 0.32),
+    rgba(248, 113, 113, 0.14)
+  );
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.18) inset;
+}
+
+.cancelButton:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.1);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.25) inset,
+    0 10px 22px -10px rgba(248, 113, 113, 0.6);
+}
+
+.confirmButton {
+  color: #04110d;
+  border: 1px solid rgba(94, 234, 212, 0.6);
+  background: linear-gradient(135deg, var(--lg-accent-1), var(--lg-accent-2));
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.4) inset,
+    0 10px 22px -10px rgba(94, 234, 212, 0.6);
+}
+
+.confirmButton:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.5) inset,
+    0 14px 28px -10px rgba(129, 140, 248, 0.7);
+}
+
+.confirmButton:focus-visible,
+.cancelButton:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.3);
+}
+
+/* ---- Default theme ---- */
+[data-theme="default"] .container {
+  background: #ffffff;
+  border-color: #cfd7e1;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+[data-theme="default"] .title {
+  color: var(--lg-text);
+  text-shadow: none;
+}
+
+[data-theme="default"] .stage {
+  background: #f0f3f7;
+  border-color: #d1d9e3;
+}
+
+[data-theme="default"] .cancelButton,
+[data-theme="default"] .confirmButton {
+  box-shadow: none;
+  transition: none;
+}
+
+[data-theme="default"] .cancelButton {
+  color: #ffffff;
+  background: #bd3636;
+  border-color: #bd3636;
+}
+
+[data-theme="default"] .cancelButton:hover:not(:disabled) {
+  background: #a92e2e;
+  border-color: #a92e2e;
+  box-shadow: none;
+  filter: none;
+  transform: none;
+}
+
+[data-theme="default"] .confirmButton {
+  color: #ffffff;
+  background: var(--lg-accent-1);
+  border-color: var(--lg-accent-1);
+}
+
+[data-theme="default"] .confirmButton:hover:not(:disabled) {
+  background: #115aa7;
+  border-color: #115aa7;
+  box-shadow: none;
+  filter: none;
+  transform: none;
+}
+
+[data-theme="default"] .confirmButton:focus-visible,
+[data-theme="default"] .cancelButton:focus-visible {
+  box-shadow: 0 0 0 3px rgba(23, 105, 194, 0.2);
+}
+
+/* ---- Hand-drawn theme ---- */
+[data-theme="hand-drawn"] .container {
+  background: var(--lg-bg-1);
+  border: 1.5px solid var(--ink-medium);
+  border-radius: 10px 12px 8px 11px;
+  box-shadow: 4px 5px 0 -2px rgba(45, 58, 71, 0.1);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+[data-theme="hand-drawn"] .title {
+  color: var(--ink-dark);
+  text-shadow: none;
+}
+
+[data-theme="hand-drawn"] .stage {
+  background: var(--lg-bg-0);
+  border: 1.5px solid var(--ink-light);
+  border-radius: 6px 8px 5px 7px;
+  box-shadow: 2px 3px 0 -1px rgba(45, 58, 71, 0.06);
+}
+
+[data-theme="hand-drawn"] .cancelButton,
+[data-theme="hand-drawn"] .confirmButton {
+  box-shadow: 2px 3px 0 -1px rgba(45, 58, 71, 0.1);
+  transition: none;
+}
+
+[data-theme="hand-drawn"] .cancelButton {
+  color: var(--lg-bg-1);
+  background: var(--lg-err);
+  border: 1.5px solid #8a3535;
+  border-radius: 8px 10px 7px 9px;
+}
+
+[data-theme="hand-drawn"] .cancelButton:hover:not(:disabled) {
+  background: #8a3535;
+  border-color: #7a2525;
+  box-shadow: 3px 4px 0 -1px rgba(160, 69, 69, 0.2);
+  filter: none;
+  transform: none;
+}
+
+[data-theme="hand-drawn"] .confirmButton {
+  color: var(--lg-bg-1);
+  background: var(--lg-accent-1);
+  border: 1.5px solid var(--lg-accent-2);
+  border-radius: 10px 12px 9px 11px;
+}
+
+[data-theme="hand-drawn"] .confirmButton:hover:not(:disabled) {
+  background: var(--lg-accent-2);
+  border-color: var(--lg-accent-3);
+  box-shadow: 3px 4px 0 -1px rgba(107, 91, 60, 0.2);
+  filter: none;
+  transform: none;
+}
+
+[data-theme="hand-drawn"] .confirmButton:focus-visible,
+[data-theme="hand-drawn"] .cancelButton:focus-visible {
+  box-shadow: 2px 2px 0 0 rgba(45, 58, 71, 0.15);
+}
