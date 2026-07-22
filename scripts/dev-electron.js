@@ -111,10 +111,7 @@ const main = async () => {
               console.log("📝 ScreenPicker Preload构建完成，重启 Electron...");
               startElectron();
             } else {
-              console.error(
-                "⚠️ ScreenPicker Preload构建出错",
-                result.errors,
-              );
+              console.error("⚠️ ScreenPicker Preload构建出错", result.errors);
             }
           });
         },
