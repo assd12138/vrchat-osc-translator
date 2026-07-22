@@ -5,8 +5,10 @@ import {
   type BrowserWindowConstructorOptions,
   net,
   protocol,
+  session,
 } from "electron";
 import { initializeIpcRouter } from "./ipc";
+import { showScreenPicker } from "./utils/screen-picker";
 
 // 判断是否为开发环境
 const isDev = process.env.NODE_ENV === "development" || !app.isPackaged;
@@ -80,6 +82,28 @@ app.whenReady().then(() => {
   initializeIpcRouter();
   registerProtocol();
   createMainWindow();
+
+  // 拦截渲染进程的 getDisplayMedia 请求，弹出模态选择器让用户选择屏幕或窗口。
+  // 始终忽略音频：回调只包含 video。
+  session.defaultSession.setDisplayMediaRequestHandler(
+    async (_request, callback) => {
+      if (!mainWindow || mainWindow.isDestroyed()) {
+        callback({});
+        return;
+      }
+      try {
+        const source = await showScreenPicker(mainWindow);
+        if (source) {
+          callback({ video: source });
+        } else {
+          callback({});
+        }
+      } catch (err) {
+        console.error("Display media handler error:", err);
+        callback({});
+      }
+    },
+  );
 
   app.on("activate", () => {
     // macOS通常在点击dock图标时重新创建窗口

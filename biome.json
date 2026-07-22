@@ -1,12 +1,18 @@
 {
-  "$schema": "./biomejs-schema.json",
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "vcs": {
     "enabled": true,
     "clientKind": "git",
     "useIgnoreFile": true
   },
   "files": {
-    "includes": ["**", "!!**/dist", "!!**/vite-env.d.ts", "!!**/*.wasm.js"]
+    "includes": [
+      "**",
+      "!!**/dist",
+      "!!**/vite-env.d.ts",
+      "!!**/*.wasm.js",
+      "!!**/src-electron/main/utils/picker.html"
+    ]
   },
   "formatter": {
     "enabled": true,
@@ -18,7 +24,7 @@
       "suspicious": {
         "useAwait": "warn"
       },
-      "recommended": true,
+      "preset": "recommended",
       "a11y": "off"
     }
   },
