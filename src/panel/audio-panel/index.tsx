@@ -7,7 +7,7 @@ import { EApiProviderType } from "@/store/rehydrate/rehydrate-constant";
 import { togglePanelExpansion } from "@/store/settings";
 import store from "@/store/store";
 import { loadMicDevices } from "@/utils";
-import invoke, { NATIVE_COMMAND } from "../../cross-platform/invoke";
+import { sendToVrcChat } from "@/utils/vrc-chat-queue";
 import { useAppDispatch, useAppSelector } from "../../store/hook";
 import globalStyles from "../../styles/index.module.css";
 import eventBus, { EventBusEvent } from "../../utils/event-bus";
@@ -83,9 +83,7 @@ export default function AudioPanel() {
               sendText = transcriptionResult;
             }
 
-            invoke(NATIVE_COMMAND.SEND_TO_VRC_CHAT, {
-              text: sendText,
-            });
+            sendToVrcChat(sendText);
             eventBus.emit(
               EventBusEvent.ADD_LOG,
               t("识别成功", {
@@ -216,9 +214,7 @@ export default function AudioPanel() {
       });
       sendText = translationResult;
 
-      invoke(NATIVE_COMMAND.SEND_TO_VRC_CHAT, {
-        text: sendText,
-      });
+      sendToVrcChat(sendText);
       eventBus.emit(
         EventBusEvent.ADD_LOG,
         t("手动翻译成功", {
