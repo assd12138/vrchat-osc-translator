@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { transcriptionRouter, translateRouter } from "@/api/commonRouter";
 import { RUNTIME, runtime } from "@/cross-platform/environmentDetect";
+import invoke, { NATIVE_COMMAND } from "@/cross-platform/invoke";
 import { EApiProviderType } from "@/store/rehydrate/rehydrate-constant";
 import { togglePanelExpansion } from "@/store/settings";
 import store from "@/store/store";
@@ -257,6 +258,16 @@ export default function AudioPanel() {
           </button>
           <button onClick={refresh} className={globalStyles.button}>
             {t("刷新")}
+          </button>
+          <button
+            onClick={() => {
+              invoke(NATIVE_COMMAND.INIT_SHERPA_TRANSCRIPTION, {
+                modelPath: ".",
+              });
+            }}
+            className={globalStyles.button}
+          >
+            test
           </button>
           {[RUNTIME.TAURI, RUNTIME.WEB].includes(runtime) && (
             <button onClick={getDeviceManually} className={globalStyles.button}>

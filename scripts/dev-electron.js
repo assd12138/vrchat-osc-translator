@@ -21,7 +21,7 @@ const publicConfig = {
   bundle: true,
   platform: "node",
   target: "node24",
-  external: ["electron"],
+  external: ["electron", "sherpa-onnx", "decibri"],
   format: "cjs",
   sourcemap: true,
   loader: { ".html": "text" },

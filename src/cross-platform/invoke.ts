@@ -13,18 +13,21 @@ export enum NATIVE_COMMAND {
   SEND_TO_VRC_CHAT = "send_to_vrc_chat",
   /** 仅electron */
   OPEN_EXTERNAL = "open_external",
+  INIT_SHERPA_TRANSCRIPTION = "init_sherpa_transcription",
 }
 
 // 命令参数类型映射
 interface CommandArgsMap {
   [NATIVE_COMMAND.SEND_TO_VRC_CHAT]: SEND_TO_VRC_CHAT_REQUEST;
   [NATIVE_COMMAND.OPEN_EXTERNAL]: OPEN_EXTERNAL_REQUEST;
+  [NATIVE_COMMAND.INIT_SHERPA_TRANSCRIPTION]: { modelPath: string };
 }
 
 // 命令返回值类型映射
 interface CommandReturnMap {
   [NATIVE_COMMAND.SEND_TO_VRC_CHAT]: undefined;
   [NATIVE_COMMAND.OPEN_EXTERNAL]: undefined;
+  [NATIVE_COMMAND.INIT_SHERPA_TRANSCRIPTION]: undefined;
 }
 
 interface SEND_TO_VRC_CHAT_REQUEST extends Record<string, string> {
