@@ -1,26 +1,34 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: 对应的库暂未提供定义文件，所以允许any */
+import { globalVariant } from "../../globalVariant";
+
 const sherpa = require("sherpa-onnx");
 
 export const initRecognizer = ({ modelPath }: { modelPath: string }) => {
   console.log({ modelPath, sherpa });
-  const config = {
-    featConfig: { sampleRate: 16000, featureDim: 80 },
-    modelConfig: {
-      transducer: {
-        encoder: `${modelPath}/encoder-epoch-99-avg-1.onnx`,
-        decoder: `${modelPath}/decoder-epoch-99-avg-1.onnx`,
-        joiner: `${modelPath}/joiner-epoch-99-avg-1.onnx`,
+  try {
+    const config = {
+      featConfig: { sampleRate: 16000, featureDim: 80 },
+      modelConfig: {
+        transducer: {
+          encoder: `${modelPath}/encoder-epoch-99-avg-1.onnx`,
+          decoder: `${modelPath}/decoder-epoch-99-avg-1.onnx`,
+          joiner: `${modelPath}/joiner-epoch-99-avg-1.onnx`,
+        },
+        tokens: `${modelPath}/tokens.txt`,
+        numThreads: 2,
+        provider: "cpu",
+        modelType: "zipformer",
       },
-      tokens: `${modelPath}/tokens.txt`,
-      numThreads: 2,
-      provider: "cpu",
-      modelType: "zipformer",
-    },
-  };
-  const recognizer = new sherpa.createOnlineRecognizer(config);
-  const stream = recognizer.createStream();
+    };
+    const recognizer = new sherpa.createOnlineRecognizer(config);
+    const stream = recognizer.createStream();
 
-  return { recognizer, stream };
+    globalVariant.recognizer = recognizer;
+    globalVariant.stream = stream;
+    return { recognizer, stream };
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 // export const startRecognition = ({
