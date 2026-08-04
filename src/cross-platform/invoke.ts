@@ -7,6 +7,7 @@ declare global {
     electronAPI?: ElectronAPI;
     electronPostAPI?: {
       sendVoiceToSherpa: (data: Buffer) => void;
+      onSherpaResult: (callback: (text: string) => void) => void;
     };
     __TAURI__?: unknown;
   }

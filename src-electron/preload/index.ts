@@ -44,5 +44,17 @@ ipcPostApi.sendVoiceToSherpa = (data: Buffer) => {
   sendVoiceToSherpaPort.port2?.postMessage(data);
 };
 
+ipcPostApi.onSherpaResult = (callback: (text: string) => void) => {
+  if (!sendVoiceToSherpaPort.port1 || !sendVoiceToSherpaPort.port2) {
+    const { port1, port2 } = new MessageChannel();
+    sendVoiceToSherpaPort.port1 = port1;
+    sendVoiceToSherpaPort.port2 = port2;
+    ipcRenderer.postMessage("init_sherpa_recognize_port", null, [port1]);
+  }
+  sendVoiceToSherpaPort.port2?.on("message", (event) => {
+    callback(event.data as string);
+  });
+};
+
 contextBridge.exposeInMainWorld("electronAPI", ipcApi);
 contextBridge.exposeInMainWorld("electronPostAPI", ipcPostApi);

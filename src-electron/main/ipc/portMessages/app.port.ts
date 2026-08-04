@@ -7,8 +7,10 @@ export function initSherpaRecognizePort(event: IpcMainEvent) {
 
   port.on("message", (event) => {
     const data = event.data as Buffer;
-    console.log("Received audio data from renderer:", data);
-    sendAudioBufferToSherpa(data);
+    const newText = sendAudioBufferToSherpa(data);
+    if (newText) {
+      port.postMessage(newText);
+    }
   });
   port.start();
 }

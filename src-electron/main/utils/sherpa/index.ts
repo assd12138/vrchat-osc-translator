@@ -31,7 +31,7 @@ export const initRecognizer = ({ modelPath }: { modelPath: string }) => {
   }
 };
 
-export const sendAudioBufferToSherpa = (chunk: Buffer) => {
+export const sendAudioBufferToSherpa = (chunk: Buffer): string | null => {
   const int16 = new Int16Array(
     chunk.buffer,
     chunk.byteOffset,
@@ -45,7 +45,7 @@ export const sendAudioBufferToSherpa = (chunk: Buffer) => {
   const { recognizer, stream } = globalVariant;
   if (!recognizer || !stream) {
     console.error("Recognizer or stream is not initialized.");
-    return;
+    return null;
   }
 
   stream.acceptWaveform(16000, float32);
@@ -54,9 +54,7 @@ export const sendAudioBufferToSherpa = (chunk: Buffer) => {
   }
 
   const text = recognizer.getResult(stream).text.trim();
-  if (text) {
-    console.log(`\r${text}`);
-  }
+  return text || null;
 };
 
 export const cleanRecognizer = ({
