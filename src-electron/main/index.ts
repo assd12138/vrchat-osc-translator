@@ -7,7 +7,7 @@ import {
   protocol,
   session,
 } from "electron";
-import { initializeIpcRouter } from "./ipc";
+import { initializeIpcPortRouter, initializeIpcRouter } from "./ipc";
 import { showScreenPicker } from "./utils/screen-picker";
 
 // 判断是否为开发环境
@@ -73,16 +73,7 @@ function createMainWindow() {
   });
 }
 
-// 应用生命周期
-app.commandLine.appendSwitch(
-  "--enable-features",
-  "WebMachineLearningNeuralNetwork",
-);
-app.whenReady().then(() => {
-  initializeIpcRouter();
-  registerProtocol();
-  createMainWindow();
-
+function registerScreenPickerHandler() {
   // 拦截渲染进程的 getDisplayMedia 请求，弹出模态选择器让用户选择屏幕或窗口。
   // 始终忽略音频：回调只包含 video。
   session.defaultSession.setDisplayMediaRequestHandler(
@@ -104,6 +95,19 @@ app.whenReady().then(() => {
       }
     },
   );
+}
+
+// 应用生命周期
+app.commandLine.appendSwitch(
+  "--enable-features",
+  "WebMachineLearningNeuralNetwork",
+);
+app.whenReady().then(() => {
+  initializeIpcRouter();
+  initializeIpcPortRouter();
+  registerProtocol();
+  createMainWindow();
+  registerScreenPickerHandler();
 
   app.on("activate", () => {
     // macOS通常在点击dock图标时重新创建窗口

@@ -1,9 +1,13 @@
 import { MicVAD } from "@ricky0123/vad-web";
+import { Microphone } from "decibri";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { transcriptionRouter, translateRouter } from "@/api/commonRouter";
 import { RUNTIME, runtime } from "@/cross-platform/environmentDetect";
-import invoke, { NATIVE_COMMAND } from "@/cross-platform/invoke";
+import invoke, {
+  electronPostAPI,
+  NATIVE_COMMAND,
+} from "@/cross-platform/invoke";
 import { EApiProviderType } from "@/store/rehydrate/rehydrate-constant";
 import { togglePanelExpansion } from "@/store/settings";
 import store from "@/store/store";
@@ -232,6 +236,19 @@ export default function AudioPanel() {
     }
   };
 
+  const streamMicStart = async () => {
+    await invoke(NATIVE_COMMAND.INIT_SHERPA_TRANSCRIPTION, {
+      modelPath: ".",
+    });
+
+    const mic = new Microphone({ sampleRate: 16000 });
+    mic.on("data", (chunk) => {
+      electronPostAPI?.sendVoiceToSherpa(chunk);
+    });
+    // biome-ignore lint/suspicious/noExplicitAny: 类型定义不全
+    await (mic as any).start();
+  };
+
   return (
     <div className={globalStyles.panel}>
       <div className={globalStyles.title}>
@@ -259,15 +276,8 @@ export default function AudioPanel() {
           <button onClick={refresh} className={globalStyles.button}>
             {t("刷新")}
           </button>
-          <button
-            onClick={() => {
-              invoke(NATIVE_COMMAND.INIT_SHERPA_TRANSCRIPTION, {
-                modelPath: ".",
-              });
-            }}
-            className={globalStyles.button}
-          >
-            test
+          <button onClick={streamMicStart} className={globalStyles.button}>
+            stream mic
           </button>
           {[RUNTIME.TAURI, RUNTIME.WEB].includes(runtime) && (
             <button onClick={getDeviceManually} className={globalStyles.button}>

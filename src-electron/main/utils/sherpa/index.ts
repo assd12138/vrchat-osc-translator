@@ -31,49 +31,33 @@ export const initRecognizer = ({ modelPath }: { modelPath: string }) => {
   }
 };
 
-// export const startRecognition = ({
-//   recognizer,
-//   stream,
-//   channels = 1,
-//   onText,
-// }: {
-//   recognizer: any;
-//   stream: any;
-//   channels?: number;
-//   onText?: (text: string) => void;
-// }) => {
-//   const mic = new Microphone({ sampleRate: 16000, channels });
-//   let lastText = "";
+export const sendAudioBufferToSherpa = (chunk: Buffer) => {
+  const int16 = new Int16Array(
+    chunk.buffer,
+    chunk.byteOffset,
+    chunk.length / 2,
+  );
+  const float32 = new Float32Array(int16.length);
+  for (let i = 0; i < int16.length; i++) {
+    float32[i] = int16[i] / 32768;
+  }
 
-//   mic.on("data", (chunk: Int16Array) => {
-//     // 将int16转换为float32
-//     const int16 = new Int16Array(
-//       chunk.buffer,
-//       chunk.byteOffset,
-//       chunk.length / 2,
-//     );
-//     const float32 = new Float32Array(int16.length);
-//     for (let i = 0; i < int16.length; i++) {
-//       float32[i] = int16[i] / 32768;
-//     }
+  const { recognizer, stream } = globalVariant;
+  if (!recognizer || !stream) {
+    console.error("Recognizer or stream is not initialized.");
+    return;
+  }
 
-//     stream.acceptWaveform(16000, float32);
-//     while (recognizer.isReady(stream)) {
-//       recognizer.decode(stream);
-//     }
+  stream.acceptWaveform(16000, float32);
+  while (recognizer.isReady(stream)) {
+    recognizer.decode(stream);
+  }
 
-//     // 获取片段结果
-//     const text = recognizer.getResult(stream).text.trim();
-//     if (text && text !== lastText) {
-//       lastText = text;
-//       if (onText) {
-//         onText(text);
-//       } else {
-//         console.log(`\r${text}`);
-//       }
-//     }
-//   });
-// };
+  const text = recognizer.getResult(stream).text.trim();
+  if (text) {
+    console.log(`\r${text}`);
+  }
+};
 
 export const cleanRecognizer = ({
   recognizer,

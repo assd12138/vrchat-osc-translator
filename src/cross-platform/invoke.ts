@@ -5,6 +5,9 @@ import { RUNTIME, runtime } from "./environmentDetect";
 declare global {
   interface Window {
     electronAPI?: ElectronAPI;
+    electronPostAPI?: {
+      sendVoiceToSherpa: (data: Buffer) => void;
+    };
     __TAURI__?: unknown;
   }
 }
@@ -57,3 +60,5 @@ export default function invoke<T extends NATIVE_COMMAND>(
     return {};
   });
 }
+
+export const electronPostAPI = window.electronPostAPI;

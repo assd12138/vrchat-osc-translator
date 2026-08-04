@@ -374,11 +374,13 @@ export default function OcrPanel() {
           <textarea
             style={{ width: "42%", height: "200px" }}
             value={ocr}
+            readOnly
           ></textarea>
           ➡
           <textarea
             style={{ width: "42%", height: "200px" }}
             value={trans}
+            readOnly
           ></textarea>
         </div>
 

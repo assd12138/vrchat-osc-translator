@@ -3,7 +3,7 @@ import { contextBridge, ipcRenderer } from "electron";
 import { camelToSnake } from "../shared/utils";
 
 const ipcApi: Record<string, any> = {};
-
+const ipcPostApi: Record<string, any> = {};
 // 定义要暴露的 API 函数名列表 (驼峰式)
 const apiFunctions = [
   "open_external",
@@ -26,4 +26,23 @@ apiFunctions.forEach((funcName) => {
   };
 });
 
+const sendVoiceToSherpaPort: {
+  port1: MessagePort | null;
+  port2: MessagePort | null;
+} = {
+  port1: null,
+  port2: null,
+};
+ipcPostApi.sendVoiceToSherpa = (data: Buffer) => {
+  // 初始化port
+  if (!sendVoiceToSherpaPort.port1 || !sendVoiceToSherpaPort.port2) {
+    const { port1, port2 } = new MessageChannel();
+    sendVoiceToSherpaPort.port1 = port1;
+    sendVoiceToSherpaPort.port2 = port2;
+    ipcRenderer.postMessage("init_sherpa_recognize_port", null, [port1]);
+  }
+  sendVoiceToSherpaPort.port2?.postMessage(data);
+};
+
 contextBridge.exposeInMainWorld("electronAPI", ipcApi);
+contextBridge.exposeInMainWorld("electronPostAPI", ipcPostApi);

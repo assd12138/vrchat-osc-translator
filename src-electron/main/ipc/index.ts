@@ -1,7 +1,11 @@
 import { ipcMain } from "electron/main";
-import type { IpcControllerMap } from "../../shared/ipc.types";
+import type {
+  IpcControllerMap,
+  IpcPortControllerMap,
+} from "../../shared/ipc.types";
 import { camelToSnake } from "../../shared/utils";
 import * as appController from "./controllers/app.controller";
+import * as appPortController from "./portMessages/app.port";
 
 // 1. 将所有控制器放入一个数组，方便统一管理
 const controllers: IpcControllerMap[] = [appController];
@@ -35,6 +39,33 @@ export function initializeIpcRouter() {
           }
         });
         console.log(`[IPC Route] Registered: ${channel}`);
+      }
+    }
+  });
+}
+
+const portControllers: IpcPortControllerMap[] = [appPortController];
+
+export function initializeIpcPortRouter() {
+  console.log("Initializing IPC Port Router...");
+  portControllers.forEach((controller) => {
+    for (const functionName in controller) {
+      if (typeof controller[functionName] === "function") {
+        const handler = controller[functionName];
+        const channel = camelToSnake(functionName);
+
+        ipcMain.on(channel, (event) => {
+          console.log(`[IPC Port Recv] ${channel}`, event.ports);
+          try {
+            handler(event);
+          } catch (error) {
+            if (!(error instanceof Error)) {
+              return;
+            }
+            console.error(`[IPC Port Error] on channel ${channel}:`, error);
+          }
+        });
+        console.log(`[IPC Port Route] Registered: ${channel}`);
       }
     }
   });
