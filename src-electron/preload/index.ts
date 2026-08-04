@@ -17,12 +17,7 @@ apiFunctions.forEach((funcName) => {
     console.log(`[IPC Send] ${funcName}`, args);
     const channel = camelToSnake(funcName);
     const result = await ipcRenderer.invoke(channel, ...args);
-    if (result?.success) {
-      return result?.data;
-    } else {
-      // 如果失败，直接抛出错误，方便调用方使用 try...catch
-      throw new Error(result?.error?.message);
-    }
+    return result;
   };
 });
 
@@ -42,18 +37,6 @@ ipcPostApi.sendVoiceToSherpa = (data: Buffer) => {
     ipcRenderer.postMessage("init_sherpa_recognize_port", null, [port1]);
   }
   sendVoiceToSherpaPort.port2?.postMessage(data);
-};
-
-ipcPostApi.onSherpaResult = (callback: (text: string) => void) => {
-  if (!sendVoiceToSherpaPort.port1 || !sendVoiceToSherpaPort.port2) {
-    const { port1, port2 } = new MessageChannel();
-    sendVoiceToSherpaPort.port1 = port1;
-    sendVoiceToSherpaPort.port2 = port2;
-    ipcRenderer.postMessage("init_sherpa_recognize_port", null, [port1]);
-  }
-  sendVoiceToSherpaPort.port2?.on("message", (event) => {
-    callback(event.data as string);
-  });
 };
 
 contextBridge.exposeInMainWorld("electronAPI", ipcApi);

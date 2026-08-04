@@ -240,10 +240,6 @@ export default function AudioPanel() {
     await invoke(NATIVE_COMMAND.INIT_SHERPA_TRANSCRIPTION, {
       modelPath: ".",
     });
-    electronPostAPI?.onSherpaResult((text) => {
-      console.log(`[stream] ${text}`);
-      eventBus.emit(EventBusEvent.ADD_LOG, `[stream] ${text}`);
-    });
 
     const mic = new Microphone({ sampleRate: 16000 });
     mic.on("data", (chunk) => {

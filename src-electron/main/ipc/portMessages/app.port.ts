@@ -8,9 +8,8 @@ export function initSherpaRecognizePort(event: IpcMainEvent) {
   port.on("message", (event) => {
     const data = event.data as Buffer;
     const newText = sendAudioBufferToSherpa(data);
-    if (newText) {
-      port.postMessage(newText);
-    }
+    //需要把这个结果告知渲染环境
+    console.log(newText);
   });
   port.start();
 }
