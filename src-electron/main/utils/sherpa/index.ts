@@ -1,8 +1,8 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: 对应的库暂未提供定义文件，所以允许any */
 import { globalVariant } from "../../globalVariant";
 
-const sherpa = require("sherpa-onnx");
-
+// const sherpa = require("sherpa-onnx");
+const sherpa = {};
 export const initRecognizer = ({ modelPath }: { modelPath: string }) => {
   console.log({ modelPath, sherpa });
   try {
