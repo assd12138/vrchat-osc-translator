@@ -88,6 +88,48 @@ export const transcriptionAudio = (data: {
   });
 };
 
+/**
+ * 通过 chat/completions 接口转录音频（input_audio 格式）
+ */
+export const transcriptionAudioByChat = async (data: {
+  /** 音频文件 */
+  file: File;
+  api: string;
+  model: string;
+  auth: string;
+}) => {
+  const base64 = await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(data.file);
+  });
+  return request(data.api, {
+    method: "POST",
+    body: JSON.stringify({
+      model: data.model,
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "input_audio",
+              input_audio: {
+                data: base64,
+              },
+            },
+          ],
+        },
+      ],
+      stream: false,
+    }),
+    headers: {
+      Authorization: `Bearer ${data.auth}`,
+      "Content-Type": "application/json",
+    },
+  });
+};
+
 export const translateByAI = (data: {
   token: string;
   text: string;

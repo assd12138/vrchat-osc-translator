@@ -236,6 +236,7 @@ export default function AudioPanel() {
     }
   };
 
+  // biome-ignore lint/correctness/noUnusedVariables: 暂时不适用
   const streamMicStart = async () => {
     await invoke(NATIVE_COMMAND.INIT_SHERPA_TRANSCRIPTION, {
       modelPath: ".",
@@ -276,9 +277,9 @@ export default function AudioPanel() {
           <button onClick={refresh} className={globalStyles.button}>
             {t("刷新")}
           </button>
-          <button onClick={streamMicStart} className={globalStyles.button}>
+          {/* <button onClick={streamMicStart} className={globalStyles.button}>
             stream mic
-          </button>
+          </button> */}
           {[RUNTIME.TAURI, RUNTIME.WEB].includes(runtime) && (
             <button onClick={getDeviceManually} className={globalStyles.button}>
               {t("获取麦克风")}

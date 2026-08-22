@@ -8,6 +8,7 @@ import { extractLanguagesFromTemplate } from "@/utils";
 import { ocrByOmni, translateAudioDirectlyFromOmni } from "./omni";
 import {
   transcriptionAudio,
+  transcriptionAudioByChat,
   translateByAI,
   translateByAISingleLanguage,
 } from "./translate";
@@ -156,13 +157,26 @@ export const transcriptionRouter = async (data: {
     lastModified: Date.now(),
   });
   if (settings.api_provider_type === EApiProviderType.CUSTOM) {
-    const transcriptionRes = await transcriptionAudio({
-      file,
-      api: settings.transcription_url,
-      auth: settings.transcription_token,
-      model: settings.transcription_model,
-    });
-    result = transcriptionRes.text.replace(/^[\s\S]*?<asr_text>/, "");
+    if (settings.transcription_url.endsWith("chat/completions")) {
+      const transcriptionRes = await transcriptionAudioByChat({
+        file,
+        api: settings.transcription_url,
+        auth: settings.transcription_token,
+        model: settings.transcription_model,
+      });
+      result = (transcriptionRes.choices?.[0]?.message?.content ?? "").replace(
+        /^[\s\S]*?<asr_text>/,
+        "",
+      );
+    } else {
+      const transcriptionRes = await transcriptionAudio({
+        file,
+        api: settings.transcription_url,
+        auth: settings.transcription_token,
+        model: settings.transcription_model,
+      });
+      result = transcriptionRes.text.replace(/^[\s\S]*?<asr_text>/, "");
+    }
   } else if (settings.api_provider_type === EApiProviderType.OMNI) {
     const extractedLanguages = extractLanguagesFromTemplate(
       settings.outputTemplate,
