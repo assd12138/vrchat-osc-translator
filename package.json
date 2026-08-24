@@ -1,7 +1,7 @@
 {
   "name": "vrchat-translator",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
   "author": "ased12138",
   "description": "A simple translator for Vrchat",
   "type": "module",
