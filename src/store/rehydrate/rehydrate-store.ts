@@ -1,13 +1,10 @@
+import type { ApiConfig } from "../api-config";
 import type { PanelExpansionState } from "../settings";
-import {
-  type EApiProviderType,
-  REDUX_STORAGE_KEY,
-  rehydrateFlag,
-} from "./rehydrate-constant";
+import { REDUX_STORAGE_KEY, rehydrateFlag } from "./rehydrate-constant";
 
 export function redux_store(
   module: string,
-  data: string | EApiProviderType | boolean | string[] | PanelExpansionState,
+  data: string | boolean | string[] | PanelExpansionState | ApiConfig,
 ) {
   if (!rehydrateFlag.flag) return;
 

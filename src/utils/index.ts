@@ -90,7 +90,7 @@ export const generateTranslationPrompt = (
   languages: string[],
 ): string => {
   const langList = languages.join("/");
-  return `Translate the text within the brackets into ${langList}, without additional explanation.\n\n[${(text || "").replace(/\n/g, ". ")}]`;
+  return `Translate the text within the brackets into ${langList}, without additional explanation and brackets it self, if the content is already in the target language, output the original text.\n\n[${(text || "").replace(/\n/g, ". ")}]`;
 };
 
 export async function loadMicDevices() {

@@ -18,8 +18,8 @@ export default function Root() {
       <Audiopanel />
       <Translationpanel />
       <Settingpanel />
-      <Systemlog />
       <Ocrpanel />
+      <Systemlog />
     </div>
   );
 }

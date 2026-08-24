@@ -186,3 +186,581 @@
   color: var(--lg-text-faint);
   font-style: italic;
 }
+
+/* Provider configuration — a focused workspace rather than a settings table. */
+.apiChoices {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+  padding: 14px;
+  border: 1px solid rgba(124, 145, 180, 0.22);
+  border-radius: 14px;
+  background: linear-gradient(
+    135deg,
+    rgba(87, 109, 170, 0.13),
+    rgba(255, 255, 255, 0.025)
+  );
+}
+.choiceHeading,
+.modelsHeader,
+.listToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.choiceHeading span,
+.modelsHeader span,
+.listToolbar > span {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.choiceHeading small,
+.modelsHeader small {
+  color: var(--lg-text-faint);
+  font-size: 11px;
+}
+.selectionField {
+  display: grid;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--lg-text-muted);
+}
+.selectionField select,
+.profileGrid input,
+.modelCard input,
+.typePicker select {
+  width: 100%;
+  min-height: 32px;
+  box-sizing: border-box;
+  border: 1px solid rgba(130, 151, 186, 0.35);
+  border-radius: 8px;
+  padding: 6px 9px;
+  color: var(--lg-text);
+  background: rgba(12, 19, 34, 0.35);
+}
+.requiredMark {
+  display: inline-grid;
+  place-items: center;
+  width: 15px;
+  height: 15px;
+  margin-left: 6px;
+  border-radius: 50%;
+  color: #fff;
+  background: #c84c58;
+  font-size: 11px;
+}
+.batchChoice,
+.capabilities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 11px;
+  align-items: center;
+  font-size: 12px;
+  color: var(--lg-text-muted);
+}
+.batchChoice {
+  padding: 7px 9px;
+  border-left: 2px solid var(--lg-accent-1);
+  background: rgba(92, 117, 195, 0.08);
+}
+.providerLaunch {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  margin-top: 10px;
+  padding: 9px 12px;
+  border: 1px solid rgba(126, 148, 206, 0.45);
+  border-radius: 9px;
+  color: var(--lg-text);
+  background: rgba(97, 117, 186, 0.14);
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.16s ease,
+    background 0.16s ease;
+}
+.providerHeaderLaunch {
+  width: auto;
+  margin: 0 8px 0 0;
+  padding: 4px 8px;
+  font-size: 11px;
+}
+.providerLaunch:hover {
+  transform: translateY(-1px);
+  background: rgba(97, 117, 186, 0.27);
+}
+.providerDialog {
+  width: min(920px, calc(100vw - 28px));
+  max-height: min(820px, calc(100vh - 28px));
+  margin: auto;
+  padding: 0;
+  border: 1px solid rgba(151, 173, 222, 0.36);
+  border-radius: 18px;
+  color: var(--lg-text);
+  background: var(--lg-bg-0);
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.48);
+}
+.providerDialog::backdrop {
+  background: rgba(7, 12, 24, 0.58);
+  backdrop-filter: blur(5px);
+}
+.dialogShell {
+  overflow: auto;
+  max-height: inherit;
+}
+.dialogShell > header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid rgba(137, 158, 195, 0.2);
+  background: color-mix(in srgb, var(--lg-bg-0) 88%, transparent);
+  backdrop-filter: blur(15px);
+}
+.dialogHeaderIntro {
+  display: grid;
+  gap: 3px;
+}
+.dialogShell > header span {
+  font-size: 18px;
+  font-weight: 800;
+}
+.dialogShell > header small {
+  color: var(--lg-text-faint);
+}
+.dialogCloseButton,
+.removeModel {
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 50%;
+  color: var(--lg-text-muted);
+  background: transparent;
+  font-size: 20px;
+  cursor: pointer;
+}
+.dialogCloseButton:hover,
+.removeModel:hover {
+  color: var(--lg-text);
+  background: rgba(255, 255, 255, 0.1);
+}
+.providerList,
+.editor {
+  padding: 22px 24px;
+}
+.listToolbar {
+  margin-bottom: 16px;
+}
+.primaryButton,
+.listToolbar button,
+.modelsHeader button,
+.discovery button {
+  border: 0;
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: white;
+  background: linear-gradient(135deg, var(--lg-accent-1), var(--lg-accent-2));
+  font-weight: 700;
+  cursor: pointer;
+}
+.emptyState {
+  display: grid;
+  place-items: center;
+  gap: 8px;
+  min-height: 250px;
+  text-align: center;
+  border: 1px dashed rgba(143, 162, 204, 0.42);
+  border-radius: 13px;
+  background: rgba(93, 117, 184, 0.06);
+}
+.emptyState strong {
+  font-size: 16px;
+}
+.emptyState p {
+  max-width: 300px;
+  margin: 0 0 8px;
+  color: var(--lg-text-muted);
+  font-size: 13px;
+}
+.providerCards {
+  display: grid;
+  gap: 10px;
+}
+.providerCards article {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 15px;
+  border: 1px solid rgba(139, 159, 197, 0.25);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.035);
+}
+.providerCardInfo {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+.providerCards strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.providerCards span {
+  overflow: hidden;
+  max-width: 440px;
+  color: var(--lg-text-faint);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.providerCards small {
+  color: var(--lg-text-muted);
+}
+.providerCards nav {
+  display: flex;
+  gap: 6px;
+}
+.providerCardAction,
+.editorActions button,
+.backButton {
+  border: 1px solid rgba(142, 160, 198, 0.33);
+  border-radius: 7px;
+  padding: 6px 9px;
+  color: var(--lg-text-muted);
+  cursor: pointer;
+}
+.providerCardAction:hover,
+.editorActions button:hover,
+.backButton:hover {
+  color: var(--lg-text);
+  background: rgba(255, 255, 255, 0.08);
+}
+.providerCards .dangerButton {
+  color: #d66974;
+}
+.dialogShell footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 24px 20px;
+}
+.dialogShell footer button {
+  border: 0;
+  color: var(--lg-text-muted);
+  background: none;
+  cursor: pointer;
+}
+.editor {
+  display: grid;
+  gap: 18px;
+}
+.editorIntro {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 800;
+}
+.backButton {
+  padding: 5px 8px;
+}
+.profileGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 13px;
+}
+.profileGrid label {
+  display: grid;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--lg-text-muted);
+}
+.profileGrid label:first-child {
+  grid-column: 1 / -1;
+}
+.profileGrid small {
+  color: var(--lg-text-faint);
+}
+.inlineError {
+  color: #d85d68;
+}
+.keyField > div {
+  display: flex;
+}
+.keyField input {
+  border-radius: 8px 0 0 8px;
+}
+.keyField button {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  border: 1px solid rgba(130, 151, 186, 0.35);
+  border-left: 0;
+  border-radius: 0 8px 8px 0;
+  color: var(--lg-text-muted);
+  background: rgba(12, 19, 34, 0.35);
+  cursor: pointer;
+}
+.keyIcon {
+  display: block;
+  width: 18px;
+  height: 18px;
+  background-color: currentColor;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: contain;
+}
+.keyIconVisible {
+  mask-image: url("../../images/eye.svg");
+  -webkit-mask-image: url("../../images/eye.svg");
+}
+.keyIconHidden {
+  mask-image: url("../../images/eye-off.svg");
+  -webkit-mask-image: url("../../images/eye-off.svg");
+}
+.discovery {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 34px;
+}
+.discovery button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+.discovery span {
+  color: var(--lg-text-faint);
+  font-size: 12px;
+}
+.modelsHeader {
+  padding-top: 6px;
+  border-top: 1px solid rgba(137, 158, 195, 0.17);
+}
+.modelsHeaderInfo {
+  display: grid;
+  gap: 3px;
+}
+.modelList {
+  display: grid;
+  gap: 10px;
+}
+.modelEmpty {
+  padding: 22px;
+  border: 1px dashed rgba(143, 162, 204, 0.3);
+  border-radius: 10px;
+  color: var(--lg-text-faint);
+  text-align: center;
+  font-size: 13px;
+}
+.modelCard {
+  position: relative;
+  display: grid;
+  gap: 10px;
+  padding: 13px 52px 13px 13px;
+  border: 1px solid rgba(137, 158, 195, 0.24);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.025);
+}
+.modelTop {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 8px;
+}
+.modelIdField {
+  display: contents;
+}
+.modelIdField > span {
+  grid-column: 1 / -1;
+}
+.modelIdField > input,
+.modelIdField > small {
+  grid-column: 1;
+}
+.modelTop .candidateWrap {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: end;
+  position: relative;
+}
+.modelIdField > span,
+.typePicker {
+  display: grid;
+  gap: 5px;
+  color: var(--lg-text-muted);
+  font-size: 12px;
+}
+.modelCard .removeModel {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+.candidateWrap > button {
+  min-height: 32px;
+  border: 1px solid rgba(142, 160, 198, 0.33);
+  border-radius: 7px;
+  color: var(--lg-text-muted);
+  background: transparent;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.candidateMenu {
+  position: absolute;
+  z-index: 8;
+  right: 0;
+  top: calc(100% + 6px);
+  width: max(280px, 28vw);
+  max-height: 250px;
+  overflow: auto;
+  padding: 7px;
+  border: 1px solid rgba(146, 167, 209, 0.42);
+  border-radius: 9px;
+  background: var(--lg-bg-0);
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.3);
+}
+.candidateMenuHeader {
+  display: flex;
+  justify-content: space-between;
+  padding: 3px 5px 7px;
+}
+.candidateMenu button {
+  display: block;
+  width: 100%;
+  border: 0;
+  border-radius: 5px;
+  padding: 7px 6px;
+  color: var(--lg-text-muted);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+.candidateMenu button:hover {
+  background: rgba(118, 143, 205, 0.16);
+  color: var(--lg-text);
+}
+.candidateMenu > div button {
+  width: auto;
+  padding: 0 5px;
+  text-align: center;
+}
+.candidateMenu p {
+  margin: 8px 5px;
+  color: var(--lg-text-faint);
+  font-size: 12px;
+}
+.typePicker {
+  grid-template-columns: 105px 1fr;
+  align-items: center;
+}
+.capabilities {
+  padding-top: 8px;
+  border-top: 1px solid rgba(137, 158, 195, 0.15);
+}
+.capabilities label {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+.modelCard .capabilities input[type="checkbox"],
+.modelCard .capabilities input[type="checkbox"]:checked {
+  all: revert;
+  appearance: auto;
+  -webkit-appearance: checkbox;
+}
+.modelCard .capabilities input[type="checkbox"]::before,
+.modelCard .capabilities input[type="checkbox"]:checked::before {
+  all: revert;
+  content: revert;
+}
+.editorActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 4px;
+}
+.editorActions .primaryButton {
+  color: #fff;
+}
+[data-theme="default"] .apiChoices,
+[data-theme="default"] .providerCards article,
+[data-theme="default"] .modelCard {
+  background: #fff;
+  border-color: #d7e0eb;
+}
+[data-theme="default"] .selectionField select,
+[data-theme="default"] .profileGrid input,
+[data-theme="default"] .modelCard input,
+[data-theme="default"] .typePicker select,
+[data-theme="default"] .keyField button {
+  background: #fff;
+  border-color: #cdd8e5;
+}
+[data-theme="default"] .providerDialog,
+[data-theme="default"] .candidateMenu {
+  background: #f9fbfd;
+}
+[data-theme="hand-drawn"] .providerDialog,
+[data-theme="hand-drawn"] .apiChoices,
+[data-theme="hand-drawn"] .providerCards article,
+[data-theme="hand-drawn"] .modelCard {
+  border-radius: 7px 11px 8px 10px;
+  border-color: var(--ink-medium);
+  box-shadow: 2px 3px 0 rgba(45, 58, 71, 0.08);
+}
+[data-theme="hand-drawn"] .providerLaunch,
+[data-theme="hand-drawn"] .primaryButton {
+  border-radius: 5px 8px 6px 7px;
+}
+@media (max-width: 580px) {
+  .providerDialog {
+    width: calc(100vw - 16px);
+    max-height: calc(100vh - 16px);
+  }
+  .dialogShell > header,
+  .providerList,
+  .editor {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+  .profileGrid {
+    grid-template-columns: 1fr;
+  }
+  .profileGrid label:first-child {
+    grid-column: auto;
+  }
+  .providerCards article {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .providerCards nav {
+    width: 100%;
+  }
+  .providerCards nav button {
+    flex: 1;
+  }
+  .modelTop {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .candidateMenu {
+    left: 0;
+    right: auto;
+    width: min(280px, calc(100vw - 62px));
+  }
+  .typePicker {
+    grid-template-columns: 1fr;
+  }
+  .discovery {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .dialogShell footer {
+    padding: 0 15px 15px;
+  }
+}

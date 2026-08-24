@@ -1,19 +1,16 @@
 import i18next from "i18next";
 import { useTranslation } from "react-i18next";
 import { useAppDispatch, useAppSelector } from "../../store/hook";
-import { EApiProviderType } from "../../store/rehydrate/rehydrate-constant";
 import {
-  reinit,
-  setApiProviderType,
   setLanguage,
   setTheme,
   type ThemePreference,
   togglePanelExpansion,
 } from "../../store/settings";
 import globalStyles from "../../styles/index.module.css";
-import CustomProviderConfig from "./components/CustomProviderConfig";
-import OmniProviderConfig from "./components/OmniProviderConfig";
-import styles from "./index.module.css";
+import ProviderSettings, {
+  ModelSelections,
+} from "./components/ProviderSettings";
 
 export default function SettingPanel() {
   const settings = useAppSelector((state) => state.settings);
@@ -26,32 +23,11 @@ export default function SettingPanel() {
     dispatch(setLanguage(language));
   };
 
-  const handleApiProviderChange = (provider: EApiProviderType) => {
-    dispatch(setApiProviderType(provider));
-  };
-
-  const renderProviderConfig = () => {
-    switch (settings.api_provider_type) {
-      case EApiProviderType.CUSTOM:
-        return <CustomProviderConfig />;
-      case EApiProviderType.OMNI:
-        return <OmniProviderConfig />;
-      default:
-        return null;
-    }
-  };
-
   return (
     <div className={globalStyles.panel}>
       <div className={globalStyles.title}>
         ⚙️ {t("系统设置")}&nbsp;
-        <button
-          type="button"
-          className={`${styles.initBtn} ${globalStyles.panelHeaderAction}`}
-          onClick={() => dispatch(reinit())}
-        >
-          {t("恢复默认")}
-        </button>
+        <ProviderSettings />
         <button
           type="button"
           className={globalStyles.panelToggle}
@@ -88,18 +64,7 @@ export default function SettingPanel() {
           <option value="liquid-glass">{t("流体玻璃")}</option>
           <option value="hand-drawn">{t("手绘风格")}</option>
         </select>
-        <label className={globalStyles.labelS}>{t("API供应商")}</label>
-        <select
-          className={globalStyles.selectS}
-          value={settings.api_provider_type}
-          onChange={(e) =>
-            handleApiProviderChange(e.target.value as EApiProviderType)
-          }
-        >
-          <option value={EApiProviderType.CUSTOM}>Custom</option>
-          <option value={EApiProviderType.OMNI}>Omni</option>
-        </select>
-        {renderProviderConfig()}
+        <ModelSelections />
       </div>
     </div>
   );

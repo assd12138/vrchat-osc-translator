@@ -34,3 +34,6 @@ stats.html
 
 #不上传C++编译结果文件
 src-cpp/*/build
+
+# Deepwork state
+.slim/deepwork/

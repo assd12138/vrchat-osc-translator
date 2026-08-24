@@ -1,7 +1,16 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import { languages } from "@/constants/language";
 import {
-  EApiProviderType,
+  type ApiConfig,
+  type ApiProvider,
+  createInitialApiConfig,
+  isProviderIdentifierAvailable,
+  type ModelSelection,
+  type ModelSlot,
+  sanitizeApiConfig,
+  type TranslationMode,
+} from "./api-config";
+import {
   REDUX_STORAGE_KEY,
   REHYDRATE_KEYS,
 } from "./rehydrate/rehydrate-constant";
@@ -28,37 +37,22 @@ export interface PanelExpansionState {
 }
 
 export interface SettingState {
-  transcription_url: string;
-  transcription_model: string;
-  transcription_token: string;
-  openai_api_url: string;
-  openai_model: string;
-  openai_token: string;
+  /** Deepwork provider configuration. This is the only persisted API configuration. */
+  apiConfig: ApiConfig;
   outputTemplate: string;
-  /** 批量翻译模式 - 每个语言单独发送请求（仅 CUSTOM provider） */
-  batchTranslate: boolean;
   language: string;
   ocrTargetLanguage: string;
   theme: ThemePreference;
   panelExpansion: PanelExpansionState;
-  api_provider_type: EApiProviderType;
-  /** Omni模式下是否保留音频base64类型信息 */
-  omni_keep_audio_type: boolean;
 }
 
 export const initialState: SettingState = {
-  transcription_url: import.meta.env.VITE_DEFAULT_TRANSCRIPTION_URL,
-  transcription_model: import.meta.env.VITE_DEFAULT_TRANSCRIPTION_MODEL,
-  transcription_token: import.meta.env.VITE_DEFAULT_TRANSCRIPTION_TOKEN,
-  openai_api_url: import.meta.env.VITE_DEFAULT_OPENAI_API_URL,
-  openai_model: import.meta.env.VITE_DEFAULT_OPENAI_MODEL,
-  openai_token: import.meta.env.VITE_DEFAULT_OPENAI_TOKEN,
+  apiConfig: createInitialApiConfig(),
   outputTemplate: `[中]#{zh}
 [En]#{en}
 [日]#{ja}
 [한]#{ko}
 [ru]#{ru}`,
-  batchTranslate: false,
   language: "auto",
   ocrTargetLanguage: getInitialOcrTargetLanguage(),
   theme: "default",
@@ -69,8 +63,6 @@ export const initialState: SettingState = {
     systemLog: true,
     ocr: true,
   },
-  api_provider_type: EApiProviderType.CUSTOM,
-  omni_keep_audio_type: false,
 };
 
 const settingsSlice = createSlice({
@@ -86,37 +78,60 @@ const settingsSlice = createSlice({
         }
       }
     },
-    setTranscriptionUrl: (state, action: PayloadAction<string>) => {
-      state.transcription_url = action.payload;
-      redux_store(REHYDRATE_KEYS.SETTING_TRANSCRIPTION_URL, action.payload);
-    },
-    setTranscriptionModel: (state, action: PayloadAction<string>) => {
-      state.transcription_model = action.payload;
-      redux_store(REHYDRATE_KEYS.SETTING_TRANSCRIPTION_MODEL, action.payload);
-    },
-    setTranscriptionToken: (state, action: PayloadAction<string>) => {
-      state.transcription_token = action.payload;
-      redux_store(REHYDRATE_KEYS.SETTING_TRANSCRIPTION_TOKEN, action.payload);
-    },
     setOutputTemplate: (state, action: PayloadAction<string>) => {
       state.outputTemplate = action.payload;
       redux_store(REHYDRATE_KEYS.SETTING_OUTPUT_TEMPLATE, action.payload);
     },
     setBatchTranslate: (state, action: PayloadAction<boolean>) => {
-      state.batchTranslate = action.payload;
-      redux_store(REHYDRATE_KEYS.SETTING_BATCH_TRANSLATE, action.payload);
+      state.apiConfig.batchTranslate = action.payload;
+      state.apiConfig = sanitizeApiConfig(state.apiConfig);
+      redux_store(REHYDRATE_KEYS.SETTING_API_CONFIG, state.apiConfig);
     },
-    setOpenaiApiUrl: (state, action: PayloadAction<string>) => {
-      state.openai_api_url = action.payload;
-      redux_store(REHYDRATE_KEYS.SETTING_OPENAI_API_URL, action.payload);
+    setTranslationMode: (state, action: PayloadAction<TranslationMode>) => {
+      state.apiConfig.translationMode = action.payload;
+      state.apiConfig = sanitizeApiConfig(state.apiConfig);
+      redux_store(REHYDRATE_KEYS.SETTING_API_CONFIG, state.apiConfig);
     },
-    setOpenaiModel: (state, action: PayloadAction<string>) => {
-      state.openai_model = action.payload;
-      redux_store(REHYDRATE_KEYS.SETTING_OPENAI_MODEL, action.payload);
+    setModelSelection: (
+      state,
+      action: PayloadAction<{ slot: ModelSlot; selection: ModelSelection }>,
+    ) => {
+      state.apiConfig.selections[action.payload.slot] =
+        action.payload.selection;
+      state.apiConfig = sanitizeApiConfig(state.apiConfig);
+      redux_store(REHYDRATE_KEYS.SETTING_API_CONFIG, state.apiConfig);
     },
-    setOpenaiToken: (state, action: PayloadAction<string>) => {
-      state.openai_token = action.payload;
-      redux_store(REHYDRATE_KEYS.SETTING_OPENAI_TOKEN, action.payload);
+    upsertProvider: (state, action: PayloadAction<ApiProvider>) => {
+      const provider = action.payload;
+      const identifier = provider.identifier.trim();
+      if (
+        !isProviderIdentifierAvailable(
+          identifier,
+          state.apiConfig.providers,
+          provider.uid,
+        )
+      ) {
+        return;
+      }
+      const index = state.apiConfig.providers.findIndex(
+        ({ uid }) => uid === provider.uid,
+      );
+      const nextProvider = { ...provider, identifier };
+      if (index === -1) state.apiConfig.providers.push(nextProvider);
+      else state.apiConfig.providers[index] = nextProvider;
+      state.apiConfig = sanitizeApiConfig(state.apiConfig);
+      redux_store(REHYDRATE_KEYS.SETTING_API_CONFIG, state.apiConfig);
+    },
+    removeProvider: (state, action: PayloadAction<string>) => {
+      state.apiConfig.providers = state.apiConfig.providers.filter(
+        ({ uid }) => uid !== action.payload,
+      );
+      state.apiConfig = sanitizeApiConfig(state.apiConfig);
+      redux_store(REHYDRATE_KEYS.SETTING_API_CONFIG, state.apiConfig);
+    },
+    /** Internal rehydrate action; not a user-facing configuration mutation. */
+    hydrateApiConfig: (state, action: PayloadAction<ApiConfig>) => {
+      state.apiConfig = sanitizeApiConfig(action.payload);
     },
     setLanguage: (state, action: PayloadAction<string>) => {
       state.language = action.payload;
@@ -142,33 +157,22 @@ const settingsSlice = createSlice({
       state.panelExpansion[panel] = !state.panelExpansion[panel];
       redux_store(REHYDRATE_KEYS.SETTING_PANEL_EXPANSION, state.panelExpansion);
     },
-    setApiProviderType: (state, action: PayloadAction<EApiProviderType>) => {
-      state.api_provider_type = action.payload;
-      redux_store(REHYDRATE_KEYS.SETTING_API_PROVIDER_TYPE, action.payload);
-    },
-    setOmniKeepAudioType: (state, action: PayloadAction<boolean>) => {
-      state.omni_keep_audio_type = action.payload;
-      redux_store(REHYDRATE_KEYS.SETTING_OMNI_KEEP_AUDIO_TYPE, action.payload);
-    },
   },
 });
 
 export const {
-  setTranscriptionUrl,
   setOutputTemplate,
   setBatchTranslate,
-  setOpenaiApiUrl,
-  setOpenaiModel,
-  setOpenaiToken,
+  setTranslationMode,
+  setModelSelection,
+  upsertProvider,
+  removeProvider,
   setLanguage,
   setOcrTargetLanguage,
   setTheme,
   setPanelExpansion,
   togglePanelExpansion,
-  setTranscriptionModel,
-  setTranscriptionToken,
-  setApiProviderType,
-  setOmniKeepAudioType,
+  hydrateApiConfig,
   reinit,
 } = settingsSlice.actions;
 

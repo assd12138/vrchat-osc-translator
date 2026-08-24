@@ -1,12 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  transformOCRRouter,
-  translateSingleLanguageRouter,
-} from "@/api/commonRouter";
+import { transformOCRRouter } from "@/api/commonRouter";
 import { languages } from "@/constants/language";
 import { useAppDispatch, useAppSelector } from "../../store/hook";
-import { EApiProviderType } from "../../store/rehydrate/rehydrate-constant";
 import {
   setOcrTargetLanguage,
   togglePanelExpansion,
@@ -78,11 +74,6 @@ export default function OcrPanel() {
     cropImageSrcRef.current = cropImageSrc;
   }, [cropImageSrc]);
 
-  // CUSTOM provider 不支持 OCR，隐藏面板
-  if (settings.api_provider_type === EApiProviderType.CUSTOM) {
-    return null;
-  }
-
   const runOcr = async (file: Blob) => {
     const base64String = await new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
@@ -92,13 +83,9 @@ export default function OcrPanel() {
     });
     setOCR("");
     setTrans("");
-    const ocrContent = await transformOCRRouter({ base64: base64String });
-    setOCR(ocrContent);
-    const translation = await translateSingleLanguageRouter({
-      text: ocrContent,
-      language: settings.ocrTargetLanguage,
-    });
-    setTrans(translation);
+    const result = await transformOCRRouter({ base64: base64String });
+    setOCR(result.original);
+    setTrans(result.translation);
   };
 
   const ocrRecogonition = async () => {

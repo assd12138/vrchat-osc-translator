@@ -1,12 +1,10 @@
 import { MicVAD } from "@ricky0123/vad-web";
-import { Microphone } from "decibri";
+// import { Microphone } from "decibri";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { transcriptionRouter, translateRouter } from "@/api/commonRouter";
-import invoke, { electronPostAPI, NATIVE_COMMAND } from "@/electron/ipc";
-import { EApiProviderType } from "@/store/rehydrate/rehydrate-constant";
+import { processAudioRouter, translateRouter } from "@/api/commonRouter";
+// import invoke, { electronPostAPI, NATIVE_COMMAND } from "@/electron/ipc";
 import { togglePanelExpansion } from "@/store/settings";
-import store from "@/store/store";
 import { loadMicDevices } from "@/utils";
 import { sendToVrcChat } from "@/utils/vrc-chat-queue";
 import { useAppDispatch, useAppSelector } from "../../store/hook";
@@ -69,26 +67,14 @@ export default function AudioPanel() {
         onSpeechEnd: async (audio) => {
           try {
             setSpeaking(false);
-            let sendText = "";
-            const transcriptionResult = await transcriptionRouter({ audio });
-            // 如果是多模态，那么可以直接把输出当做翻译结果了
-            if (
-              store.getState().settings.api_provider_type !==
-              EApiProviderType.OMNI
-            ) {
-              const translationResult = await translateRouter({
-                text: transcriptionResult,
-              });
-              sendText = translationResult;
-            } else {
-              sendText = transcriptionResult;
-            }
+            const result = await processAudioRouter({ audio });
+            const sendText = result.translation;
 
             sendToVrcChat(sendText);
             eventBus.emit(
               EventBusEvent.ADD_LOG,
               t("识别成功", {
-                transcription: transcriptionResult,
+                transcription: result.transcription ?? "",
                 translation: sendText,
               }),
             );
@@ -223,18 +209,18 @@ export default function AudioPanel() {
   };
 
   // biome-ignore lint/correctness/noUnusedVariables: 暂时不适用
-  const streamMicStart = async () => {
-    await invoke(NATIVE_COMMAND.INIT_SHERPA_TRANSCRIPTION, {
-      modelPath: ".",
-    });
+  // const streamMicStart = async () => {
+  //   await invoke(NATIVE_COMMAND.INIT_SHERPA_TRANSCRIPTION, {
+  //     modelPath: ".",
+  //   });
 
-    const mic = new Microphone({ sampleRate: 16000 });
-    mic.on("data", (chunk) => {
-      electronPostAPI?.sendVoiceToSherpa(chunk);
-    });
-    // biome-ignore lint/suspicious/noExplicitAny: 类型定义不全
-    await (mic as any).start();
-  };
+  //   const mic = new Microphone({ sampleRate: 16000 });
+  //   mic.on("data", (chunk) => {
+  //     electronPostAPI?.sendVoiceToSherpa(chunk);
+  //   });
+  //   // biome-ignore lint/suspicious/noExplicitAny: 类型定义不全
+  //   await (mic as any).start();
+  // };
 
   return (
     <div className={globalStyles.panel}>
