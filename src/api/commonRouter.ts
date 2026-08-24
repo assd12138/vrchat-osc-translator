@@ -51,7 +51,11 @@ const postChat = (resolved: ResolvedModel, body: object) =>
     buildProviderEndpoint(resolved.provider.baseURL, "chat-completions"),
     {
       method: "POST",
-      body: JSON.stringify({ model: resolved.model.modelId, ...body }),
+      body: JSON.stringify({
+        model: resolved.model.modelId,
+        ...body,
+        thinking: { type: "disabled" },
+      }),
       headers: {
         Authorization: `Bearer ${resolved.provider.apiKey}`,
         "Content-Type": "application/json",
