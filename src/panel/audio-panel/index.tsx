@@ -3,11 +3,7 @@ import { Microphone } from "decibri";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { transcriptionRouter, translateRouter } from "@/api/commonRouter";
-import { RUNTIME, runtime } from "@/cross-platform/environmentDetect";
-import invoke, {
-  electronPostAPI,
-  NATIVE_COMMAND,
-} from "@/cross-platform/invoke";
+import invoke, { electronPostAPI, NATIVE_COMMAND } from "@/electron/ipc";
 import { EApiProviderType } from "@/store/rehydrate/rehydrate-constant";
 import { togglePanelExpansion } from "@/store/settings";
 import store from "@/store/store";
@@ -189,9 +185,7 @@ export default function AudioPanel() {
       );
       setMicDevices(devices);
     };
-    if (runtime === RUNTIME.ELECTRON) {
-      load();
-    }
+    load();
   }, []);
 
   // 手动输入的文本
@@ -199,14 +193,6 @@ export default function AudioPanel() {
   // 是否正在翻译中
   const [translating, setTranslating] = useState(false);
 
-  const getDeviceManually = async () => {
-    await navigator.mediaDevices.getUserMedia({ audio: true });
-    const devices = await loadMicDevices();
-    setDeviceId(
-      devices.find((item) => item.deviceId === "default")?.deviceId || "",
-    );
-    setMicDevices(devices);
-  };
   const handleManualTranslate = async () => {
     if (!manualText.trim() || translating) return;
 
@@ -280,11 +266,6 @@ export default function AudioPanel() {
           {/* <button onClick={streamMicStart} className={globalStyles.button}>
             stream mic
           </button> */}
-          {[RUNTIME.TAURI, RUNTIME.WEB].includes(runtime) && (
-            <button onClick={getDeviceManually} className={globalStyles.button}>
-              {t("获取麦克风")}
-            </button>
-          )}
         </div>
         <div>
           <select

@@ -25,18 +25,26 @@
 
 ## 开发说明
 
-前端部分开发非常简单，仅需要Node.js环境即可。如需运行Tauri部分，你需要配置以下环境：
+桌面应用使用 Electron。请先安装 `.nvmrc` 中指定版本的 Node.js，然后安装依赖：
 
-1. [Rust](https://www.rust-lang.org/)
-2. [Tauri](https://tauri.app/)
+```bash
+npm install
+```
 
-## 双运行时支持
+开发时，在一个终端中启动 Vite 渲染进程服务：
 
-本项目同时支持Tauri和Electron两种运行时栈：
-- **Tauri栈（默认）**：轻量、低内存占用、性能更好，推荐大多数用户使用
-- **Electron栈**：对旧系统兼容性更好，Web API支持更完整，适合遇到Tauri兼容性问题的用户使用
+```bash
+npm run dev
+```
 
-使用Electron栈：
-1. 无需切换分支，主分支已内置Electron支持
-2. 运行`npm run electron-dev`启动Electron开发服务
-3. 运行`npm run electron-build`构建Electron版本的应用程序
+再在另一个终端中启动 Electron：
+
+```bash
+npm run electron-dev
+```
+
+构建桌面应用安装包：
+
+```bash
+npm run electron-build
+```

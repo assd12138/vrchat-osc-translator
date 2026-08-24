@@ -23,18 +23,28 @@ For translate api, you can host it by ollama or llm studio, or just buy an api k
 
 These keys should not be shared with anyone. The leak of auth key maybe cost you a lot of money.
 
-## develop
+## Development
 
-Basically, it's easy to develop the frontend part by using nodejs, to run the tauri part, you need to setup the follow environment
+The desktop application uses Electron. Install the Node.js version specified in `.nvmrc`, then install dependencies:
 
-1. [Rust](https://www.rust-lang.org/)
-2. [Tauri](https://tauri.app/)
-## Dual Stack Support
-This project supports both Tauri and Electron runtime stacks:
-- **Tauri Stack (Default)**: Lightweight, low memory usage, better performance, recommended for most users
-- **Electron Stack**: Better compatibility with older systems, more complete web API support, suitable for users encountering compatibility issues with Tauri
+```bash
+npm install
+```
 
-To use Electron stack:
-1. No need to switch branches, Electron support is already included in the main branch
-2. Run `npm run electron-dev` to start the development server for Electron
-3. Run `npm run electron-build` to build the Electron version of the application
+For development, start the Vite renderer server in one terminal:
+
+```bash
+npm run dev
+```
+
+Then start Electron in another terminal:
+
+```bash
+npm run electron-dev
+```
+
+Build the packaged desktop application with:
+
+```bash
+npm run electron-build
+```

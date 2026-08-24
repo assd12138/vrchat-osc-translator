@@ -1,4 +1,3 @@
-import fetch from "@/cross-platform/fetch";
 import { generateTranslationPrompt, generateTranslationTool } from "@/utils";
 import { request } from "./index";
 

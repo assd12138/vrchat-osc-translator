@@ -1,6 +1,4 @@
-import fetch from "../cross-platform/fetch";
-
-// 封装原生fetch
+// 封装渲染进程的原生 fetch
 const request = async (url: string, options: RequestInit = {}) => {
   const applyOptions = { ...options };
   const controller = new AbortController();

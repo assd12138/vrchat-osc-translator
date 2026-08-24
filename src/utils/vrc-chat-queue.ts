@@ -1,4 +1,4 @@
-import invoke, { NATIVE_COMMAND } from "@/cross-platform/invoke";
+import invoke, { NATIVE_COMMAND } from "@/electron/ipc";
 
 /**
  * VRChat 发送队列
