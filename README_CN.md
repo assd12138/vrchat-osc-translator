@@ -99,7 +99,7 @@ Me: #{en}
 - 转写：**mimo-v2.5-asr** — [小米 mimo](https://mimo.mi.com/models/zh-CN/mimo-v2.5-asr)
 - 翻译：**deepseek-v4-flash** — [DeepSeek 开放平台](https://platform.deepseek.com/)
 
-  在同一供应商或分两个供应商添加两个模型：ASR 模型设为 **audio-transcription** 类型，翻译模型设为 **chat-completion（text + tools）** 类型。选择 **先转写再翻译**，并分别分配到对应槽位。
+  在同一供应商或分两个供应商添加两个模型。mimo-v2.5-asr 必须设为 **chat-completion** 类型，且只勾选 **audio** 能力，不要勾选 text 或 tools；deepseek-v4-flash 设为 **chat-completion（text + tools）** 类型。选择 **先转写再翻译**，并分别分配到对应槽位。
 
 **国外用户推荐：**
 

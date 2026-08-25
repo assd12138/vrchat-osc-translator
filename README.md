@@ -99,7 +99,7 @@ These recommendations are grouped by region and translation mode. Pick the combi
 - Transcription: **mimo-v2.5-asr** — [Mi Mimo](https://mimo.mi.com/models/zh-CN/mimo-v2.5-asr)
 - Translation: **deepseek-v4-flash** — [DeepSeek Platform](https://platform.deepseek.com/)
 
-  Add two models under the same or separate providers: set the ASR model as **audio-transcription** and the translation model as **chat-completion (text + tools)**. Then choose **transcribe-then-translate** and assign each slot accordingly.
+  Add two models under the same or separate providers. mimo-v2.5-asr must be configured as **chat-completion** with **only audio** enabled; do not select text or tools. Configure deepseek-v4-flash as **chat-completion (text + tools)**. Then choose **transcribe-then-translate** and assign each slot accordingly.
 
 **For users outside China:**
 
