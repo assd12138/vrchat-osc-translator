@@ -13,31 +13,6 @@ VRChat OSC Translator 使用语音活动检测（VAD）捕获语音，通过可�
 - **先转写再翻译：** 转写模型先生成文本，再由文本翻译模型翻译。转写模型可以使用 `/audio/transcriptions`，也可以是支持 audio 能力的聊天模型。
 - **直接翻译：** 单个 chat-completion 模型直接接收音频并返回翻译。该模型必须支持 **audio + text + tools**。此模式没有独立的转写结果。
 
-## 从源码快速开始
-
-本仓库没有可确认的发布版下载，请从源码运行。
-
-1. 安装 Node.js **24.14.0**（`.nvmrc` 中指定的版本）。
-2. 安装依赖：
-
-   ```bash
-   npm install
-   ```
-
-3. 在第一个终端启动渲染器：
-
-   ```bash
-   npm run dev
-   ```
-
-4. 在第二个终端启动 Electron：
-
-   ```bash
-   npm run electron-dev
-   ```
-
-只有在 Electron 中运行时才能发送 OSC。使用语音翻译前，请先在 VRChat 中启用 OSC。
-
 ## 配置 AI 供应商
 
 1. 打开 **设置** → **供应商设置**，新建供应商。
@@ -99,6 +74,40 @@ Me: #{en}
 
 仅当部署的 whisper.cpp、Ollama、LM Studio、OpenRouter 或类似服务暴露了所需的兼容接口和能力时，才可以使用它们。配置前请确认供应商实际 API 行为。
 
+## 推荐供应商
+
+以下推荐按地区和翻译模式分组，请根据网络环境和使用习惯选择。
+
+### 直接翻译模式（音频 → 翻译内容）
+
+**国内用户推荐：**
+
+- **doubao-seed-2.0-mini** — [火山方舟](https://console.volcengine.com/ark/region:cn-beijing/model/detail?name=doubao-seed-2-0-mini)
+
+  轻量、低延迟的端到端音频翻译模型，中文表现出色。配置为 **chat-completion** 类型，声明 **audio + text + tools** 能力，并分配给 **direct** 槽位。
+
+**国外用户推荐：**
+
+- **gemini-3.5-flash-lite** — [Google DeepMind](https://deepmind.google/models/gemini/flash-lite/)
+
+  低延迟多模态模型，适合实时音频翻译场景。配置为 **chat-completion** 类型，声明 **audio + text + tools** 能力，并分配给 **direct** 槽位。
+
+### 先转写再翻译模式
+
+**国内用户推荐：**
+
+- 转写：**mimo-v2.5-asr** — [小米 mimo](https://mimo.mi.com/models/zh-CN/mimo-v2.5-asr)
+- 翻译：**deepseek-v4-flash** — [DeepSeek 开放平台](https://platform.deepseek.com/)
+
+  在同一供应商或分两个供应商添加两个模型：ASR 模型设为 **audio-transcription** 类型，翻译模型设为 **chat-completion（text + tools）** 类型。选择 **先转写再翻译**，并分别分配到对应槽位。
+
+**国外用户推荐：**
+
+- 转写：**gpt-transcribe** — [OpenAI](https://developers.openai.com/api/docs/models/gpt-transcribe)
+- 翻译：**gpt-5.6-luna** — [OpenAI](https://developers.openai.com/api/docs/models/gpt-5.6-luna)
+
+  两个模型均通过 OpenAI API 提供。将 gpt-transcribe 配置为 **audio-transcription** 类型，gpt-5.6-luna 配置为 **chat-completion（text + tools）** 类型，然后分别分配给转写和翻译槽位。
+
 ## 排错
 
 | 问题 | 检查项 |
@@ -110,9 +119,30 @@ Me: #{en}
 | `missing transcription text` | 转写接口返回不兼容，缺少所需的 `text` 字段。 |
 | VRChat 没有输出 | 确认已启用 VRChat OSC，并且运行的是 Electron 而不只是 Vite。 |
 
-## 安全提示
+## 从源码快速开始
 
-API Key 以明文形式保存在应用的 localStorage 中。建议使用独立且有限额的密钥；不要分享包含密钥的导出配置或用户数据。
+本仓库没有可确认的发布版下载，请从源码运行。
+
+1. 安装 Node.js **24.14.0**（`.nvmrc` 中指定的版本）。
+2. 安装依赖：
+
+   ```bash
+   npm install
+   ```
+
+3. 在第一个终端启动渲染器：
+
+   ```bash
+   npm run dev
+   ```
+
+4. 在第二个终端启动 Electron：
+
+   ```bash
+   npm run electron-dev
+   ```
+
+只有在 Electron 中运行时才能发送 OSC。使用语音翻译前，请先在 VRChat 中启用 OSC。
 
 ## 开发
 

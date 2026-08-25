@@ -13,31 +13,6 @@ Choose one of two audio workflows:
 - **Transcribe then translate:** a transcription model produces text, then a text translation model translates it. The transcription model can use `/audio/transcriptions`, or it can be a chat model with audio capability.
 - **Direct translation:** one chat-completion model receives audio and returns translations directly. It must support **audio + text + tools**. This mode has no separate transcription result.
 
-## Quick start from source
-
-This repository does not provide a documented release download. Run it from source instead.
-
-1. Install Node.js **24.14.0** (the version in `.nvmrc`).
-2. Install dependencies:
-
-   ```bash
-   npm install
-   ```
-
-3. In one terminal, start the renderer:
-
-   ```bash
-   npm run dev
-   ```
-
-4. In a second terminal, start Electron:
-
-   ```bash
-   npm run electron-dev
-   ```
-
-OSC can only be sent when the app is running in Electron. Enable OSC in VRChat before using voice translation.
-
 ## Configure an AI provider
 
 1. Open **Settings** → **Provider settings** and create a provider.
@@ -99,6 +74,40 @@ Messages are sent to local UDP `127.0.0.1:9000` at `/chatbox/input`, with at lea
 
 whisper.cpp, Ollama, LM Studio, OpenRouter, and similar services can be used only when the deployed version exposes the required compatible interface and capabilities. Check the provider's actual API behavior before configuring it.
 
+## Recommended providers
+
+These recommendations are grouped by region and translation mode. Pick the combination that matches your network access and preferred workflow.
+
+### Direct translation mode (audio → translated text)
+
+**For users in China:**
+
+- **doubao-seed-2.0-mini** — [Volcengine Ark](https://console.volcengine.com/ark/region:cn-beijing/model/detail?name=doubao-seed-2-0-mini)
+
+  Fast, lightweight direct audio translation with good Chinese support. Configure it as a chat-completion model with **audio + text + tools** capabilities and assign it to the **direct** slot.
+
+**For users outside China:**
+
+- **gemini-3.5-flash-lite** — [Google DeepMind](https://deepmind.google/models/gemini/flash-lite/)
+
+  Low-latency multimodal model suitable for real-time audio translation. Configure it as a chat-completion model with **audio + text + tools** capabilities and assign it to the **direct** slot.
+
+### Transcribe then translate mode
+
+**For users in China:**
+
+- Transcription: **mimo-v2.5-asr** — [Mi Mimo](https://mimo.mi.com/models/zh-CN/mimo-v2.5-asr)
+- Translation: **deepseek-v4-flash** — [DeepSeek Platform](https://platform.deepseek.com/)
+
+  Add two models under the same or separate providers: set the ASR model as **audio-transcription** and the translation model as **chat-completion (text + tools)**. Then choose **transcribe-then-translate** and assign each slot accordingly.
+
+**For users outside China:**
+
+- Transcription: **gpt-transcribe** — [OpenAI](https://developers.openai.com/api/docs/models/gpt-transcribe)
+- Translation: **gpt-5.6-luna** — [OpenAI](https://developers.openai.com/api/docs/models/gpt-5.6-luna)
+
+  Both models are available through the OpenAI API. Configure gpt-transcribe as **audio-transcription** and gpt-5.6-luna as **chat-completion (text + tools)**, then assign them to the transcription and translation slots.
+
 ## Troubleshooting
 
 | Problem | Check |
@@ -110,9 +119,30 @@ whisper.cpp, Ollama, LM Studio, OpenRouter, and similar services can be used onl
 | `missing transcription text` | The transcription endpoint response is not compatible with the required `text` field. |
 | VRChat receives nothing | Enable VRChat OSC and make sure Electron, not only Vite, is running. |
 
-## Security
+## Quick start from source
 
-API keys are stored as plain text in the application's localStorage. Use separate, quota-limited keys where possible, and do not share exported configuration or user data containing secrets.
+This repository does not provide a documented release download. Run it from source instead.
+
+1. Install Node.js **24.14.0** (the version in `.nvmrc`).
+2. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+
+3. In one terminal, start the renderer:
+
+   ```bash
+   npm run dev
+   ```
+
+4. In a second terminal, start Electron:
+
+   ```bash
+   npm run electron-dev
+   ```
+
+OSC can only be sent when the app is running in Electron. Enable OSC in VRChat before using voice translation.
 
 ## Development
 
