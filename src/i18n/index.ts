@@ -32,6 +32,9 @@ i18next.use(initReactI18next).init({
   fallbackLng: {
     default: ["en"],
   },
+  interpolation: {
+    escapeValue: false,
+  },
 });
 
 export default i18next;

@@ -8,9 +8,8 @@ import {
   togglePanelExpansion,
 } from "../../store/settings";
 import globalStyles from "../../styles/index.module.css";
-import ProviderSettings, {
-  ModelSelections,
-} from "./components/ProviderSettings";
+import ModelSelections from "./components/ModelSelections";
+import ProviderSettings from "./components/ProviderSettings";
 
 export default function SettingPanel() {
   const settings = useAppSelector((state) => state.settings);

@@ -1,12 +1,11 @@
-/**
- * 语言描述映射
- */
-const LANGUAGE_DESCRIPTIONS: Record<string, string> = {
-  zh: "zh translate result",
-  en: "en translate result",
-  ja: "ja translate result",
-  ko: "ko translate result",
-};
+import { languages as LANGUAGE_OPTIONS } from "@/constants/language";
+
+const LANGUAGE_NAME_MAP: Record<string, string> = Object.fromEntries(
+  LANGUAGE_OPTIONS.map((item) => [item.code, item.englishName]),
+);
+
+const getLanguageEnglishName = (code: string): string =>
+  LANGUAGE_NAME_MAP[code] ?? code;
 
 /**
  * 从输出模板中提取语言列表
@@ -34,7 +33,7 @@ export const generateTranslationSchema = (languages: string[]): object => {
   for (const lang of languages) {
     properties[lang] = {
       type: "string",
-      description: LANGUAGE_DESCRIPTIONS[lang] || `${lang} translate result`,
+      description: `${getLanguageEnglishName(lang)} translate result`,
     };
   }
 
@@ -62,7 +61,7 @@ export const generateTranslationTool = (languages: string[]): object => {
   for (const lang of languages) {
     properties[lang] = {
       type: "string",
-      description: LANGUAGE_DESCRIPTIONS[lang] || `${lang} translate result`,
+      description: `${getLanguageEnglishName(lang)} translate result`,
     };
   }
 
@@ -89,7 +88,7 @@ export const generateTranslationPrompt = (
   text: string,
   languages: string[],
 ): string => {
-  const langList = languages.join("/");
+  const langList = languages.map(getLanguageEnglishName).join("/");
   return `Translate the text within the brackets into ${langList}, without additional explanation and brackets it self, if the content is already in the target language, output the original text.\n\n[${(text || "").replace(/\n/g, ". ")}]`;
 };
 

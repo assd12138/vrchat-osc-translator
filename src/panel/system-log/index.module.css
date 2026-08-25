@@ -38,6 +38,12 @@
 .logItem:last-child {
   border-bottom: none;
 }
+.logItem > div:last-child {
+  flex: 1;
+  min-width: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
 
 /* ---- Default theme ---- */
 [data-theme="default"] .logContainer {

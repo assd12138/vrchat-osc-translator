@@ -208,7 +208,6 @@ export default function AudioPanel() {
     }
   };
 
-  // biome-ignore lint/correctness/noUnusedVariables: 暂时不适用
   // const streamMicStart = async () => {
   //   await invoke(NATIVE_COMMAND.INIT_SHERPA_TRANSCRIPTION, {
   //     modelPath: ".",

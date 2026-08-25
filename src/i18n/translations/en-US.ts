@@ -69,7 +69,7 @@ export default {
     "No language placeholders detected. Use #{lang} format in template",
   模板placeholder: "Click template generator or manually write template",
   手动翻译成功:
-    "✅ Manual translation successful. Original: {{original}}, Translation: {{translation}}",
+    "✅ Manual translation successful. Original\n「{{original}}」, Translation\n{{translation}}",
   手动翻译失败: "❌ Manual translation failed",
   翻译失败: "❌ Translation failed",
   输入文本手动翻译: "Enter text for manual translation",
