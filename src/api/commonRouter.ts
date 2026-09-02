@@ -1,4 +1,5 @@
 import { encodeWAV } from "@ricky0123/vad-web/dist/utils";
+import { BEHAVIOR, isBehaviorActive } from "@/constants/model-behavior";
 import {
   type ApiConfig,
   type ApiModel,
@@ -233,6 +234,14 @@ const fileToBase64 = (file: File): Promise<string> =>
     reader.readAsDataURL(file);
   });
 
+/** 按模型行为预设决定音频数据格式：命中预设时附带 data URI 前缀。 */
+const buildAudioData = async (file: File, modelId: string) => {
+  const base64 = await fileToBase64(file);
+  return isBehaviorActive(modelId, BEHAVIOR.BASE64_WITH_AUDIO_TYPE)
+    ? `data:audio/wav;base64,${base64}`
+    : base64;
+};
+
 /** 根据模型类型，通过转写接口或聊天音频输入生成转写文本。 */
 const transcribe = async (
   audio: Float32Array<ArrayBufferLike>,
@@ -259,7 +268,10 @@ const transcribe = async (
   const content: object[] = [
     {
       type: "input_audio",
-      input_audio: { data: await fileToBase64(file), format: "wav" },
+      input_audio: {
+        data: await buildAudioData(file, resolved.model.modelId),
+        format: "wav",
+      },
     },
   ];
   if (resolved.model.capabilities.text) {
@@ -295,7 +307,10 @@ export const processAudioRouter = async ({
         [
           {
             type: "input_audio",
-            input_audio: { data: await fileToBase64(file), format: "wav" },
+            input_audio: {
+              data: await buildAudioData(file, resolved.model.modelId),
+              format: "wav",
+            },
           },
           {
             type: "text",
