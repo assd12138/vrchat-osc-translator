@@ -4,7 +4,7 @@ const LANGUAGE_NAME_MAP: Record<string, string> = Object.fromEntries(
   LANGUAGE_OPTIONS.map((item) => [item.code, item.englishName]),
 );
 
-const getLanguageEnglishName = (code: string): string =>
+export const getLanguageEnglishName = (code: string): string =>
   LANGUAGE_NAME_MAP[code] ?? code;
 
 /**

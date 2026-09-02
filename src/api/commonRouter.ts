@@ -11,6 +11,7 @@ import {
   extractLanguagesFromTemplate,
   generateTranslationPrompt,
   generateTranslationTool,
+  getLanguageEnglishName,
 } from "@/utils";
 import { request } from "./index";
 import { buildProviderEndpoint } from "./provider";
@@ -340,7 +341,7 @@ export const transformOCRRouter = async ({
           { type: "image_url", image_url: { url: base64 } },
           {
             type: "text",
-            text: `Recognize this image and translate it into ${ocrTargetLanguage}.`,
+            text: `Recognize this image and translate it into ${getLanguageEnglishName(ocrTargetLanguage)}.`,
           },
         ],
       },
