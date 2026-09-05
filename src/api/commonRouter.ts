@@ -348,6 +348,7 @@ export const transformOCRRouter = async ({
   const { apiConfig, ocrTargetLanguage } = store.getState().settings;
   const resolved = resolveModel(apiConfig, "ocr");
   const toolName = "ocr_result";
+  const targetLanguage = getLanguageEnglishName(ocrTargetLanguage);
   const response = await postChat(resolved, {
     messages: [
       {
@@ -356,7 +357,7 @@ export const transformOCRRouter = async ({
           { type: "image_url", image_url: { url: base64 } },
           {
             type: "text",
-            text: `Recognize this image and translate it into ${getLanguageEnglishName(ocrTargetLanguage)}.`,
+            text: `Recognize this image and translate it into ${targetLanguage}.`,
           },
         ],
       },
@@ -366,11 +367,21 @@ export const transformOCRRouter = async ({
         type: "function",
         function: {
           name: toolName,
+          description:
+            "Return all text recognized from the image and its complete translation. Preserve the visible text's reading order and line breaks, place only the unmodified OCR text in original, and place only its translation in translation. Do not describe the image or add explanations. If the image contains no recognizable text, return empty strings for both fields.",
           parameters: {
+            $schema: "https://json-schema.org/draft/2020-12/schema",
             type: "object",
             properties: {
-              original: { type: "string" },
-              translation: { type: "string" },
+              original: {
+                type: "string",
+                description:
+                  "The complete text recognized in the image in its original language. Preserve the original wording, reading order, and line breaks; do not translate, summarize, explain, or include non-text image content.",
+              },
+              translation: {
+                type: "string",
+                description: `The complete ${targetLanguage} translation of original. Translate only the recognized text, preserving its meaning, reading order, and line breaks; do not add explanations or image descriptions. If original is already in ${targetLanguage}, return it unchanged.`,
+              },
             },
             required: ["original", "translation"],
             additionalProperties: false,
