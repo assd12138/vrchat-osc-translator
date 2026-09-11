@@ -7,7 +7,7 @@ import {
   protocol,
   session,
 } from "electron";
-import { initializeIpcPortRouter, initializeIpcRouter } from "./ipc";
+import { initializeIpcRouter } from "./ipc";
 import { showScreenPicker } from "./utils/screen-picker";
 
 // 判断是否为开发环境
@@ -104,7 +104,6 @@ app.commandLine.appendSwitch(
 );
 app.whenReady().then(() => {
   initializeIpcRouter();
-  initializeIpcPortRouter();
   registerProtocol();
   createMainWindow();
   registerScreenPickerHandler();

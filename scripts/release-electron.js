@@ -35,7 +35,7 @@ async function buildMainAndPreload() {
     bundle: true,
     platform: "node",
     target: "node24",
-    external: ["electron", "sherpa-onnx", "decibri"],
+    external: ["electron", "decibri"],
     format: "cjs",
     sourcemap: false,
     minify: true,

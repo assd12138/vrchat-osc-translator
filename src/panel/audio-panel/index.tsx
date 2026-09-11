@@ -1,9 +1,7 @@
 import { MicVAD } from "@ricky0123/vad-web";
-// import { Microphone } from "decibri";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { processAudioRouter, translateRouter } from "@/api/commonRouter";
-// import invoke, { electronPostAPI, NATIVE_COMMAND } from "@/electron/ipc";
 import { togglePanelExpansion } from "@/store/settings";
 import { loadMicDevices } from "@/utils";
 import { sendToVrcChat } from "@/utils/vrc-chat-queue";
@@ -207,19 +205,6 @@ export default function AudioPanel() {
       setTranslating(false);
     }
   };
-
-  // const streamMicStart = async () => {
-  //   await invoke(NATIVE_COMMAND.INIT_SHERPA_TRANSCRIPTION, {
-  //     modelPath: ".",
-  //   });
-
-  //   const mic = new Microphone({ sampleRate: 16000 });
-  //   mic.on("data", (chunk) => {
-  //     electronPostAPI?.sendVoiceToSherpa(chunk);
-  //   });
-  //   // biome-ignore lint/suspicious/noExplicitAny: 类型定义不全
-  //   await (mic as any).start();
-  // };
 
   return (
     <div className={globalStyles.panel}>
