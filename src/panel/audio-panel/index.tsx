@@ -76,63 +76,6 @@ export default function AudioPanel() {
                 translation: sendText,
               }),
             );
-            // 非流式 end
-
-            // 下面是流式的
-            // setSpeaking(false);
-            // // 记录本次调用的时间戳
-            // const currentTimestamp = Date.now();
-            // latestSpeechTimestampRef.current = currentTimestamp;
-
-            // // 转录音频
-            // const transcriptionResult = await transcriptionRouter({ audio });
-
-            // // 如果在转录过程中出现了新的 onSpeechEnd 调用，则放弃本次处理
-            // if (latestSpeechTimestampRef.current !== currentTimestamp) {
-            //   console.log("放弃旧会话的翻译处理");
-            //   return;
-            // }
-
-            // // 流式翻译
-            // let accumulatedText = "";
-            // const controller = new AbortController();
-
-            // await translateRouterStream(
-            //   { text: transcriptionResult },
-            //   (chunk) => {
-            //     // 如果出现了新的会话，取消当前流式处理
-            //     if (latestSpeechTimestampRef.current !== currentTimestamp) {
-            //       controller.abort();
-            //       return;
-            //     }
-
-            //     accumulatedText += chunk;
-
-            //     // 节流 invoke：确保两次调用间隔至少 500ms
-            //     const now = Date.now();
-            //     if (now - lastInvokeTimeRef.current >= 500) {
-            //       lastInvokeTimeRef.current = now;
-            //       invoke(NATIVE_COMMAND.SEND_TO_VRC_CHAT, {
-            //         text: accumulatedText,
-            //       });
-            //     }
-            //   },
-            //   controller.signal,
-            // );
-
-            // // 最终检查：如果当前会话仍然是最新的，发送最终结果并记录日志
-            // if (latestSpeechTimestampRef.current === currentTimestamp) {
-            //   invoke(NATIVE_COMMAND.SEND_TO_VRC_CHAT, {
-            //     text: accumulatedText,
-            //   });
-            //   eventBus.emit(
-            //     EventBusEvent.ADD_LOG,
-            //     t("识别成功", {
-            //       transcription: transcriptionResult,
-            //       translation: accumulatedText,
-            //     }),
-            //   );
-            // }
           } catch (e) {
             if (!(e instanceof Error)) return;
             eventBus.emit(EventBusEvent.ADD_LOG, t("翻译失败") + e.message);

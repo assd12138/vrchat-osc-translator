@@ -146,7 +146,11 @@ export default function ProviderSettings() {
           )}
           <footer>
             {!editing && (
-              <button type="button" onClick={close}>
+              <button
+                type="button"
+                className={styles.dialogFooterClose}
+                onClick={close}
+              >
                 {t("关闭")}
               </button>
             )}

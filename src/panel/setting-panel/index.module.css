@@ -52,12 +52,6 @@
   );
   text-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
 }
-.localModelTable tbody tr:last-child .localModelTd {
-  border-bottom: none;
-}
-.localModelTable tbody tr:hover .localModelTd {
-  background: rgba(255, 255, 255, 0.04);
-}
 
 /* ---- Checkbox rows ---- */
 .checkboxRow {
@@ -113,10 +107,6 @@
   text-shadow: none;
 }
 
-[data-theme="default"] .localModelTable tbody tr:hover .localModelTd {
-  background: #f3f7fa;
-}
-
 [data-theme="default"] .checkboxRow:hover {
   background: #f3f6f9;
 }
@@ -161,14 +151,6 @@
   font-weight: 600;
 }
 
-[data-theme="hand-drawn"] .localModelTable tbody tr:last-child .localModelTd {
-  border-bottom: none;
-}
-
-[data-theme="hand-drawn"] .localModelTable tbody tr:hover .localModelTd {
-  background: rgba(245, 241, 235, 0.5);
-}
-
 [data-theme="hand-drawn"] .checkboxRow {
   background: var(--lg-bg-1);
   border: 1px solid var(--ink-light);
@@ -185,6 +167,20 @@
 [data-theme="hand-drawn"] .checkboxHint {
   color: var(--lg-text-faint);
   font-style: italic;
+}
+
+/* ---- Local model table: row-level rules (highest specificity) ---- */
+.localModelTable tbody tr:last-child .localModelTd {
+  border-bottom: none;
+}
+.localModelTable tbody tr:hover .localModelTd {
+  background: rgba(255, 255, 255, 0.04);
+}
+[data-theme="default"] .localModelTable tbody tr:hover .localModelTd {
+  background: #f3f7fa;
+}
+[data-theme="hand-drawn"] .localModelTable tbody tr:hover .localModelTd {
+  background: rgba(245, 241, 235, 0.5);
 }
 
 /* Provider configuration — a focused workspace rather than a settings table. */
@@ -327,11 +323,11 @@
   display: grid;
   gap: 3px;
 }
-.dialogShell > header span {
+.dialogHeaderIntro span {
   font-size: 18px;
   font-weight: 800;
 }
-.dialogShell > header small {
+.dialogHeaderIntro small {
   color: var(--lg-text-faint);
 }
 .dialogCloseButton,
@@ -449,7 +445,7 @@
   justify-content: flex-end;
   padding: 0 24px 20px;
 }
-.dialogShell footer button {
+.dialogFooterClose {
   border: 0;
   color: var(--lg-text-muted);
   background: none;

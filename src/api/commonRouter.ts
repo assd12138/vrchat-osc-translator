@@ -321,22 +321,23 @@ export const processAudioRouter = async ({
         outputTemplate,
       ),
     };
-  }
-  const transcriptionModel = resolveModel(apiConfig, "transcription");
-  const translationModel = resolveModel(apiConfig, "translation");
-  const transcription = await transcribe(audio, transcriptionModel);
-  return {
-    transcription,
-    translation: await translateText(
-      translationModel,
+  } else {
+    const transcriptionModel = resolveModel(apiConfig, "transcription");
+    const translationModel = resolveModel(apiConfig, "translation");
+    const transcription = await transcribe(audio, transcriptionModel);
+    return {
       transcription,
-      translationModel.model.type === "chat-completion" &&
-        translationModel.model.capabilities.tools &&
-        !apiConfig.batchTranslate,
-      outputTemplate,
-      languages,
-    ),
-  };
+      translation: await translateText(
+        translationModel,
+        transcription,
+        translationModel.model.type === "chat-completion" &&
+          translationModel.model.capabilities.tools &&
+          !apiConfig.batchTranslate,
+        outputTemplate,
+        languages,
+      ),
+    };
+  }
 };
 
 /** 使用 OCR 模型识别图片文本，并返回原文及目标语言译文。 */
