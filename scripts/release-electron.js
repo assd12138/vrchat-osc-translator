@@ -76,6 +76,10 @@ async function buildElectron() {
           target: "dmg",
           category: "public.app-category.productivity",
         },
+        extraResources: [{
+          from: 'backend/dist/gateway',
+          to: 'backend/gateway'
+        }],
         nsis: {
           installerIcon: "src-electron/build-resources/icon.ico",
           // biome-ignore lint/suspicious/noTemplateCurlyInString: 打包配置模板就是这样的，无需更改为js的模板字符串

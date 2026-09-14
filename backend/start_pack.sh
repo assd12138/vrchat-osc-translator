@@ -1,0 +1,1 @@
+uv run pyinstaller --noconfirm --clean --onedir --name gateway --paths src ./main.py

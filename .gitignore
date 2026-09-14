@@ -37,3 +37,13 @@ src-cpp/*/build
 
 # Deepwork state
 .slim/deepwork/
+
+# Python / uv
+backend/.venv/
+backend/**/__pycache__/
+backend/**/*.py[cod]
+
+# PyInstaller
+backend/build/
+backend/dist/
+backend/*.spec
