@@ -8,6 +8,10 @@ import {
   session,
 } from "electron";
 import { initializeIpcRouter } from "./ipc";
+import {
+  startLocalServiceDiscovery,
+  stopLocalServiceDiscovery,
+} from "./utils/local-service-discovery";
 import { showScreenPicker } from "./utils/screen-picker";
 
 // 判断是否为开发环境
@@ -104,6 +108,7 @@ app.commandLine.appendSwitch(
 );
 app.whenReady().then(() => {
   initializeIpcRouter();
+  startLocalServiceDiscovery();
   registerProtocol();
   createMainWindow();
   registerScreenPickerHandler();
@@ -114,6 +119,10 @@ app.whenReady().then(() => {
       createMainWindow();
     }
   });
+});
+
+app.on("before-quit", () => {
+  stopLocalServiceDiscovery();
 });
 
 app.on("window-all-closed", () => {

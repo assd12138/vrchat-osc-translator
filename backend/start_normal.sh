@@ -1,1 +1,1 @@
-uv run python ./main.py --port 8765
+uv run python ./main.py

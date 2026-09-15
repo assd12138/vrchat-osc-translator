@@ -1,10 +1,10 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import type { TranslationMode } from "@/store/api-config";
 import { useAppDispatch, useAppSelector } from "@/store/hook";
 import { setBatchTranslate, setTranslationMode } from "@/store/settings";
 import styles from "../index.module.css";
 import ModelSelect from "./ModelSelect";
-import { TranslationMode } from "@/store/api-config";
 
 export default function ModelSelections() {
   const { t } = useTranslation();

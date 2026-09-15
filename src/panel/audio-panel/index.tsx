@@ -2,6 +2,7 @@ import { MicVAD } from "@ricky0123/vad-web";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { processAudioRouter, translateRouter } from "@/api/commonRouter";
+import invoke, { NATIVE_COMMAND } from "@/electron/ipc";
 import { togglePanelExpansion } from "@/store/settings";
 import { loadMicDevices } from "@/utils";
 import { sendToVrcChat } from "@/utils/vrc-chat-queue";
@@ -149,6 +150,11 @@ export default function AudioPanel() {
     }
   };
 
+  const test = async () => {
+    const a = await invoke(NATIVE_COMMAND.GET_LOCAL_SERVICE, undefined);
+    console.log(a);
+  };
+
   return (
     <div className={globalStyles.panel}>
       <div className={globalStyles.title}>
@@ -176,9 +182,9 @@ export default function AudioPanel() {
           <button onClick={refresh} className={globalStyles.button}>
             {t("刷新")}
           </button>
-          {/* <button onClick={streamMicStart} className={globalStyles.button}>
-            stream mic
-          </button> */}
+          <button onClick={test} className={globalStyles.button}>
+            test
+          </button>
         </div>
         <div>
           <select
