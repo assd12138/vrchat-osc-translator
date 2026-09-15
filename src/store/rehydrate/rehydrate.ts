@@ -58,8 +58,7 @@ export function rehydrate() {
     }
   }
   obj[REHYDRATE_KEYS.SETTING_API_CONFIG] = apiConfig;
-  // API secrets/configuration were historically persisted as independent keys.
-  // Do not migrate them; remove them from the envelope before future writes.
+  // 移除废弃的持久化key
   for (const key of [
     "SETTING_TRANSCRIPTION_URL",
     "SETTING_TRANSCRIPTION_MODEL",
@@ -70,6 +69,7 @@ export function rehydrate() {
     "SETTING_API_PROVIDER_TYPE",
     "SETTING_OMNI_KEEP_AUDIO_TYPE",
     "SETTING_BATCH_TRANSLATE",
+    "SETTING_AI_TEMPLATE",
   ])
     delete obj[key];
   localStorage.setItem(REDUX_STORAGE_KEY, JSON.stringify(obj));

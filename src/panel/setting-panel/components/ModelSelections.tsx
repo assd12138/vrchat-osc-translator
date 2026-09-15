@@ -4,6 +4,7 @@ import { useAppDispatch, useAppSelector } from "@/store/hook";
 import { setBatchTranslate, setTranslationMode } from "@/store/settings";
 import styles from "../index.module.css";
 import ModelSelect from "./ModelSelect";
+import { TranslationMode } from "@/store/api-config";
 
 export default function ModelSelections() {
   const { t } = useTranslation();
@@ -30,11 +31,7 @@ export default function ModelSelections() {
         <select
           value={config.translationMode}
           onChange={(e) =>
-            dispatch(
-              setTranslationMode(
-                e.target.value as "direct" | "transcribe-then-translate",
-              ),
-            )
+            dispatch(setTranslationMode(e.target.value as TranslationMode))
           }
         >
           <option value="transcribe-then-translate">{t("先转写再翻译")}</option>

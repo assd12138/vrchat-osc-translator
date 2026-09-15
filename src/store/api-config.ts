@@ -154,12 +154,9 @@ export const isProviderIdentifierAvailable = (
 };
 
 export const sanitizeApiConfig = (config: ApiConfig): ApiConfig => {
-  const raw = config as unknown;
-  const value = isRecord(raw) ? raw : {};
   const identifiers = new Set<string>();
-  const providerCandidates = Array.isArray(value.providers)
-    ? value.providers.flatMap(sanitizeProvider)
-    : [];
+  const providerCandidates = (config.providers || []).flatMap(sanitizeProvider);
+
   const providerUidCounts = countUids(providerCandidates);
   const providers = providerCandidates.filter((provider) => {
     const identifier = canonicalizeProviderIdentifier(provider.identifier);
@@ -171,8 +168,10 @@ export const sanitizeApiConfig = (config: ApiConfig): ApiConfig => {
     identifiers.add(identifier);
     return true;
   });
-  const rawSelections = isRecord(value.selections) ? value.selections : {};
+  const rawSelections = isRecord(config.selections) ? config.selections : {};
   const selections = {} as Record<ModelSlot, ModelSelection>;
+
+  // 模型配置完成后，已配置的模型可能因能力发生变化导致无法使用，遍历后将已配置的部分设置为空
   for (const slot of modelSlots) {
     const selection = sanitizeSelection(rawSelections[slot]);
     selections[slot] = isSelectionValid(slot, selection, providers)
@@ -181,12 +180,9 @@ export const sanitizeApiConfig = (config: ApiConfig): ApiConfig => {
   }
   return {
     providers,
-    translationMode:
-      value.translationMode === "direct"
-        ? "direct"
-        : "transcribe-then-translate",
+    translationMode: config.translationMode,
     selections,
-    batchTranslate: value.batchTranslate === true,
+    batchTranslate: config.batchTranslate === true,
   };
 };
 
