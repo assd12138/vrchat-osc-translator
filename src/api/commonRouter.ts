@@ -6,6 +6,7 @@ import {
   type ApiProvider,
   isSelectionValid,
   type ModelSlot,
+  ModelType,
 } from "@/store/api-config";
 import store from "@/store/store";
 import {
@@ -50,7 +51,7 @@ const resolveModel = (apiConfig: ApiConfig, slot: ModelSlot): ResolvedModel => {
 
 const postChat = (resolved: ResolvedModel, body: object) =>
   request(
-    buildProviderEndpoint(resolved.provider.baseURL, "chat-completions"),
+    buildProviderEndpoint(resolved.provider.baseURL, ModelType.CHAT_COMPLETION),
     {
       method: "POST",
       body: JSON.stringify({
@@ -206,7 +207,7 @@ export const translateRouter = ({
     resolved,
     text,
     direct ||
-      (resolved.model.type === "chat-completion" &&
+      (resolved.model.type === ModelType.CHAT_COMPLETION &&
         resolved.model.capabilities.tools &&
         !apiConfig.batchTranslate),
     outputTemplate,
@@ -248,12 +249,15 @@ const transcribe = async (
   resolved: ResolvedModel,
 ): Promise<string> => {
   const file = audioToFile(audio);
-  if (resolved.model.type === "audio-transcription") {
+  if (resolved.model.type === ModelType.AUDIO_TRANSCRIPTION) {
     const form = new FormData();
     form.append("file", file, "audio.wav");
     form.append("model", resolved.model.modelId);
     const response = await request(
-      buildProviderEndpoint(resolved.provider.baseURL, "audio-transcriptions"),
+      buildProviderEndpoint(
+        resolved.provider.baseURL,
+        ModelType.AUDIO_TRANSCRIPTION,
+      ),
       {
         method: "POST",
         body: form,
@@ -265,6 +269,26 @@ const transcribe = async (
       throw new Error("Provider protocol error: missing transcription text");
     return text.replace(/^[\s\S]*?<asr_text>/, "");
   }
+  if (resolved.model.type === ModelType.MINIMAX_AUDIO_SPEECH_TO_TEXT) {
+    const form = new FormData();
+    form.append("file", file, "audio.wav");
+    form.append("model", resolved.model.modelId);
+    const response = await request(
+      buildProviderEndpoint(
+        resolved.provider.baseURL,
+        ModelType.MINIMAX_AUDIO_SPEECH_TO_TEXT,
+      ),
+      {
+        method: "POST",
+        body: form,
+        headers: { Authorization: `Bearer ${resolved.provider.apiKey}` },
+      },
+    );
+    const text = (response as { text?: unknown }).text;
+    if (typeof text !== "string")
+      throw new Error("Provider protocol error: missing transcription text");
+    return text;
+  }
   const content: object[] = [
     {
       type: "input_audio",
@@ -274,6 +298,8 @@ const transcribe = async (
       },
     },
   ];
+
+  // 如果模型是同时支持文本的多模态，需要提示模型进行转写而非回答
   if (resolved.model.capabilities.text) {
     content.push({
       type: "text",
@@ -330,7 +356,7 @@ export const processAudioRouter = async ({
       translation: await translateText(
         translationModel,
         transcription,
-        translationModel.model.type === "chat-completion" &&
+        translationModel.model.type === ModelType.CHAT_COMPLETION &&
           translationModel.model.capabilities.tools &&
           !apiConfig.batchTranslate,
         outputTemplate,

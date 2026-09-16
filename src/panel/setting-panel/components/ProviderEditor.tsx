@@ -4,9 +4,10 @@ import { discoverModels, normalizeBaseURL } from "@/api/provider";
 import {
   type ApiModel,
   type ApiProvider,
-  createAudioTranscriptionModel,
   createChatCompletionModel,
+  createModel,
   isProviderIdentifierAvailable,
+  ModelType,
 } from "@/store/api-config";
 import { useAppDispatch, useAppSelector } from "@/store/hook";
 import { upsertProvider } from "@/store/settings";
@@ -258,29 +259,31 @@ export default function ProviderEditor({
               <select
                 value={model.type}
                 onChange={(e) =>
-                  updateModel(
-                    model.uid,
-                    e.target.value === "audio-transcription"
-                      ? {
-                          ...createAudioTranscriptionModel(model.modelId),
-                          uid: model.uid,
-                        }
-                      : {
-                          ...createChatCompletionModel(model.modelId),
-                          uid: model.uid,
-                        },
-                  )
+                  updateModel(model.uid, {
+                    ...createModel({
+                      modelId: model.modelId,
+                      type: e.target.value as ModelType,
+                      capabilities:
+                        model.type === ModelType.CHAT_COMPLETION
+                          ? model.capabilities
+                          : {},
+                    }),
+                    uid: model.uid,
+                  })
                 }
               >
-                <option value="audio-transcription">
+                <option value={ModelType.AUDIO_TRANSCRIPTION}>
                   {t("语音转写")} /audio/transcriptions
                 </option>
-                <option value="chat-completion">
+                <option value={ModelType.CHAT_COMPLETION}>
                   {t("文本补全")} /chat/completions
+                </option>
+                <option value={ModelType.MINIMAX_AUDIO_SPEECH_TO_TEXT}>
+                  {t("语音转写")}(minimax) /speech_to_text
                 </option>
               </select>
             </label>
-            {model.type === "chat-completion" && (
+            {model.type === ModelType.CHAT_COMPLETION && (
               <div className={styles.capabilities}>
                 {(["audio", "image", "text", "tools"] as const).map(
                   (capability) => (

@@ -1,16 +1,19 @@
-import type { ApiProvider } from "@/store/api-config";
+import { type ApiProvider, ModelType } from "@/store/api-config";
 
-export type ProviderEndpoint =
-  | "models"
-  | "audio-transcriptions"
-  | "chat-completions";
+export type ProviderEndpoint = "models" | ModelType;
 
 const endpointPaths: Record<ProviderEndpoint, string> = {
   models: "/models",
-  "audio-transcriptions": "/audio/transcriptions",
-  "chat-completions": "/chat/completions",
+  [ModelType.AUDIO_TRANSCRIPTION]: "/audio/transcriptions",
+  [ModelType.CHAT_COMPLETION]: "/chat/completions",
+  [ModelType.MINIMAX_AUDIO_SPEECH_TO_TEXT]: "/speech_to_text",
 };
 
+/**
+ * remove trailing slashes from the base URL and trim whitespace
+ * @param baseURL
+ * @returns
+ */
 export const normalizeBaseURL = (baseURL: string): string =>
   baseURL.trim().replace(/\/+$/, "");
 

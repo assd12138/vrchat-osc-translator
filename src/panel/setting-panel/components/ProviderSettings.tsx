@@ -3,9 +3,9 @@ import { useTranslation } from "react-i18next";
 import {
   type ApiProvider,
   createApiProvider,
-  createAudioTranscriptionModel,
-  createChatCompletionModel,
+  createModel,
   isProviderIdentifierAvailable,
+  ModelType,
 } from "@/store/api-config";
 import { useAppDispatch, useAppSelector } from "@/store/hook";
 import { removeProvider, upsertProvider } from "@/store/settings";
@@ -28,9 +28,12 @@ export default function ProviderSettings() {
     while (!isProviderIdentifierAvailable(identifier, providers))
       identifier = `${provider.identifier}-copy-${++n}`;
     const copiedModels = provider.models.map((model) =>
-      model.type === "audio-transcription"
-        ? { ...createAudioTranscriptionModel(model.modelId) }
-        : createChatCompletionModel(model.modelId, model.capabilities),
+      createModel({
+        modelId: model.modelId,
+        type: model.type,
+        capabilities:
+          model.type === ModelType.CHAT_COMPLETION ? model.capabilities : {},
+      }),
     );
     const copiedProvider = createApiProvider();
     dispatch(

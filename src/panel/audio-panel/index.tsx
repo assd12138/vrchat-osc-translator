@@ -182,7 +182,11 @@ export default function AudioPanel() {
           <button onClick={refresh} className={globalStyles.button}>
             {t("刷新")}
           </button>
-          <button onClick={test} className={globalStyles.button}>
+          <button
+            style={{ display: "none" }}
+            onClick={test}
+            className={globalStyles.button}
+          >
             test
           </button>
         </div>

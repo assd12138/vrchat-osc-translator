@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import type { TranslationMode } from "@/store/api-config";
+import { ModelType, type TranslationMode } from "@/store/api-config";
 import { useAppDispatch, useAppSelector } from "@/store/hook";
 import { setBatchTranslate, setTranslationMode } from "@/store/settings";
 import styles from "../index.module.css";
@@ -17,7 +17,7 @@ export default function ModelSelections() {
       ?.models.find((m) => m.uid === s?.modelUid);
   }, [config]);
   const showBatch =
-    translationModel?.type === "chat-completion" &&
+    translationModel?.type === ModelType.CHAT_COMPLETION &&
     translationModel.capabilities.tools;
   return (
     <section className={styles.apiChoices}>

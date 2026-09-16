@@ -8,20 +8,36 @@ export interface ChatCapabilities {
   tools: boolean;
 }
 
+export enum ModelType {
+  MINIMAX_AUDIO_SPEECH_TO_TEXT = "minimax-audio-speech-to-text",
+  AUDIO_TRANSCRIPTION = "audio-transcription",
+  CHAT_COMPLETION = "chat-completion",
+}
+
+/** minimax speech to text api */
+export interface MinimaxAudioSpeechToText {
+  uid: string;
+  modelId: string;
+  type: ModelType.MINIMAX_AUDIO_SPEECH_TO_TEXT;
+}
+
 export interface AudioTranscriptionModel {
   uid: string;
   modelId: string;
-  type: "audio-transcription";
+  type: ModelType.AUDIO_TRANSCRIPTION;
 }
 
 export interface ChatCompletionModel {
   uid: string;
   modelId: string;
-  type: "chat-completion";
+  type: ModelType.CHAT_COMPLETION;
   capabilities: ChatCapabilities;
 }
 
-export type ApiModel = AudioTranscriptionModel | ChatCompletionModel;
+export type ApiModel =
+  | AudioTranscriptionModel
+  | ChatCompletionModel
+  | MinimaxAudioSpeechToText;
 
 export interface ApiProvider {
   uid: string;
@@ -54,12 +70,34 @@ export const createApiProvider = (): ApiProvider => ({
   models: [],
 });
 
+export const createModel = ({
+  modelId,
+  type,
+  capabilities,
+}: {
+  modelId: string;
+  type: ModelType;
+  capabilities?: Partial<ChatCapabilities>;
+}): ApiModel => {
+  if (type === ModelType.AUDIO_TRANSCRIPTION) {
+    return createAudioTranscriptionModel(modelId);
+  }
+  if (type === ModelType.MINIMAX_AUDIO_SPEECH_TO_TEXT) {
+    return {
+      uid: crypto.randomUUID(),
+      modelId,
+      type: ModelType.MINIMAX_AUDIO_SPEECH_TO_TEXT,
+    };
+  }
+  return createChatCompletionModel(modelId, capabilities);
+};
+
 export const createAudioTranscriptionModel = (
   modelId = "",
 ): AudioTranscriptionModel => ({
   uid: crypto.randomUUID(),
   modelId,
-  type: "audio-transcription",
+  type: ModelType.AUDIO_TRANSCRIPTION,
 });
 
 export const createChatCompletionModel = (
@@ -68,7 +106,7 @@ export const createChatCompletionModel = (
 ): ChatCompletionModel => ({
   uid: crypto.randomUUID(),
   modelId,
-  type: "chat-completion",
+  type: ModelType.CHAT_COMPLETION,
   capabilities: {
     audio: true,
     image: true,
@@ -90,11 +128,21 @@ export const createInitialApiConfig = (): ApiConfig => ({
   batchTranslate: false,
 });
 
+/**
+ *
+ * @param slot the usage setting of specific model
+ * @param model is the model fit the usage of the setting
+ * @returns
+ */
 export const isModelEligible = (slot: ModelSlot, model: ApiModel): boolean => {
   if (slot === "transcription") {
-    return model.type === "audio-transcription" || model.capabilities.audio;
+    return (
+      model.type === ModelType.AUDIO_TRANSCRIPTION ||
+      model.type === ModelType.MINIMAX_AUDIO_SPEECH_TO_TEXT ||
+      (model.type === ModelType.CHAT_COMPLETION && model.capabilities.audio)
+    );
   }
-  if (model.type !== "chat-completion") return false;
+  if (model.type !== ModelType.CHAT_COMPLETION) return false;
   if (slot === "direct") {
     return (
       model.capabilities.audio &&
@@ -259,10 +307,13 @@ const sanitizeModel = (value: unknown): ApiModel[] => {
   }
   const uid = value.uid.trim();
   if (!uid) return [];
-  if (value.type === "audio-transcription") {
+  if (value.type === ModelType.AUDIO_TRANSCRIPTION) {
     return [{ uid, modelId: value.modelId.trim(), type: value.type }];
   }
-  if (value.type !== "chat-completion") return [];
+  if (value.type === ModelType.MINIMAX_AUDIO_SPEECH_TO_TEXT) {
+    return [{ uid, modelId: value.modelId.trim(), type: value.type }];
+  }
+  if (value.type !== ModelType.CHAT_COMPLETION) return [];
   const capabilities = isRecord(value.capabilities) ? value.capabilities : {};
   return [
     {
