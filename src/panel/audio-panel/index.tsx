@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { processAudioRouter, translateRouter } from "@/api/commonRouter";
 import { resolveModel } from "@/api/provider";
+import { streamTranscription } from "@/api/stream";
 import invoke, { NATIVE_COMMAND } from "@/electron/ipc";
 import { ModelType } from "@/store/api-config";
 import { togglePanelExpansion } from "@/store/settings";
@@ -22,6 +23,8 @@ export default function AudioPanel() {
     (state) => state.settings.panelExpansion.audio,
   );
   const myVad = useRef<MicVAD>(null);
+  const streamMic = useRef<Microphone | null>(null);
+  const stopStreamTranscription = useRef<(() => void) | null>(null);
   // 是否正在录音
   const [recording, setRecording] = useState(false);
   // 是否正在说话
@@ -32,15 +35,18 @@ export default function AudioPanel() {
   const [deviceId, setDeviceId] = useState<string>();
 
   const start = () => {
+    if (myVad.current || streamMic.current) return;
     const { apiConfig } = store.getState().settings;
-    const resolvedConfig = resolveModel(apiConfig, "transcription");
+
     //  如果是流式的识别模型，使用stream采集
-    if (
-      apiConfig.translationMode === "transcribe-then-translate" &&
-      resolvedConfig.model.type === ModelType.NARILAB_AUDIO_SPEECH_TO_TEXT
-    ) {
-      startStreamVoice();
-      return;
+    if (apiConfig.translationMode === "transcribe-then-translate") {
+      const resolvedConfig = resolveModel(apiConfig, "transcription");
+      if (
+        resolvedConfig.model.type === ModelType.NARILAB_AUDIO_SPEECH_TO_TEXT
+      ) {
+        startStreamVoice();
+        return;
+      }
     }
     startVadVoice();
   };
@@ -108,24 +114,40 @@ export default function AudioPanel() {
   const startStreamVoice = async () => {
     const mic = new Microphone({
       sampleRate: 16000,
+      channels: 1,
+      dtype: "int16",
       device: deviceId,
     });
-    mic.on("data", (chunk) => {
-      console.log("chunk", chunk);
-    });
-    mic.on("speech", () => {
-      console.log("speech");
-    });
-    mic.on("silence", () => {
-      console.log("silence");
-    });
-    await mic.start();
+    try {
+      const stopStreaming = await streamTranscription(mic, (text) => {
+        eventBus.emit(EventBusEvent.ADD_LOG, text);
+      });
+      streamMic.current = mic;
+      stopStreamTranscription.current = stopStreaming;
+      await mic.start();
+      setRecording(true);
+      eventBus.emit(EventBusEvent.ADD_LOG, t("开始语音识别"));
+    } catch (error) {
+      mic.stop();
+      stopStreamTranscription.current?.();
+      stopStreamTranscription.current = null;
+      streamMic.current = null;
+      console.error(error);
+    }
   };
 
   const stop = () => {
-    if (!myVad.current) return;
-    myVad.current.destroy();
-    myVad.current = null;
+    if (myVad.current) {
+      myVad.current.destroy();
+      myVad.current = null;
+    } else if (streamMic.current) {
+      streamMic.current.stop();
+      streamMic.current = null;
+      stopStreamTranscription.current?.();
+      stopStreamTranscription.current = null;
+    } else {
+      return;
+    }
     setSpeaking(false);
     setRecording(false);
     eventBus.emit(EventBusEvent.ADD_LOG, t("停止语音识别"));
