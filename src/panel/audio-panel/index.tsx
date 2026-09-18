@@ -28,6 +28,7 @@ export default function AudioPanel() {
   const myVad = useRef<MicVAD>(null);
   const streamMic = useRef<Microphone | null>(null);
   const stopStreamTranscription = useRef<(() => void) | null>(null);
+  const streamAbortController = useRef<AbortController | null>(null);
   // 是否正在录音
   const [recording, setRecording] = useState(false);
   // 是否正在说话
@@ -38,7 +39,9 @@ export default function AudioPanel() {
   const [deviceId, setDeviceId] = useState<string>();
 
   const start = () => {
-    if (myVad.current || streamMic.current) return;
+    if (myVad.current || streamMic.current || streamAbortController.current) {
+      return;
+    }
     const { apiConfig } = store.getState().settings;
 
     //  如果是流式的识别模型，使用stream采集
@@ -126,10 +129,15 @@ export default function AudioPanel() {
       dtype: "int16",
       device: deviceId,
     });
+    const abortController = new AbortController();
+    streamAbortController.current = abortController;
     try {
-      const stopStreaming = await streamTranscription(mic, config, (text) => {
-        eventBus.emit(EventBusEvent.ADD_LOG, text);
-      });
+      const stopStreaming = await streamTranscription(
+        mic,
+        config,
+        (text) => eventBus.emit(EventBusEvent.ADD_LOG, text),
+        abortController.signal,
+      );
       streamMic.current = mic;
       stopStreamTranscription.current = stopStreaming;
       await mic.start();
@@ -141,6 +149,10 @@ export default function AudioPanel() {
       stopStreamTranscription.current = null;
       streamMic.current = null;
       console.error(error);
+    } finally {
+      if (streamAbortController.current === abortController) {
+        streamAbortController.current = null;
+      }
     }
   };
 
@@ -153,6 +165,9 @@ export default function AudioPanel() {
       streamMic.current = null;
       stopStreamTranscription.current?.();
       stopStreamTranscription.current = null;
+    } else if (streamAbortController.current) {
+      streamAbortController.current.abort();
+      streamAbortController.current = null;
     } else {
       return;
     }

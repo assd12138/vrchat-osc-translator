@@ -83,6 +83,13 @@ async def receive_pcm(websocket: WebSocket, session: TranscriptionSession) -> No
         await session.send_pcm(pcm)
 
 
+async def wait_for_disconnect(websocket: WebSocket) -> None:
+    while True:
+        message = await websocket.receive()
+        if message["type"] == "websocket.disconnect":
+            return
+
+
 async def send_transcripts(
     websocket: WebSocket, session: TranscriptionSession
 ) -> None:
@@ -97,11 +104,15 @@ async def send_transcripts(
 async def transcription(websocket: WebSocket) -> None:
     """Relay raw PCM frames to a provider and return its text results.
 
-    The first client message configures the provider, followed by binary 16 kHz,
-    mono, signed 16-bit little-endian PCM frames.
-    Server messages are JSON text frames: {"type": "transcript", "text": "..."}.
-    """
+     The first client message configures the provider, followed by binary 16 kHz,
+     mono, signed 16-bit little-endian PCM frames.
+     Server messages are JSON text frames: {"type": "transcript", "text": "..."}.
+     Closing the client WebSocket closes the provider session, including during
+     provider initialization.
+     """
     await websocket.accept()
+    session: TranscriptionSession | None = None
+    disconnect_task: asyncio.Task[None] | None = None
     try:
         config = await receive_config(websocket)
         provider = providers.get(config.model_type)
@@ -109,21 +120,38 @@ async def transcription(websocket: WebSocket) -> None:
             raise TranscriptionConfigurationError(
                 f"Unsupported transcription model type: {config.model_type}"
             )
-        session = await provider.create_session(config)
+        disconnect_task = asyncio.create_task(wait_for_disconnect(websocket))
+        session_task = asyncio.create_task(provider.create_session(config))
+        done, _ = await asyncio.wait(
+            {disconnect_task, session_task}, return_when=asyncio.FIRST_COMPLETED
+        )
+        if disconnect_task in done:
+            session_task.cancel()
+            await asyncio.gather(session_task, return_exceptions=True)
+            return
+        session = session_task.result()
+        disconnect_task.cancel()
+        await asyncio.gather(disconnect_task, return_exceptions=True)
+        disconnect_task = None
     except (TranscriptionConfigurationError, TranscriptionProtocolError) as error:
+        if disconnect_task is not None:
+            disconnect_task.cancel()
+            await asyncio.gather(disconnect_task, return_exceptions=True)
         await send_error(websocket, str(error))
         await websocket.close(code=1008)
         return
     except Exception as error:
+        if disconnect_task is not None:
+            disconnect_task.cancel()
+            await asyncio.gather(disconnect_task, return_exceptions=True)
         await send_error(websocket, f"Unable to initialize transcription: {error}")
         await websocket.close(code=1011)
         return
 
-    await websocket.send_json({"type": "ready"})
-    receive_task = asyncio.create_task(receive_pcm(websocket, session))
-    send_task = asyncio.create_task(send_transcripts(websocket, session))
-
     try:
+        await websocket.send_json({"type": "ready"})
+        receive_task = asyncio.create_task(receive_pcm(websocket, session))
+        send_task = asyncio.create_task(send_transcripts(websocket, session))
         done, pending = await asyncio.wait(
             {receive_task, send_task}, return_when=asyncio.FIRST_COMPLETED
         )
@@ -133,7 +161,11 @@ async def transcription(websocket: WebSocket) -> None:
         for task in done:
             task.result()
     finally:
-        await session.close()
+        if disconnect_task is not None:
+            disconnect_task.cancel()
+            await asyncio.gather(disconnect_task, return_exceptions=True)
+        if session is not None:
+            await session.close()
 
 
 def get_free_port() -> int:

@@ -34,7 +34,11 @@ class TranscriptionConfig:
 
 
 class TranscriptionSession(ABC):
-    """One bidirectional streaming transcription session."""
+    """One bidirectional streaming transcription session.
+
+    The relay owns the session and must call close when the local client
+    disconnects, including while the session is being initialized.
+    """
 
     @abstractmethod
     async def send_pcm(self, pcm: bytes) -> None:
