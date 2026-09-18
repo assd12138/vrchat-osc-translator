@@ -6,6 +6,7 @@ import { processAudioRouter, translateRouter } from "@/api/commonRouter";
 import { resolveModel } from "@/api/provider";
 import {
   type StreamTranscriptionConfig,
+  StreamTranslationProcessor,
   streamTranscription,
 } from "@/api/stream";
 import invoke, { NATIVE_COMMAND } from "@/electron/ipc";
@@ -29,6 +30,7 @@ export default function AudioPanel() {
   const streamMic = useRef<Microphone | null>(null);
   const stopStreamTranscription = useRef<(() => void) | null>(null);
   const streamAbortController = useRef<AbortController | null>(null);
+  const streamTranslationProcessor = useRef(new StreamTranslationProcessor());
   // 是否正在录音
   const [recording, setRecording] = useState(false);
   // 是否正在说话
@@ -132,12 +134,15 @@ export default function AudioPanel() {
     const abortController = new AbortController();
     streamAbortController.current = abortController;
     try {
-      const stopStreaming = await streamTranscription(
-        mic,
+      const stopStreaming = await streamTranscription({
+        microphone: mic,
         config,
-        (text) => eventBus.emit(EventBusEvent.ADD_LOG, text),
-        abortController.signal,
-      );
+        onTranscript: (text) => {
+          eventBus.emit(EventBusEvent.ADD_LOG, text);
+          streamTranslationProcessor.current.push(text);
+        },
+        signal: abortController.signal,
+      });
       streamMic.current = mic;
       stopStreamTranscription.current = stopStreaming;
       await mic.start();

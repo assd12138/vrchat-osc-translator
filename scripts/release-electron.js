@@ -8,26 +8,78 @@ import { build } from "esbuild";
 // const Platform = builder.Platform;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const distPath = path.join(__dirname, "../dist-electron");
-const srcPath = path.join(__dirname, "../src-electron");
+const projectPath = path.join(__dirname, "..");
+const distPath = path.join(projectPath, "dist-electron");
+const releasePath = path.join(projectPath, "release");
+const backendPath = path.join(projectPath, "backend");
+const srcPath = path.join(projectPath, "src-electron");
 
-async function cleanBuildCache() {
-  await rm(distPath, { recursive: true, force: true });
+async function cleanBuildArtifacts() {
+  await Promise.all([
+    rm(distPath, { recursive: true, force: true }),
+    rm(releasePath, { recursive: true, force: true }),
+    rm(path.join(backendPath, "build"), { recursive: true, force: true }),
+    rm(path.join(backendPath, "dist"), { recursive: true, force: true }),
+    rm(path.join(backendPath, "gateway.spec"), { force: true }),
+  ]);
+}
+
+function runCommand(command, args, cwd = projectPath) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, args, {
+      cwd,
+      stdio: "inherit",
+    });
+    child.once("error", reject);
+    child.once("close", (code, signal) => {
+      if (code === 0) {
+        resolve();
+        return;
+      }
+      reject(
+        new Error(
+          `${command} exited with code ${code ?? "unknown"}${signal ? ` (signal: ${signal})` : ""}`,
+        ),
+      );
+    });
+  });
 }
 
 function buildRender() {
-  const buildProcess = spawn("npm", ["run", "electron-build-render"], {
-    stdio: "inherit",
-    shell: true,
-  });
-  return new Promise((resolve, reject) => {
-    buildProcess.on("close", (code) => {
-      if (code === 0) {
-        resolve(true);
-      }
-      reject(new Error(`Build render process exited with code ${code}`));
-    });
-  });
+  return runCommand(
+    process.execPath,
+    [
+      path.join(
+        path.dirname(process.execPath),
+        "node_modules",
+        "npm",
+        "bin",
+        "npm-cli.js",
+      ),
+      "run",
+      "electron-build-render",
+    ],
+    projectPath,
+  );
+}
+
+function buildBackend() {
+  return runCommand(
+    "uv",
+    [
+      "run",
+      "pyinstaller",
+      "--noconfirm",
+      "--clean",
+      "--onedir",
+      "--name",
+      "gateway",
+      "--paths",
+      "src",
+      "./main.py",
+    ],
+    backendPath,
+  );
 }
 
 async function buildMainAndPreload() {
@@ -61,42 +113,44 @@ async function buildMainAndPreload() {
 }
 
 async function buildElectron() {
-  try {
-    await builder.build({
-      projectDir: path.join(__dirname, ".."),
-      config: {
-        appId: "com.ased12138.vrchat-osc-translator",
-        productName: "VRChatTranslator",
-        directories: {
-          buildResources: "src-electron/build-resources",
-        },
-        // asar: false,
-        files: ["dist-electron/**/*", "package.json", "!node_modules/**"],
-        mac: {
-          target: "dmg",
-          category: "public.app-category.productivity",
-        },
-        extraResources: [{
-          from: 'backend/dist/gateway',
-          to: 'backend/gateway'
-        }],
-        nsis: {
-          installerIcon: "src-electron/build-resources/icon.ico",
-          // biome-ignore lint/suspicious/noTemplateCurlyInString: 打包配置模板就是这样的，无需更改为js的模板字符串
-          artifactName: "${productName}-${version}-Setup.${ext}",
-        },
+  await builder.build({
+    projectDir: projectPath,
+    config: {
+      appId: "com.ased12138.vrchat-osc-translator",
+      productName: "VRChatTranslator",
+      directories: {
+        output: "release",
+        buildResources: "src-electron/build-resources",
       },
-      publish: "never",
-    });
-  } catch (error) {
-    console.log("ELectron build error", error);
-  }
+      files: ["dist-electron/**/*", "package.json", "!node_modules/**"],
+      mac: {
+        target: "dmg",
+        category: "public.app-category.productivity",
+      },
+      // extraResources is copied beside app.asar under process.resourcesPath.
+      extraResources: [
+        {
+          from: "backend/dist/gateway",
+          to: "backend/gateway",
+        },
+      ],
+      nsis: {
+        installerIcon: "src-electron/build-resources/icon.ico",
+        // biome-ignore lint/suspicious/noTemplateCurlyInString: 打包配置模板就是这样的，无需更改为js的模板字符串
+        artifactName: "${productName}-${version}-Setup.${ext}",
+      },
+    },
+    publish: "never",
+  });
 }
 
-(async () => {
-  // 清理打包产物
-  await cleanBuildCache();
-  // 同时运行打包渲染进程和主进程、预加载脚本
-  await Promise.all([buildRender(), buildMainAndPreload()]);
+async function main() {
+  await cleanBuildArtifacts();
+  await Promise.all([buildRender(), buildMainAndPreload(), buildBackend()]);
   await buildElectron();
-})();
+}
+
+main().catch((error) => {
+  console.error("Electron build failed", error);
+  process.exitCode = 1;
+});

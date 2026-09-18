@@ -1,3 +1,4 @@
+import { type ChildProcess, spawn } from "node:child_process";
 import path from "node:path";
 import {
   app,
@@ -22,6 +23,49 @@ const PROTOCOL_NAME = "vrctran";
 
 // 主窗口引用
 let mainWindow: BrowserWindow | null = null;
+let backendProcess: ChildProcess | null = null;
+
+function startPackagedBackend() {
+  if (isDev || backendProcess) return;
+
+  const executableName =
+    process.platform === "win32" ? "gateway.exe" : "gateway";
+  const executablePath = path.join(
+    process.resourcesPath,
+    "backend",
+    "gateway",
+    executableName,
+  );
+  const child = spawn(executablePath, [], {
+    cwd: path.dirname(executablePath),
+    stdio: "inherit",
+    windowsHide: true,
+  });
+  backendProcess = child;
+
+  child.once("error", (error) => {
+    console.error("Unable to start packaged backend", error);
+    if (backendProcess === child) backendProcess = null;
+  });
+  child.once("exit", (code, signal) => {
+    console.log(
+      `Packaged backend exited with code ${code ?? "unknown"}${signal ? ` (signal: ${signal})` : ""}`,
+    );
+    if (backendProcess === child) backendProcess = null;
+  });
+}
+
+function stopPackagedBackend() {
+  const child = backendProcess;
+  backendProcess = null;
+  if (!child || child.exitCode !== null) return;
+
+  try {
+    child.kill();
+  } catch (error) {
+    console.error("Unable to stop packaged backend", error);
+  }
+}
 
 protocol.registerSchemesAsPrivileged([
   {
@@ -108,6 +152,7 @@ app.commandLine.appendSwitch(
 );
 app.whenReady().then(() => {
   initializeIpcRouter();
+  startPackagedBackend();
   startLocalServiceDiscovery();
   registerProtocol();
   createMainWindow();
@@ -123,6 +168,7 @@ app.whenReady().then(() => {
 
 app.on("before-quit", () => {
   stopLocalServiceDiscovery();
+  stopPackagedBackend();
 });
 
 app.on("window-all-closed", () => {

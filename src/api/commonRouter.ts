@@ -166,7 +166,7 @@ const translateWithRequests = async (
 };
 
 /** 根据调用要求，在工具调用与逐语言请求之间选择翻译策略。 */
-const translateText = (
+export const translateText = (
   resolved: ResolvedModel,
   text: string,
   forceTool: boolean,
