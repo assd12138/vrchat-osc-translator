@@ -117,8 +117,11 @@ const settingsSlice = createSlice({
         ({ uid }) => uid === provider.uid,
       );
       const nextProvider = { ...provider, identifier };
-      if (index === -1) state.apiConfig.providers.push(nextProvider);
-      else state.apiConfig.providers[index] = nextProvider;
+      if (index === -1) {
+        state.apiConfig.providers.push(nextProvider);
+      } else {
+        state.apiConfig.providers[index] = nextProvider;
+      }
       state.apiConfig = sanitizeApiConfig(state.apiConfig);
       redux_store(REHYDRATE_KEYS.SETTING_API_CONFIG, state.apiConfig);
     },

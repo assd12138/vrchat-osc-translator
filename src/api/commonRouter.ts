@@ -1,13 +1,6 @@
 import { encodeWAV } from "@ricky0123/vad-web/dist/utils";
 import { BEHAVIOR, isBehaviorActive } from "@/constants/model-behavior";
-import {
-  type ApiConfig,
-  type ApiModel,
-  type ApiProvider,
-  isSelectionValid,
-  type ModelSlot,
-  ModelType,
-} from "@/store/api-config";
+import { type ApiModel, type ApiProvider, ModelType } from "@/store/api-config";
 import store from "@/store/store";
 import {
   extractLanguagesFromTemplate,
@@ -16,38 +9,14 @@ import {
   getLanguageEnglishName,
 } from "@/utils";
 import { request } from "./index";
-import { buildProviderEndpoint } from "./provider";
+import { buildProviderEndpoint, resolveModel } from "./provider";
 
 const translationToolName = "translateFormat";
 
-type ResolvedModel = { provider: ApiProvider; model: ApiModel };
+export type ResolvedModel = { provider: ApiProvider; model: ApiModel };
 
-const configurationError = (message: string): Error =>
+export const configurationError = (message: string): Error =>
   new Error(`Provider configuration error: ${message}`);
-
-/** 根据功能槽位解析已选供应商和模型，并统一校验调用所需配置。 */
-const resolveModel = (apiConfig: ApiConfig, slot: ModelSlot): ResolvedModel => {
-  const selection = apiConfig.selections[slot];
-  if (!isSelectionValid(slot, selection, apiConfig.providers) || !selection) {
-    throw configurationError(`a valid ${slot} model selection is required`);
-  }
-  const provider = apiConfig.providers.find(
-    ({ uid }) => uid === selection.providerUid,
-  );
-  const model = provider?.models.find(({ uid }) => uid === selection.modelUid);
-  if (
-    !provider ||
-    !model ||
-    !provider.baseURL ||
-    !provider.apiKey ||
-    !model.modelId
-  ) {
-    throw configurationError(
-      `${slot} provider URL, API key, and model ID are required`,
-    );
-  }
-  return { provider, model };
-};
 
 const postChat = (resolved: ResolvedModel, body: object) =>
   request(
@@ -238,7 +207,10 @@ const fileToBase64 = (file: File): Promise<string> =>
 /** 按模型行为预设决定音频数据格式：命中预设时附带 data URI 前缀。 */
 const buildAudioData = async (file: File, modelId: string) => {
   const base64 = await fileToBase64(file);
-  return isBehaviorActive(modelId, BEHAVIOR.BASE64_WITH_AUDIO_TYPE)
+  return isBehaviorActive(
+    modelId,
+    BEHAVIOR.BASE64_WITH_AUDIO_TYPE_CHAT_COMPLETION_OMNI,
+  )
     ? `data:audio/wav;base64,${base64}`
     : base64;
 };
@@ -300,7 +272,7 @@ const transcribe = async (
   ];
 
   // 如果模型是同时支持文本的多模态，需要提示模型进行转写而非回答
-  if (resolved.model.capabilities.text) {
+  if (resolved?.model?.capabilities?.text) {
     content.push({
       type: "text",
       text: "Transcribe this audio without adding any answers or translated content.",

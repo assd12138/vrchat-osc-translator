@@ -9,9 +9,17 @@ export interface ChatCapabilities {
 }
 
 export enum ModelType {
+  NARILAB_AUDIO_SPEECH_TO_TEXT = "narilab-audio-speech-to-text",
   MINIMAX_AUDIO_SPEECH_TO_TEXT = "minimax-audio-speech-to-text",
+  /** behind is standard openAI standard api format */
   AUDIO_TRANSCRIPTION = "audio-transcription",
   CHAT_COMPLETION = "chat-completion",
+}
+
+export interface NarilabAudioSpeechToText {
+  uid: string;
+  modelId: string;
+  type: ModelType.NARILAB_AUDIO_SPEECH_TO_TEXT;
 }
 
 /** minimax speech to text api */
@@ -37,7 +45,8 @@ export interface ChatCompletionModel {
 export type ApiModel =
   | AudioTranscriptionModel
   | ChatCompletionModel
-  | MinimaxAudioSpeechToText;
+  | MinimaxAudioSpeechToText
+  | NarilabAudioSpeechToText;
 
 export interface ApiProvider {
   uid: string;
@@ -87,6 +96,13 @@ export const createModel = ({
       uid: crypto.randomUUID(),
       modelId,
       type: ModelType.MINIMAX_AUDIO_SPEECH_TO_TEXT,
+    };
+  }
+  if (type === ModelType.NARILAB_AUDIO_SPEECH_TO_TEXT) {
+    return {
+      uid: crypto.randomUUID(),
+      modelId,
+      type: ModelType.NARILAB_AUDIO_SPEECH_TO_TEXT,
     };
   }
   return createChatCompletionModel(modelId, capabilities);
@@ -139,6 +155,7 @@ export const isModelEligible = (slot: ModelSlot, model: ApiModel): boolean => {
     return (
       model.type === ModelType.AUDIO_TRANSCRIPTION ||
       model.type === ModelType.MINIMAX_AUDIO_SPEECH_TO_TEXT ||
+      model.type === ModelType.NARILAB_AUDIO_SPEECH_TO_TEXT ||
       (model.type === ModelType.CHAT_COMPLETION && model.capabilities.audio)
     );
   }
@@ -266,7 +283,7 @@ const sanitizeSelection = (value: unknown): ModelSelection => {
   return providerUid && modelUid ? { providerUid, modelUid } : null;
 };
 
-const sanitizeProvider = (value: unknown): ApiProvider[] => {
+const sanitizeProvider = (value: ApiProvider): ApiProvider[] => {
   if (
     !isRecord(value) ||
     typeof value.uid !== "string" ||
@@ -297,7 +314,7 @@ const sanitizeProvider = (value: unknown): ApiProvider[] => {
   ];
 };
 
-const sanitizeModel = (value: unknown): ApiModel[] => {
+const sanitizeModel = (value: ApiModel): ApiModel[] => {
   if (
     !isRecord(value) ||
     typeof value.uid !== "string" ||
@@ -307,25 +324,31 @@ const sanitizeModel = (value: unknown): ApiModel[] => {
   }
   const uid = value.uid.trim();
   if (!uid) return [];
-  if (value.type === ModelType.AUDIO_TRANSCRIPTION) {
-    return [{ uid, modelId: value.modelId.trim(), type: value.type }];
-  }
-  if (value.type === ModelType.MINIMAX_AUDIO_SPEECH_TO_TEXT) {
-    return [{ uid, modelId: value.modelId.trim(), type: value.type }];
-  }
-  if (value.type !== ModelType.CHAT_COMPLETION) return [];
-  const capabilities = isRecord(value.capabilities) ? value.capabilities : {};
-  return [
-    {
-      uid,
-      modelId: value.modelId.trim(),
-      type: value.type,
-      capabilities: {
-        audio: capabilities.audio === true,
-        image: capabilities.image === true,
-        text: capabilities.text === true,
-        tools: capabilities.tools === true,
+
+  if (value.type === ModelType.CHAT_COMPLETION) {
+    const capabilities = isRecord(value.capabilities)
+      ? value.capabilities
+      : null;
+    return [
+      {
+        uid,
+        modelId: value.modelId.trim(),
+        type: value.type,
+        capabilities: capabilities
+          ? {
+              audio: capabilities.audio === true,
+              image: capabilities.image === true,
+              text: capabilities.text === true,
+              tools: capabilities.tools === true,
+            }
+          : {
+              audio: false,
+              image: false,
+              text: false,
+              tools: false,
+            },
       },
-    },
-  ];
+    ];
+  }
+  return [{ uid, modelId: value.modelId.trim(), type: value.type }];
 };

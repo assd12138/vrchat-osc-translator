@@ -77,13 +77,7 @@ export default function ProviderEditor({
     onDone();
   };
   return (
-    <form
-      className={styles.editor}
-      onSubmit={(e) => {
-        e.preventDefault();
-        save();
-      }}
-    >
+    <form className={styles.editor}>
       <div className={styles.editorIntro}>
         <button type="button" className={styles.backButton} onClick={onDone}>
           ← {t("返回列表")}
@@ -281,6 +275,9 @@ export default function ProviderEditor({
                 <option value={ModelType.MINIMAX_AUDIO_SPEECH_TO_TEXT}>
                   {t("语音转写")}(minimax) /speech_to_text
                 </option>
+                <option value={ModelType.NARILAB_AUDIO_SPEECH_TO_TEXT}>
+                  {t("流式转写")}(nariLab) /realtime
+                </option>
               </select>
             </label>
             {model.type === ModelType.CHAT_COMPLETION && (
@@ -314,7 +311,7 @@ export default function ProviderEditor({
         <button type="button" onClick={onDone}>
           {t("取消")}
         </button>
-        <button type="submit" className={styles.primaryButton}>
+        <button type="submit" onClick={save} className={styles.primaryButton}>
           {t("保存")}
         </button>
       </div>

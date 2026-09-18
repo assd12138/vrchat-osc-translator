@@ -119,6 +119,7 @@ export default {
   模型名称必填: "Model name is required",
   模型类型: "Model type",
   语音转写: "Audio transcription",
+  流式转写: "Streaming transcription",
   文本补全: "Text completion",
   语音: "Audio",
   图像: "Image",

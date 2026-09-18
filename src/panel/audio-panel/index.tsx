@@ -1,9 +1,13 @@
 import { MicVAD } from "@ricky0123/vad-web";
+import { Microphone } from "decibri";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { processAudioRouter, translateRouter } from "@/api/commonRouter";
+import { resolveModel } from "@/api/provider";
 import invoke, { NATIVE_COMMAND } from "@/electron/ipc";
+import { ModelType } from "@/store/api-config";
 import { togglePanelExpansion } from "@/store/settings";
+import store from "@/store/store";
 import { loadMicDevices } from "@/utils";
 import { sendToVrcChat } from "@/utils/vrc-chat-queue";
 import { useAppDispatch, useAppSelector } from "../../store/hook";
@@ -27,12 +31,21 @@ export default function AudioPanel() {
   // 选择的麦克风
   const [deviceId, setDeviceId] = useState<string>();
 
-  // 用于追踪最新的 onSpeechEnd 调用时间戳
-  // const latestSpeechTimestampRef = useRef<number>(0);
-  // 用于节流 invoke 的调用
-  // const lastInvokeTimeRef = useRef<number>(0);
+  const start = () => {
+    const { apiConfig } = store.getState().settings;
+    const resolvedConfig = resolveModel(apiConfig, "transcription");
+    //  如果是流式的识别模型，使用stream采集
+    if (
+      apiConfig.translationMode === "transcribe-then-translate" &&
+      resolvedConfig.model.type === ModelType.NARILAB_AUDIO_SPEECH_TO_TEXT
+    ) {
+      startStreamVoice();
+      return;
+    }
+    startVadVoice();
+  };
 
-  const start = async () => {
+  const startVadVoice = async () => {
     try {
       if (myVad.current) return;
       const vad = await MicVAD.new({
@@ -90,6 +103,23 @@ export default function AudioPanel() {
     } catch (e) {
       console.error(e);
     }
+  };
+
+  const startStreamVoice = async () => {
+    const mic = new Microphone({
+      sampleRate: 16000,
+      device: deviceId,
+    });
+    mic.on("data", (chunk) => {
+      console.log("chunk", chunk);
+    });
+    mic.on("speech", () => {
+      console.log("speech");
+    });
+    mic.on("silence", () => {
+      console.log("silence");
+    });
+    await mic.start();
   };
 
   const stop = () => {

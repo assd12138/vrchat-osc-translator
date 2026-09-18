@@ -1,4 +1,11 @@
-import { type ApiProvider, ModelType } from "@/store/api-config";
+import {
+  type ApiConfig,
+  type ApiProvider,
+  isSelectionValid,
+  type ModelSlot,
+  ModelType,
+} from "@/store/api-config";
+import { configurationError, type ResolvedModel } from "./commonRouter";
 
 export type ProviderEndpoint = "models" | ModelType;
 
@@ -7,6 +14,7 @@ const endpointPaths: Record<ProviderEndpoint, string> = {
   [ModelType.AUDIO_TRANSCRIPTION]: "/audio/transcriptions",
   [ModelType.CHAT_COMPLETION]: "/chat/completions",
   [ModelType.MINIMAX_AUDIO_SPEECH_TO_TEXT]: "/speech_to_text",
+  [ModelType.NARILAB_AUDIO_SPEECH_TO_TEXT]: "/realtime",
 };
 
 /**
@@ -58,4 +66,30 @@ export const discoverModels = async (
         .filter(Boolean),
     ),
   ];
+}; /** 根据功能槽位解析已选供应商和模型，并统一校验调用所需配置。 */
+
+export const resolveModel = (
+  apiConfig: ApiConfig,
+  slot: ModelSlot,
+): ResolvedModel => {
+  const selection = apiConfig.selections[slot];
+  if (!isSelectionValid(slot, selection, apiConfig.providers) || !selection) {
+    throw configurationError(`a valid ${slot} model selection is required`);
+  }
+  const provider = apiConfig.providers.find(
+    ({ uid }) => uid === selection.providerUid,
+  );
+  const model = provider?.models.find(({ uid }) => uid === selection.modelUid);
+  if (
+    !provider ||
+    !model ||
+    !provider.baseURL ||
+    !provider.apiKey ||
+    !model.modelId
+  ) {
+    throw configurationError(
+      `${slot} provider URL, API key, and model ID are required`,
+    );
+  }
+  return { provider, model };
 };
