@@ -4,7 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { processAudioRouter, translateRouter } from "@/api/commonRouter";
 import { resolveModel } from "@/api/provider";
-import { streamTranscription } from "@/api/stream";
+import {
+  type StreamTranscriptionConfig,
+  streamTranscription,
+} from "@/api/stream";
 import invoke, { NATIVE_COMMAND } from "@/electron/ipc";
 import { ModelType } from "@/store/api-config";
 import { togglePanelExpansion } from "@/store/settings";
@@ -44,7 +47,12 @@ export default function AudioPanel() {
       if (
         resolvedConfig.model.type === ModelType.NARILAB_AUDIO_SPEECH_TO_TEXT
       ) {
-        startStreamVoice();
+        startStreamVoice({
+          modelId: resolvedConfig.model.modelId,
+          apiKey: resolvedConfig.provider.apiKey,
+          baseURL: resolvedConfig.provider.baseURL,
+          modelType: resolvedConfig.model.type,
+        });
         return;
       }
     }
@@ -111,7 +119,7 @@ export default function AudioPanel() {
     }
   };
 
-  const startStreamVoice = async () => {
+  const startStreamVoice = async (config: StreamTranscriptionConfig) => {
     const mic = new Microphone({
       sampleRate: 16000,
       channels: 1,
@@ -119,7 +127,7 @@ export default function AudioPanel() {
       device: deviceId,
     });
     try {
-      const stopStreaming = await streamTranscription(mic, (text) => {
+      const stopStreaming = await streamTranscription(mic, config, (text) => {
         eventBus.emit(EventBusEvent.ADD_LOG, text);
       });
       streamMic.current = mic;

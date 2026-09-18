@@ -1,9 +1,15 @@
 import asyncio
+import json
 import socket
-from collections.abc import AsyncIterator
-from typing import Protocol
 
 from fastapi import FastAPI, WebSocket
+from thirdApi.narilab import NarilabTranscriptionProvider
+from transcription import (
+    TranscriptionConfig,
+    TranscriptionConfigurationError,
+    TranscriptionProvider,
+    TranscriptionSession,
+)
 from uvicorn import Config, Server
 from zeroconf import ServiceInfo, Zeroconf
 
@@ -16,59 +22,21 @@ SERVICE_NAME = "M._vt._tcp.local."
 zeroconf: Zeroconf | None = None
 
 
-class TranscriptionSession(Protocol):
-    """One bidirectional streaming transcription session."""
-
-    async def send_pcm(self, pcm: bytes) -> None:
-        """Accept a raw 16 kHz, mono, signed 16-bit little-endian PCM chunk."""
-        ...
-
-    def transcripts(self) -> AsyncIterator[str]:
-        """Yield recognized text as it becomes available."""
-        ...
-
-    async def close(self) -> None:
-        """Release provider resources for this session."""
-        ...
+class TranscriptionProtocolError(ValueError):
+    """Raised when the local WebSocket client violates the relay protocol."""
 
 
-class TranscriptionProvider(Protocol):
-    """Factory implemented by a concrete provider such as Narilab later."""
-
-    async def create_session(self) -> TranscriptionSession:
-        """Create an isolated transcription session for one WebSocket client."""
-        ...
+providers: dict[str, TranscriptionProvider] = {}
 
 
-class UnconfiguredTranscriptionSession:
-    """Consumes PCM without emitting text until a provider is configured."""
-
-    def __init__(self) -> None:
-        self._transcripts: asyncio.Queue[str | None] = asyncio.Queue()
-
-    async def send_pcm(self, pcm: bytes) -> None:
-        del pcm
-
-    async def transcripts(self) -> AsyncIterator[str]:
-        while (text := await self._transcripts.get()) is not None:
-            yield text
-
-    async def close(self) -> None:
-        await self._transcripts.put(None)
+def register_transcription_provider(provider: TranscriptionProvider) -> None:
+    """Register a provider implementation for the model type it handles."""
+    if provider.model_type in providers:
+        raise RuntimeError(f"Provider already registered: {provider.model_type}")
+    providers[provider.model_type] = provider
 
 
-class UnconfiguredTranscriptionProvider:
-    async def create_session(self) -> TranscriptionSession:
-        return UnconfiguredTranscriptionSession()
-
-
-transcription_provider: TranscriptionProvider = UnconfiguredTranscriptionProvider()
-
-
-def set_transcription_provider(provider: TranscriptionProvider) -> None:
-    """Install the concrete provider without coupling the WebSocket relay to it."""
-    global transcription_provider
-    transcription_provider = provider
+register_transcription_provider(NarilabTranscriptionProvider())
 
 
 @app.get("/health")
@@ -76,6 +44,27 @@ async def health():
     return {
         "ok": True,
     }
+
+
+async def send_error(websocket: WebSocket, message: str) -> None:
+    await websocket.send_json({"type": "error", "message": message})
+
+
+async def receive_config(websocket: WebSocket) -> TranscriptionConfig:
+    message = await websocket.receive()
+    if message["type"] == "websocket.disconnect":
+        raise TranscriptionProtocolError("Client disconnected before configuration")
+
+    text = message.get("text")
+    if not isinstance(text, str):
+        raise TranscriptionProtocolError("First message must be a configuration frame")
+    try:
+        payload = json.loads(text)
+    except json.JSONDecodeError as error:
+        raise TranscriptionProtocolError("Configuration must be valid JSON") from error
+    if not isinstance(payload, dict) or payload.get("type") != "transcription.configure":
+        raise TranscriptionProtocolError("Expected a transcription.configure message")
+    return TranscriptionConfig.from_payload(payload.get("config"))
 
 
 async def receive_pcm(websocket: WebSocket, session: TranscriptionSession) -> None:
@@ -86,12 +75,10 @@ async def receive_pcm(websocket: WebSocket, session: TranscriptionSession) -> No
 
         pcm = message.get("bytes")
         if pcm is None:
-            await websocket.send_json(
-                {
-                    "type": "error",
-                    "message": "Expected a binary PCM frame",
-                }
-            )
+            await send_error(websocket, "Expected a binary PCM frame")
+            continue
+        if not pcm or len(pcm) % 2:
+            await send_error(websocket, "PCM frames must contain complete 16-bit samples")
             continue
         await session.send_pcm(pcm)
 
@@ -99,19 +86,40 @@ async def receive_pcm(websocket: WebSocket, session: TranscriptionSession) -> No
 async def send_transcripts(
     websocket: WebSocket, session: TranscriptionSession
 ) -> None:
-    async for text in session.transcripts():
-        await websocket.send_json({"type": "transcript", "text": text})
+    try:
+        async for text in session.transcripts():
+            await websocket.send_json({"type": "transcript", "text": text})
+    except Exception as error:
+        await send_error(websocket, str(error))
 
 
 @app.websocket("/transcription")
 async def transcription(websocket: WebSocket) -> None:
     """Relay raw PCM frames to a provider and return its text results.
 
-    Client messages must be binary 16 kHz, mono, signed 16-bit little-endian PCM.
+    The first client message configures the provider, followed by binary 16 kHz,
+    mono, signed 16-bit little-endian PCM frames.
     Server messages are JSON text frames: {"type": "transcript", "text": "..."}.
     """
     await websocket.accept()
-    session = await transcription_provider.create_session()
+    try:
+        config = await receive_config(websocket)
+        provider = providers.get(config.model_type)
+        if provider is None:
+            raise TranscriptionConfigurationError(
+                f"Unsupported transcription model type: {config.model_type}"
+            )
+        session = await provider.create_session(config)
+    except (TranscriptionConfigurationError, TranscriptionProtocolError) as error:
+        await send_error(websocket, str(error))
+        await websocket.close(code=1008)
+        return
+    except Exception as error:
+        await send_error(websocket, f"Unable to initialize transcription: {error}")
+        await websocket.close(code=1011)
+        return
+
+    await websocket.send_json({"type": "ready"})
     receive_task = asyncio.create_task(receive_pcm(websocket, session))
     send_task = asyncio.create_task(send_transcripts(websocket, session))
 
