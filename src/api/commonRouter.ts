@@ -1,5 +1,9 @@
 import { encodeWAV } from "@ricky0123/vad-web/dist/utils";
-import { BEHAVIOR, isBehaviorActive } from "@/constants/model-behavior";
+import {
+  BEHAVIOR,
+  isBehaviorActive,
+  isUrlBehaviorActive,
+} from "@/constants/model-behavior";
 import { type ApiModel, type ApiProvider, ModelType } from "@/store/api-config";
 import store from "@/store/store";
 import {
@@ -18,15 +22,36 @@ export type ResolvedModel = { provider: ApiProvider; model: ApiModel };
 export const configurationError = (message: string): Error =>
   new Error(`Provider configuration error: ${message}`);
 
-const postChat = (resolved: ResolvedModel, body: object) =>
-  request(
+const postChat = (resolved: ResolvedModel, body: object) => {
+  let extraBody = {};
+  if (
+    isBehaviorActive(resolved.model.modelId, BEHAVIOR.THINKING_TYPE_DISABLED) ||
+    isUrlBehaviorActive(
+      resolved.provider.baseURL,
+      BEHAVIOR.THINKING_TYPE_DISABLED,
+    )
+  ) {
+    extraBody = {
+      thinking: { type: "disabled" },
+    };
+  } else if (
+    isBehaviorActive(
+      resolved.model.modelId,
+      BEHAVIOR.REASONING_EFFORT_NONE_TURN_OFF_THINKING,
+    )
+  ) {
+    extraBody = {
+      reasoning_effort: "none",
+    };
+  }
+  return request(
     buildProviderEndpoint(resolved.provider.baseURL, ModelType.CHAT_COMPLETION),
     {
       method: "POST",
       body: JSON.stringify({
         model: resolved.model.modelId,
         ...body,
-        thinking: { type: "disabled" },
+        ...extraBody,
       }),
       headers: {
         Authorization: `Bearer ${resolved.provider.apiKey}`,
@@ -34,7 +59,7 @@ const postChat = (resolved: ResolvedModel, body: object) =>
       },
     },
   );
-
+};
 const getMessageContent = (response: unknown): string => {
   const content = (
     response as { choices?: Array<{ message?: { content?: unknown } }> }
