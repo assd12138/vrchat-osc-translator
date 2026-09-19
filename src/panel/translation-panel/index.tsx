@@ -4,6 +4,7 @@ import { useAppDispatch, useAppSelector } from "../../store/hook";
 import { setOutputTemplate, togglePanelExpansion } from "../../store/settings";
 import globalStyles from "../../styles/index.module.css";
 import { extractLanguagesFromTemplate } from "../../utils";
+import PromptSettings from "../setting-panel/components/PromptSettings";
 import TranslationTemplateHelper from "../translation-template-helper";
 import styles from "./index.module.css";
 
@@ -41,6 +42,7 @@ export default function TranslationPanel() {
     <div className={globalStyles.panel}>
       <div className={globalStyles.title}>
         🌐 {t("翻译设置")}
+        <PromptSettings />
         <button
           type="button"
           className={globalStyles.panelToggle}

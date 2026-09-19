@@ -121,6 +121,18 @@ function createMainWindow() {
   });
 }
 
+function focusMainWindow() {
+  if (!mainWindow || mainWindow.isDestroyed()) return;
+
+  if (mainWindow.isMinimized()) {
+    mainWindow.restore();
+  }
+  if (!mainWindow.isVisible()) {
+    mainWindow.show();
+  }
+  mainWindow.focus();
+}
+
 function registerScreenPickerHandler() {
   // 拦截渲染进程的 getDisplayMedia 请求，弹出模态选择器让用户选择屏幕或窗口。
   // 始终忽略音频：回调只包含 video。
@@ -145,35 +157,49 @@ function registerScreenPickerHandler() {
   );
 }
 
-// 应用生命周期
-app.commandLine.appendSwitch(
-  "--enable-features",
-  "WebMachineLearningNeuralNetwork",
-);
-app.whenReady().then(() => {
-  initializeIpcRouter();
-  startPackagedBackend();
-  startLocalServiceDiscovery();
-  registerProtocol();
-  createMainWindow();
-  registerScreenPickerHandler();
+const hasSingleInstanceLock = app.requestSingleInstanceLock();
 
-  app.on("activate", () => {
-    // macOS通常在点击dock图标时重新创建窗口
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createMainWindow();
+if (!hasSingleInstanceLock) {
+  app.quit();
+} else {
+  app.on("second-instance", () => {
+    focusMainWindow();
+  });
+
+  // 应用生命周期
+  app.commandLine.appendSwitch(
+    "--enable-features",
+    "WebMachineLearningNeuralNetwork",
+  );
+  app.whenReady().then(() => {
+    initializeIpcRouter();
+    startLocalServiceDiscovery();
+    registerProtocol();
+    createMainWindow();
+    registerScreenPickerHandler();
+
+    // 后端通过异步 spawn 启动，不让它进入窗口创建的首轮启动路径。
+    setImmediate(startPackagedBackend);
+
+    app.on("activate", () => {
+      // macOS通常在点击dock图标时重新创建窗口
+      if (BrowserWindow.getAllWindows().length === 0) {
+        createMainWindow();
+      } else {
+        focusMainWindow();
+      }
+    });
+  });
+
+  app.on("before-quit", () => {
+    stopLocalServiceDiscovery();
+    stopPackagedBackend();
+  });
+
+  app.on("window-all-closed", () => {
+    // macOS上通常用户明确按Cmd+Q才会退出应用
+    if (process.platform !== "darwin") {
+      app.quit();
     }
   });
-});
-
-app.on("before-quit", () => {
-  stopLocalServiceDiscovery();
-  stopPackagedBackend();
-});
-
-app.on("window-all-closed", () => {
-  // macOS上通常用户明确按Cmd+Q才会退出应用
-  if (process.platform !== "darwin") {
-    app.quit();
-  }
-});
+}

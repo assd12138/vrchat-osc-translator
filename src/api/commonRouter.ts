@@ -5,6 +5,7 @@ import {
   isUrlBehaviorActive,
 } from "@/constants/model-behavior";
 import { type ApiModel, type ApiProvider, ModelType } from "@/store/api-config";
+import { getSelectedTranslationPromptContent } from "@/store/settings";
 import store from "@/store/store";
 import {
   extractLanguagesFromTemplate,
@@ -143,6 +144,7 @@ const translateWithRequests = async (
   text: string,
   languages: string[],
   template: string,
+  promptTemplate: string,
 ) => {
   const values = await Promise.all(
     languages.map(async (language) => {
@@ -150,7 +152,11 @@ const translateWithRequests = async (
         messages: [
           {
             role: "user",
-            content: generateTranslationPrompt(text, [language]),
+            content: generateTranslationPrompt(
+              text,
+              [language],
+              promptTemplate,
+            ),
           },
         ],
         temperature: 0.7,
@@ -177,14 +183,23 @@ export const translateText = (
     throw configurationError(
       "the output template must contain target languages",
     );
+  const promptTemplate = getSelectedTranslationPromptContent(
+    store.getState().settings,
+  );
   return forceTool
     ? translateWithTool(
         resolved,
-        generateTranslationPrompt(text, languages),
+        generateTranslationPrompt(text, languages, promptTemplate),
         languages,
         template,
       )
-    : translateWithRequests(resolved, text, languages, template);
+    : translateWithRequests(
+        resolved,
+        text,
+        languages,
+        template,
+        promptTemplate,
+      );
 };
 
 /** 处理纯文本翻译，并根据当前翻译模式选择对应模型。 */

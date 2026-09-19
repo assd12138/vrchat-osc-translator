@@ -87,9 +87,12 @@ export const generateTranslationTool = (languages: string[]): object => {
 export const generateTranslationPrompt = (
   text: string,
   languages: string[],
+  template: string,
 ): string => {
   const langList = languages.map(getLanguageEnglishName).join("/");
-  return `Translate the text within the brackets into ${langList}, without additional explanation and brackets it self, if the content is already in the target language, output the original text.\n\n[${(text || "").replace(/\n/g, ". ")}]`;
+  return template
+    .replaceAll("#target", langList)
+    .replaceAll("#text", (text || "").replace(/\n/g, ". "));
 };
 
 export async function loadMicDevices() {

@@ -136,4 +136,13 @@ export default {
   编辑: "Edit",
   复制: "Copy",
   删除: "Delete",
+  提示词设置: "Prompt Settings",
+  管理翻译提示词: "Manage prompts used for text translation",
+  默认提示词: "Default prompt",
+  新建提示词: "New prompt",
+  编辑标题: "Edit title",
+  提示词占位符说明:
+    "#target is replaced with the target language and #text with the text to translate.",
+  提示词标题: "Prompt title",
+  提示词内容: "Prompt content",
 };

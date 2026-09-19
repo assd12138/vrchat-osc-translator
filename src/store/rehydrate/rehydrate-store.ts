@@ -1,10 +1,19 @@
 import type { ApiConfig } from "../api-config";
-import type { PanelExpansionState } from "../settings";
+import type {
+  PanelExpansionState,
+  TranslationPromptTemplate,
+} from "../settings";
 import { REDUX_STORAGE_KEY, rehydrateFlag } from "./rehydrate-constant";
 
 export function redux_store(
   module: string,
-  data: string | boolean | string[] | PanelExpansionState | ApiConfig,
+  data:
+    | string
+    | boolean
+    | string[]
+    | PanelExpansionState
+    | ApiConfig
+    | TranslationPromptTemplate[],
 ) {
   if (!rehydrateFlag.flag) return;
 

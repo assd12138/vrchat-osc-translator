@@ -9,7 +9,9 @@ import {
   setOcrTargetLanguage,
   setOutputTemplate,
   setPanelExpansion,
+  setSelectedTranslationPrompt,
   setTheme,
+  setTranslationPromptTemplates,
 } from "../settings";
 import store from "../store";
 import {
@@ -20,6 +22,10 @@ import {
 
 export const rehydrateMapper = {
   [REHYDRATE_KEYS.SETTING_OUTPUT_TEMPLATE]: setOutputTemplate,
+  [REHYDRATE_KEYS.SETTING_TRANSLATION_PROMPT_TEMPLATES]:
+    setTranslationPromptTemplates,
+  [REHYDRATE_KEYS.SETTING_SELECTED_TRANSLATION_PROMPT]:
+    setSelectedTranslationPrompt,
   [REHYDRATE_KEYS.SETTING_LANGUAGE]: setLanguage,
   [REHYDRATE_KEYS.SETTING_OCR_TARGET_LANGUAGE]: setOcrTargetLanguage,
   [REHYDRATE_KEYS.SETTING_THEME]: setTheme,

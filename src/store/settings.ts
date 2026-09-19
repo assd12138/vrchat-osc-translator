@@ -18,6 +18,16 @@ import { redux_store } from "./rehydrate/rehydrate-store";
 
 export type ThemePreference = "default" | "liquid-glass" | "hand-drawn";
 
+export const DEFAULT_TRANSLATION_PROMPT_ID = "default";
+export const DEFAULT_TRANSLATION_PROMPT_CONTENT =
+  "Translate the text within the brackets into #target, without additional explanation and brackets it self, if the content is already in the target language, output the original text.\n\n[#text]";
+
+export interface TranslationPromptTemplate {
+  uid: string;
+  title: string;
+  content: string;
+}
+
 const getInitialOcrTargetLanguage = () => {
   const browserLanguage =
     typeof navigator === "undefined" ? undefined : navigator.language;
@@ -40,6 +50,8 @@ export interface SettingState {
   /** Deepwork provider configuration. This is the only persisted API configuration. */
   apiConfig: ApiConfig;
   outputTemplate: string;
+  translationPromptTemplates: TranslationPromptTemplate[];
+  selectedTranslationPromptId: string;
   language: string;
   ocrTargetLanguage: string;
   theme: ThemePreference;
@@ -53,6 +65,8 @@ export const initialState: SettingState = {
 [日]#{ja}
 [한]#{ko}
 [ru]#{ru}`,
+  translationPromptTemplates: [],
+  selectedTranslationPromptId: DEFAULT_TRANSLATION_PROMPT_ID,
   language: "auto",
   ocrTargetLanguage: getInitialOcrTargetLanguage(),
   theme: "default",
@@ -81,6 +95,64 @@ const settingsSlice = createSlice({
     setOutputTemplate: (state, action: PayloadAction<string>) => {
       state.outputTemplate = action.payload;
       redux_store(REHYDRATE_KEYS.SETTING_OUTPUT_TEMPLATE, action.payload);
+    },
+    setTranslationPromptTemplates: (
+      state,
+      action: PayloadAction<TranslationPromptTemplate[]>,
+    ) => {
+      state.translationPromptTemplates = sanitizeTranslationPromptTemplates(
+        action.payload,
+      );
+      ensureSelectedTranslationPrompt(state);
+      persistTranslationPromptSettings(state);
+    },
+    addTranslationPromptTemplate: (
+      state,
+      action: PayloadAction<TranslationPromptTemplate>,
+    ) => {
+      const [template] = sanitizeTranslationPromptTemplates([action.payload]);
+      if (
+        template &&
+        !state.translationPromptTemplates.some(
+          ({ uid }) => uid === template.uid,
+        )
+      ) {
+        state.translationPromptTemplates.push(template);
+        persistTranslationPromptSettings(state);
+      }
+    },
+    updateTranslationPromptTemplate: (
+      state,
+      action: PayloadAction<{
+        uid: string;
+        title?: string;
+        content?: string;
+      }>,
+    ) => {
+      const template = state.translationPromptTemplates.find(
+        ({ uid }) => uid === action.payload.uid,
+      );
+      if (!template) return;
+      if (typeof action.payload.title === "string") {
+        template.title = action.payload.title.trim() || template.title;
+      }
+      if (typeof action.payload.content === "string") {
+        template.content = action.payload.content;
+      }
+      persistTranslationPromptSettings(state);
+    },
+    removeTranslationPromptTemplate: (state, action: PayloadAction<string>) => {
+      state.translationPromptTemplates =
+        state.translationPromptTemplates.filter(
+          ({ uid }) => uid !== action.payload,
+        );
+      ensureSelectedTranslationPrompt(state);
+      persistTranslationPromptSettings(state);
+    },
+    setSelectedTranslationPrompt: (state, action: PayloadAction<string>) => {
+      state.selectedTranslationPromptId = action.payload;
+      ensureSelectedTranslationPrompt(state);
+      persistTranslationPromptSettings(state);
     },
     setBatchTranslate: (state, action: PayloadAction<boolean>) => {
       state.apiConfig.batchTranslate = action.payload;
@@ -165,6 +237,11 @@ const settingsSlice = createSlice({
 
 export const {
   setOutputTemplate,
+  setTranslationPromptTemplates,
+  addTranslationPromptTemplate,
+  updateTranslationPromptTemplate,
+  removeTranslationPromptTemplate,
+  setSelectedTranslationPrompt,
   setBatchTranslate,
   setTranslationMode,
   setModelSelection,
@@ -178,5 +255,69 @@ export const {
   hydrateApiConfig,
   reinit,
 } = settingsSlice.actions;
+
+export const getSelectedTranslationPromptContent = (
+  settings: Pick<
+    SettingState,
+    "translationPromptTemplates" | "selectedTranslationPromptId"
+  >,
+): string =>
+  settings.translationPromptTemplates.find(
+    ({ uid }) => uid === settings.selectedTranslationPromptId,
+  )?.content ?? DEFAULT_TRANSLATION_PROMPT_CONTENT;
+
+const sanitizeTranslationPromptTemplates = (
+  templates: unknown,
+): TranslationPromptTemplate[] => {
+  if (!Array.isArray(templates)) return [];
+
+  const seen = new Set<string>();
+  return templates.flatMap((template): TranslationPromptTemplate[] => {
+    if (
+      typeof template !== "object" ||
+      template === null ||
+      typeof (template as TranslationPromptTemplate).uid !== "string" ||
+      typeof (template as TranslationPromptTemplate).title !== "string" ||
+      typeof (template as TranslationPromptTemplate).content !== "string"
+    ) {
+      return [];
+    }
+    const uid = (template as TranslationPromptTemplate).uid.trim();
+    if (!uid || uid === DEFAULT_TRANSLATION_PROMPT_ID || seen.has(uid))
+      return [];
+    seen.add(uid);
+    return [
+      {
+        uid,
+        title:
+          (template as TranslationPromptTemplate).title.trim() ||
+          "Untitled prompt",
+        content: (template as TranslationPromptTemplate).content,
+      },
+    ];
+  });
+};
+
+const ensureSelectedTranslationPrompt = (state: SettingState) => {
+  if (
+    state.selectedTranslationPromptId !== DEFAULT_TRANSLATION_PROMPT_ID &&
+    !state.translationPromptTemplates.some(
+      ({ uid }) => uid === state.selectedTranslationPromptId,
+    )
+  ) {
+    state.selectedTranslationPromptId = DEFAULT_TRANSLATION_PROMPT_ID;
+  }
+};
+
+const persistTranslationPromptSettings = (state: SettingState) => {
+  redux_store(
+    REHYDRATE_KEYS.SETTING_TRANSLATION_PROMPT_TEMPLATES,
+    state.translationPromptTemplates,
+  );
+  redux_store(
+    REHYDRATE_KEYS.SETTING_SELECTED_TRANSLATION_PROMPT,
+    state.selectedTranslationPromptId,
+  );
+};
 
 export default settingsSlice;
