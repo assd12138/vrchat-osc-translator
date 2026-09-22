@@ -10,6 +10,8 @@ import { sendToVrcChat } from "@/utils/vrc-chat-queue";
 const MAX_PENDING_TRANSLATIONS = 2;
 const TRANSLATION_TIMEOUT_MS = 10_000;
 const VRCHAT_MAX_CHARACTERS = 140;
+const RECONNECT_BASE_DELAY_MS = 1_000;
+const RECONNECT_MAX_DELAY_MS = 10_000;
 
 export interface StreamTranscriptionConfig {
   modelId: string;
@@ -133,108 +135,235 @@ export const streamTranscription = async ({
   const service = await invoke(NATIVE_COMMAND.GET_LOCAL_SERVICE, undefined);
   if (!service) throw new Error("Local transcription service is unavailable");
 
-  const socket = new WebSocket(
-    `ws://${service.host}:${service.port}/transcription`,
-  );
-  try {
-    if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
-    await new Promise<void>((resolve, reject) => {
-      const cleanup = () => {
-        socket.removeEventListener("open", handleOpen);
-        socket.removeEventListener("error", handleError);
-        socket.removeEventListener("close", handleClose);
-        signal?.removeEventListener("abort", handleAbort);
-      };
-      const handleAbort = () => {
-        cleanup();
-        socket.close();
-        reject(new DOMException("Aborted", "AbortError"));
-      };
-      const handleOpen = () => {
-        cleanup();
-        resolve();
-      };
-      const handleError = () => {
-        cleanup();
-        reject(
-          new Error("Unable to connect to the local transcription service"),
-        );
-      };
-      const handleClose = () => {
-        cleanup();
-        reject(
-          new Error("Local transcription service closed before connecting"),
-        );
-      };
-      socket.addEventListener("open", handleOpen, { once: true });
-      socket.addEventListener("error", handleError, { once: true });
-      socket.addEventListener("close", handleClose, { once: true });
-      signal?.addEventListener("abort", handleAbort, { once: true });
-    });
-    await new Promise<void>((resolve, reject) => {
-      const cleanup = () => {
-        socket.removeEventListener("message", handleMessage);
-        socket.removeEventListener("error", handleError);
-        socket.removeEventListener("close", handleClose);
-        signal?.removeEventListener("abort", handleAbort);
-      };
-      const handleAbort = () => {
-        cleanup();
-        socket.close();
-        reject(new DOMException("Aborted", "AbortError"));
-      };
+  const socketURL = `ws://${service.host}:${service.port}/transcription`;
+  let socket: WebSocket | null = null;
+  let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+  let reconnectAttempt = 0;
+  let reconnecting = false;
+  let stopped = false;
+  const socketCleanups = new WeakMap<WebSocket, () => void>();
+
+  const createAbortError = () => new DOMException("Aborted", "AbortError");
+
+  const closeSocket = (target: WebSocket | null) => {
+    if (!target) return;
+    socketCleanups.get(target)?.();
+    socketCleanups.delete(target);
+    if (
+      target.readyState === WebSocket.CONNECTING ||
+      target.readyState === WebSocket.OPEN
+    ) {
+      target.close();
+    }
+  };
+
+  const clearReconnectTimer = () => {
+    if (reconnectTimer === null) return;
+    clearTimeout(reconnectTimer);
+    reconnectTimer = null;
+  };
+
+  const handleMicrophoneData = (chunk: Int16Array | Float32Array) => {
+    const activeSocket = socket;
+    if (
+      stopped ||
+      !activeSocket ||
+      activeSocket.readyState !== WebSocket.OPEN
+    ) {
+      return;
+    }
+    try {
+      activeSocket.send(chunk);
+    } catch (error) {
+      handleConnectionFailure(activeSocket, error);
+    }
+  };
+
+  const stop = () => {
+    if (stopped) return;
+    stopped = true;
+    clearReconnectTimer();
+    signal?.removeEventListener("abort", handleAbort);
+    microphone.off("data", handleMicrophoneData);
+
+    const activeSocket = socket;
+    socket = null;
+    closeSocket(activeSocket);
+  };
+
+  function handleAbort() {
+    stop();
+  }
+
+  const scheduleReconnect = (reason: unknown) => {
+    if (stopped || reconnectTimer !== null) return;
+
+    const delay = Math.min(
+      RECONNECT_BASE_DELAY_MS * 2 ** reconnectAttempt,
+      RECONNECT_MAX_DELAY_MS,
+    );
+    reconnectAttempt += 1;
+    reconnectTimer = setTimeout(() => {
+      reconnectTimer = null;
+      void reconnect();
+    }, delay);
+
+    console.error("Streaming transcription socket disconnected", reason);
+  };
+
+  const handleConnectionFailure = (
+    failedSocket: WebSocket,
+    reason: unknown,
+  ) => {
+    if (stopped || socket !== failedSocket) return;
+    socket = null;
+    closeSocket(failedSocket);
+    scheduleReconnect(reason);
+  };
+
+  const connectSocket = async () => {
+    if (stopped || signal?.aborted) throw createAbortError();
+
+    const nextSocket = new WebSocket(socketURL);
+    socket = nextSocket;
+
+    try {
+      await new Promise<void>((resolve, reject) => {
+        let settled = false;
+
+        const cleanup = () => {
+          nextSocket.removeEventListener("open", handleOpen);
+          nextSocket.removeEventListener("message", handleMessage);
+          nextSocket.removeEventListener("error", handleError);
+          nextSocket.removeEventListener("close", handleClose);
+          signal?.removeEventListener("abort", handleAbortDuringConnect);
+        };
+
+        const fail = (error: unknown) => {
+          if (settled) return;
+          settled = true;
+          cleanup();
+          reject(error);
+        };
+
+        function handleOpen() {
+          try {
+            nextSocket.send(
+              JSON.stringify({ type: "transcription.configure", config }),
+            );
+          } catch (error) {
+            fail(error);
+          }
+        }
+
+        function handleMessage({ data }: MessageEvent<unknown>) {
+          if (typeof data !== "string") return;
+          try {
+            const message: unknown = JSON.parse(data);
+            if (isReadyMessage(message)) {
+              settled = true;
+              cleanup();
+              resolve();
+            } else if (isErrorMessage(message)) {
+              fail(new Error(message.message));
+            }
+          } catch (error) {
+            fail(error);
+          }
+        }
+
+        function handleError() {
+          fail(
+            new Error("Unable to connect to the local transcription service"),
+          );
+        }
+
+        function handleClose() {
+          fail(
+            new Error("Local transcription service closed before connecting"),
+          );
+        }
+
+        function handleAbortDuringConnect() {
+          fail(createAbortError());
+        }
+
+        nextSocket.addEventListener("open", handleOpen, { once: true });
+        nextSocket.addEventListener("message", handleMessage);
+        nextSocket.addEventListener("error", handleError, { once: true });
+        nextSocket.addEventListener("close", handleClose, { once: true });
+        signal?.addEventListener("abort", handleAbortDuringConnect, {
+          once: true,
+        });
+      });
+
+      if (stopped || signal?.aborted || socket !== nextSocket) {
+        throw createAbortError();
+      }
+
       const handleMessage = ({ data }: MessageEvent<unknown>) => {
         if (typeof data !== "string") return;
         try {
           const message: unknown = JSON.parse(data);
-          if (isReadyMessage(message)) {
-            cleanup();
-            resolve();
+          if (isTranscriptMessage(message)) {
+            onTranscript(message.text);
           } else if (isErrorMessage(message)) {
-            cleanup();
-            reject(new Error(message.message));
+            handleConnectionFailure(nextSocket, new Error(message.message));
           }
         } catch (error) {
-          cleanup();
-          reject(error);
+          console.error("Invalid transcription message", error);
         }
       };
       const handleError = () => {
-        cleanup();
-        reject(
-          new Error("Unable to initialize the local transcription service"),
+        handleConnectionFailure(
+          nextSocket,
+          new Error("Unable to continue the local transcription service"),
         );
       };
       const handleClose = () => {
-        cleanup();
-        reject(
-          new Error("Local transcription service closed during initialization"),
+        handleConnectionFailure(
+          nextSocket,
+          new Error("Local transcription service closed during transcription"),
         );
       };
-      socket.addEventListener("message", handleMessage);
-      socket.addEventListener("error", handleError, { once: true });
-      socket.addEventListener("close", handleClose, { once: true });
-      signal?.addEventListener("abort", handleAbort, { once: true });
-      socket.send(JSON.stringify({ type: "transcription.configure", config }));
-    });
 
-    socket.addEventListener("message", ({ data }: MessageEvent<unknown>) => {
-      if (typeof data !== "string") return;
-      try {
-        const message: unknown = JSON.parse(data);
-        if (isTranscriptMessage(message)) onTranscript(message.text);
-        else if (isErrorMessage(message)) console.error(message.message);
-      } catch (error) {
-        console.error("Invalid transcription message", error);
-      }
-    });
-    microphone.on("data", (chunk) => {
-      if (socket.readyState === WebSocket.OPEN) socket.send(chunk);
-    });
+      socketCleanups.set(nextSocket, () => {
+        nextSocket.removeEventListener("message", handleMessage);
+        nextSocket.removeEventListener("error", handleError);
+        nextSocket.removeEventListener("close", handleClose);
+      });
+      nextSocket.addEventListener("message", handleMessage);
+      nextSocket.addEventListener("error", handleError);
+      nextSocket.addEventListener("close", handleClose);
+    } catch (error) {
+      if (socket === nextSocket) socket = null;
+      closeSocket(nextSocket);
+      throw error;
+    }
+  };
 
-    return () => socket.close();
+  const reconnect = async () => {
+    if (stopped || reconnecting) return;
+    reconnecting = true;
+    try {
+      await connectSocket();
+      if (!socket) throw new Error("Streaming transcription socket closed");
+      reconnectAttempt = 0;
+    } catch (error) {
+      if (!stopped) scheduleReconnect(error);
+    } finally {
+      reconnecting = false;
+    }
+  };
+
+  signal?.addEventListener("abort", handleAbort, { once: true });
+
+  try {
+    await connectSocket();
+    microphone.on("data", handleMicrophoneData);
+    return stop;
   } catch (error) {
-    socket.close();
+    stop();
     throw error;
   }
 };
