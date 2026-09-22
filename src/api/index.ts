@@ -1,29 +1,29 @@
 // 封装渲染进程的原生 fetch
 const request = async (url: string, options: RequestInit = {}) => {
-  const applyOptions = { ...options };
   const controller = new AbortController();
-  const config = {
-    ...applyOptions,
-    signal: controller.signal,
-    headers: { ...applyOptions.headers },
-  };
-
   const timeoutId = setTimeout(() => controller.abort(), 60000);
 
   try {
-    const response = await fetch(url, config);
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+      headers: { ...options.headers },
+    });
+    // Preserve the existing deadline: wait for headers, not the response body.
     clearTimeout(timeoutId);
 
     if (!response.ok) {
-      // 尝试解析错误信息（支持 JSON 或文本）
-      const errorData = await response.text(); // 或 response.json()
+      const errorData = await response.text();
       throw new Error(`HTTP ${response.status}: ${errorData}`);
     }
     return await response.json();
   } catch (error) {
-    if (!(error instanceof Error)) return;
-    if (error.name === "AbortError") console.error("Request timed out");
+    if (error instanceof Error && error.name === "AbortError") {
+      console.error("Request timed out");
+    }
     throw error;
+  } finally {
+    clearTimeout(timeoutId);
   }
 };
 

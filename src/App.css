@@ -427,7 +427,7 @@ input[type="checkbox"]:checked::before {
   transform: scale(1);
 }
 
-/* ---- Global anchor/link touch-up (e.g. initBtn uses <a>) ---- */
+/* ---- Global anchor/link touch-up ---- */
 a {
   color: var(--lg-accent-1);
   transition: color var(--lg-fast) var(--lg-ease);

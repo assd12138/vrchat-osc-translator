@@ -16,7 +16,6 @@
     "electron-build-render": "tsc && vite build --outDir dist-electron/render"
   },
   "dependencies": {
-    "@huggingface/transformers": "^4.2.0",
     "@reduxjs/toolkit": "^2.12.0",
     "@ricky0123/vad-web": "^0.0.30",
     "bonjour-service": "^1.4.4",

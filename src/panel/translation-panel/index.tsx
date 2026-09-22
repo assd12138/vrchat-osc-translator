@@ -1,9 +1,10 @@
 import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useAppDispatch, useAppSelector } from "../../store/hook";
-import { setOutputTemplate, togglePanelExpansion } from "../../store/settings";
+import { setOutputTemplate } from "../../store/settings";
 import globalStyles from "../../styles/index.module.css";
 import { extractLanguagesFromTemplate } from "../../utils";
+import CollapsiblePanel from "../CollapsiblePanel";
 import PromptSettings from "../setting-panel/components/PromptSettings";
 import TranslationTemplateHelper from "../translation-template-helper";
 import styles from "./index.module.css";
@@ -14,9 +15,6 @@ export default function TranslationPanel() {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const outputTemplate = useAppSelector(
     (state) => state.settings.outputTemplate,
-  );
-  const isExpanded = useAppSelector(
-    (state) => state.settings.panelExpansion.translation,
   );
 
   const detectedLanguages = extractLanguagesFromTemplate(outputTemplate);
@@ -39,61 +37,48 @@ export default function TranslationPanel() {
   };
 
   return (
-    <div className={globalStyles.panel}>
-      <div className={globalStyles.title}>
-        🌐 {t("翻译设置")}
-        <PromptSettings />
-        <button
-          type="button"
-          className={globalStyles.panelToggle}
-          onClick={() => dispatch(togglePanelExpansion("translation"))}
-          aria-expanded={isExpanded}
-          aria-controls="translation-panel-content"
-          aria-label={`${isExpanded ? "Collapse" : "Expand"} ${t("翻译设置")}`}
-        >
-          <span aria-hidden="true">{isExpanded ? "−" : "+"}</span>
-        </button>
-      </div>
-
-      <div id="translation-panel-content" hidden={!isExpanded}>
-        {/* Detected Languages Preview */}
-        <label className={globalStyles.labelS}>{t("检测到的语言")}</label>
-        <div className={styles.detectedLanguages}>
-          {detectedLanguages.length > 0 ? (
-            <textarea
-              disabled
-              className={styles.transTemplate}
-              value={detectedLanguages.join("|")}
-            />
-          ) : (
-            <span className={styles.warningText}>
-              {t("未检测到语言占位符")}
-            </span>
-          )}
-        </div>
-
-        {/* Output Template Section */}
-        <label className={globalStyles.labelS}>{t("输出模板")}</label>
-        <textarea
-          style={{ height: "140px" }}
-          onChange={(e) => handleTemplateChange(e.target.value)}
-          value={outputTemplate}
-          className={styles.transTemplate}
-          placeholder={t("模板placeholder")}
-        ></textarea>
-        <button onClick={openDialog} className={styles.templateGeneratorButton}>
-          {t("模板生成器")}
-        </button>
-
-        {/* Template Helper Dialog */}
-        <dialog ref={dialogRef} className={styles.templateHelperDialog}>
-          <TranslationTemplateHelper
-            initialValue={detectedLanguages}
-            onConfirm={handleTemplateConfirm}
-            onCancel={closeDialog}
+    <CollapsiblePanel
+      panel="translation"
+      title={t("翻译设置")}
+      icon="🌐"
+      contentId="translation-panel-content"
+      actions={<PromptSettings />}
+    >
+      {/* Detected Languages Preview */}
+      <label className={globalStyles.labelS}>{t("检测到的语言")}</label>
+      <div className={styles.detectedLanguages}>
+        {detectedLanguages.length > 0 ? (
+          <textarea
+            disabled
+            className={styles.transTemplate}
+            value={detectedLanguages.join("|")}
           />
-        </dialog>
+        ) : (
+          <span className={styles.warningText}>{t("未检测到语言占位符")}</span>
+        )}
       </div>
-    </div>
+
+      {/* Output Template Section */}
+      <label className={globalStyles.labelS}>{t("输出模板")}</label>
+      <textarea
+        style={{ height: "140px" }}
+        onChange={(e) => handleTemplateChange(e.target.value)}
+        value={outputTemplate}
+        className={styles.transTemplate}
+        placeholder={t("模板placeholder")}
+      ></textarea>
+      <button onClick={openDialog} className={styles.templateGeneratorButton}>
+        {t("模板生成器")}
+      </button>
+
+      {/* Template Helper Dialog */}
+      <dialog ref={dialogRef} className={styles.templateHelperDialog}>
+        <TranslationTemplateHelper
+          initialValue={detectedLanguages}
+          onConfirm={handleTemplateConfirm}
+          onCancel={closeDialog}
+        />
+      </dialog>
+    </CollapsiblePanel>
   );
 }

@@ -25,34 +25,6 @@ export const extractLanguagesFromTemplate = (template: string): string[] => {
 };
 
 /**
- * 生成翻译 JSON Schema
- */
-export const generateTranslationSchema = (languages: string[]): object => {
-  const properties: Record<string, object> = {};
-
-  for (const lang of languages) {
-    properties[lang] = {
-      type: "string",
-      description: `${getLanguageEnglishName(lang)} translate result`,
-    };
-  }
-
-  return {
-    type: "json_schema",
-    json_schema: {
-      name: "translation_result",
-      strict: true,
-      schema: {
-        type: "object",
-        properties,
-        required: languages,
-        additionalProperties: false,
-      },
-    },
-  };
-};
-
-/**
  * 生成翻译 翻译工具
  */
 export const generateTranslationTool = (languages: string[]): object => {

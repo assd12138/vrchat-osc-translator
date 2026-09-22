@@ -79,6 +79,11 @@ export const initialState: SettingState = {
   },
 };
 
+const persistApiConfig = (state: SettingState) => {
+  state.apiConfig = sanitizeApiConfig(state.apiConfig);
+  redux_store(REHYDRATE_KEYS.SETTING_API_CONFIG, state.apiConfig);
+};
+
 const settingsSlice = createSlice({
   name: "settings",
   initialState,
@@ -156,13 +161,11 @@ const settingsSlice = createSlice({
     },
     setBatchTranslate: (state, action: PayloadAction<boolean>) => {
       state.apiConfig.batchTranslate = action.payload;
-      state.apiConfig = sanitizeApiConfig(state.apiConfig);
-      redux_store(REHYDRATE_KEYS.SETTING_API_CONFIG, state.apiConfig);
+      persistApiConfig(state);
     },
     setTranslationMode: (state, action: PayloadAction<TranslationMode>) => {
       state.apiConfig.translationMode = action.payload;
-      state.apiConfig = sanitizeApiConfig(state.apiConfig);
-      redux_store(REHYDRATE_KEYS.SETTING_API_CONFIG, state.apiConfig);
+      persistApiConfig(state);
     },
     setModelSelection: (
       state,
@@ -170,8 +173,7 @@ const settingsSlice = createSlice({
     ) => {
       state.apiConfig.selections[action.payload.slot] =
         action.payload.selection;
-      state.apiConfig = sanitizeApiConfig(state.apiConfig);
-      redux_store(REHYDRATE_KEYS.SETTING_API_CONFIG, state.apiConfig);
+      persistApiConfig(state);
     },
     upsertProvider: (state, action: PayloadAction<ApiProvider>) => {
       const provider = action.payload;
@@ -194,15 +196,13 @@ const settingsSlice = createSlice({
       } else {
         state.apiConfig.providers[index] = nextProvider;
       }
-      state.apiConfig = sanitizeApiConfig(state.apiConfig);
-      redux_store(REHYDRATE_KEYS.SETTING_API_CONFIG, state.apiConfig);
+      persistApiConfig(state);
     },
     removeProvider: (state, action: PayloadAction<string>) => {
       state.apiConfig.providers = state.apiConfig.providers.filter(
         ({ uid }) => uid !== action.payload,
       );
-      state.apiConfig = sanitizeApiConfig(state.apiConfig);
-      redux_store(REHYDRATE_KEYS.SETTING_API_CONFIG, state.apiConfig);
+      persistApiConfig(state);
     },
     /** Internal rehydrate action; not a user-facing configuration mutation. */
     hydrateApiConfig: (state, action: PayloadAction<ApiConfig>) => {

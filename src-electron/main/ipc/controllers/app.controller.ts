@@ -2,8 +2,8 @@ import { type IpcMainInvokeEvent, shell } from "electron";
 import { getLocalService as getDiscoveredLocalService } from "../../utils/local-service-discovery";
 import { sendVrchatMessage } from "../../utils/osc";
 
-export async function openExternal(_event: IpcMainInvokeEvent, url: string) {
-  await shell.openExternal(url);
+export function openExternal(_event: IpcMainInvokeEvent, url: string) {
+  return shell.openExternal(url);
 }
 
 export function getLocalService(_event: IpcMainInvokeEvent) {
@@ -14,11 +14,5 @@ export function sendToVrcChat(
   _event: IpcMainInvokeEvent,
   args: { text: string },
 ) {
-  try {
-    sendVrchatMessage(args);
-    return;
-  } catch (error) {
-    console.error("Failed to send OSC message:", error);
-    throw error;
-  }
+  return sendVrchatMessage(args);
 }

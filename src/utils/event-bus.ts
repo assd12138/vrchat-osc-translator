@@ -29,26 +29,13 @@ class EventBus {
     });
   }
 
-  emitLast(eventName: EventBusEvent, data: any) {
-    this.events[eventName] &&
-      this.events[eventName].length > 0 &&
-      this.events[eventName][this.events[eventName].length - 1](data);
-  } /** 取消订阅 */
+  /** 取消订阅 */
 
   off(eventName: EventBusEvent, callback: EventBusHandler) {
     if (!this.events[eventName]) return;
     this.events[eventName] = this.events[eventName].filter(
       (cb) => cb !== callback,
     );
-  }
-
-  once(eventName: EventBusEvent, callback: EventBusHandler) {
-    this.events[eventName] = [];
-    const fn = (data: any) => {
-      callback(data);
-      this.off(eventName, fn);
-    };
-    this.on(eventName, fn);
   }
 }
 

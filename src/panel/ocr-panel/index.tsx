@@ -3,12 +3,10 @@ import { useTranslation } from "react-i18next";
 import { transformOCRRouter } from "@/api/commonRouter";
 import { languages } from "@/constants/language";
 import { useAppDispatch, useAppSelector } from "../../store/hook";
-import {
-  setOcrTargetLanguage,
-  togglePanelExpansion,
-} from "../../store/settings";
+import { setOcrTargetLanguage } from "../../store/settings";
 import globalStyles from "../../styles/index.module.css";
 import eventBus, { EventBusEvent } from "../../utils/event-bus";
+import CollapsiblePanel from "../CollapsiblePanel";
 import ImageCropper from "./image-cropper";
 import styles from "./index.module.css";
 
@@ -18,11 +16,64 @@ const ACCEPTED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp"];
 type ImageCaptureLike = { grabFrame: () => Promise<ImageBitmap> };
 type ImageCaptureCtor = new (track: MediaStreamTrack) => ImageCaptureLike;
 
+const blobToDataUrl = (blob: Blob): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+
+const canvasToPngBlob = (canvas: HTMLCanvasElement): Promise<Blob> =>
+  new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => (blob ? resolve(blob) : reject(new Error("PNG encode failed"))),
+      "image/png",
+    );
+  });
+
+const bitmapToPngBlob = async (bitmap: ImageBitmap): Promise<Blob> => {
+  try {
+    if (typeof OffscreenCanvas !== "undefined") {
+      const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("2d context unavailable");
+      ctx.drawImage(bitmap, 0, 0);
+      return await canvas.convertToBlob({ type: "image/png" });
+    }
+
+    const canvas = document.createElement("canvas");
+    canvas.width = bitmap.width;
+    canvas.height = bitmap.height;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("2d context unavailable");
+    ctx.drawImage(bitmap, 0, 0);
+    return canvasToPngBlob(canvas);
+  } finally {
+    bitmap.close?.();
+  }
+};
+
+const releaseCapture = (
+  streamRef: { current: MediaStream | null },
+  imageCaptureRef: { current: ImageCaptureLike | null },
+  videoRef: { current: HTMLVideoElement | null },
+) => {
+  streamRef.current?.getTracks().forEach((track) => {
+    track.stop();
+  });
+  streamRef.current = null;
+  imageCaptureRef.current = null;
+  if (videoRef.current) {
+    videoRef.current.srcObject = null;
+    videoRef.current = null;
+  }
+};
+
 export default function OcrPanel() {
   const { t } = useTranslation();
   const settings = useAppSelector((state) => state.settings);
   const dispatch = useAppDispatch();
-  const isExpanded = settings.panelExpansion.ocr;
   const [ocr, setOCR] = useState("");
   const [trans, setTrans] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -36,32 +87,14 @@ export default function OcrPanel() {
   const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
 
   const cleanupCapture = () => {
-    const stream = streamRef.current;
-    if (stream) {
-      for (const track of stream.getTracks()) track.stop();
-    }
-    streamRef.current = null;
-    imageCaptureRef.current = null;
-    if (videoRef.current) {
-      videoRef.current.srcObject = null;
-      videoRef.current = null;
-    }
+    releaseCapture(streamRef, imageCaptureRef, videoRef);
     setIsStreaming(false);
   };
 
   // Unmount cleanup: refs only (avoid deps on cleanupCapture)
   useEffect(
     () => () => {
-      const stream = streamRef.current;
-      if (stream) {
-        for (const track of stream.getTracks()) track.stop();
-      }
-      streamRef.current = null;
-      imageCaptureRef.current = null;
-      if (videoRef.current) {
-        videoRef.current.srcObject = null;
-        videoRef.current = null;
-      }
+      releaseCapture(streamRef, imageCaptureRef, videoRef);
       if (cropImageSrcRef.current) {
         URL.revokeObjectURL(cropImageSrcRef.current);
         cropImageSrcRef.current = null;
@@ -75,12 +108,7 @@ export default function OcrPanel() {
   }, [cropImageSrc]);
 
   const runOcr = async (file: Blob) => {
-    const base64String = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
+    const base64String = await blobToDataUrl(file);
     setOCR("");
     setTrans("");
     const result = await transformOCRRouter({ base64: base64String });
@@ -88,30 +116,19 @@ export default function OcrPanel() {
     setTrans(result.translation);
   };
 
-  const ocrRecogonition = async () => {
+  const recognizeClipboardImage = async () => {
     const items = await navigator.clipboard.read();
-    console.log(items);
-    let picked: Blob | null = null;
     try {
-      for (const item of items) {
-        if (
-          item.types.includes("image/png") ||
-          item.types.includes("image/jpeg") ||
-          item.types.includes("image/webp")
-        ) {
-          picked = await item.getType(
-            item.types.find((type) => type.startsWith("image/")) ||
-              item.types[0],
-          );
-
-          break; // 找到第一张图片后退出
-        }
-      }
-      if (!picked) {
+      const item = items.find((candidate) =>
+        ACCEPTED_IMAGE_TYPES.some((type) => candidate.types.includes(type)),
+      );
+      if (!item) {
         console.log("剪贴板无图片");
-      } else {
-        await runOcr(picked);
+        return;
       }
+
+      const imageType = item.types.find((type) => type.startsWith("image/"));
+      await runOcr(await item.getType(imageType || item.types[0]));
     } catch (error) {
       console.error("Error processing items:", error);
     }
@@ -192,28 +209,7 @@ export default function OcrPanel() {
   const grabPngBlob = async (): Promise<Blob> => {
     if (imageCaptureRef.current) {
       const bitmap = await imageCaptureRef.current.grabFrame();
-      try {
-        if (typeof OffscreenCanvas !== "undefined") {
-          const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
-          const ctx = canvas.getContext("2d");
-          if (!ctx) throw new Error("2d context unavailable");
-          ctx.drawImage(bitmap, 0, 0);
-          return await canvas.convertToBlob({ type: "image/png" });
-        }
-        const canvas = document.createElement("canvas");
-        canvas.width = bitmap.width;
-        canvas.height = bitmap.height;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) throw new Error("2d context unavailable");
-        ctx.drawImage(bitmap, 0, 0);
-        const blob = await new Promise<Blob | null>((resolve) =>
-          canvas.toBlob(resolve, "image/png"),
-        );
-        if (!blob) throw new Error("PNG encode failed");
-        return blob;
-      } finally {
-        bitmap.close?.();
-      }
+      return bitmapToPngBlob(bitmap);
     }
 
     const video = videoRef.current;
@@ -226,11 +222,7 @@ export default function OcrPanel() {
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error("2d context unavailable");
     ctx.drawImage(video, 0, 0);
-    const blob = await new Promise<Blob | null>((resolve) =>
-      canvas.toBlob(resolve, "image/png"),
-    );
-    if (!blob) throw new Error("PNG encode failed");
-    return blob;
+    return canvasToPngBlob(canvas);
   };
 
   const closeCropDialog = () => {
@@ -289,105 +281,94 @@ export default function OcrPanel() {
   };
 
   return (
-    <div className={globalStyles.panel}>
-      <div className={globalStyles.title}>
-        {t("图片翻译")}
-        <button
-          type="button"
-          className={globalStyles.panelToggle}
-          onClick={() => dispatch(togglePanelExpansion("ocr"))}
-          aria-expanded={isExpanded}
-          aria-controls="ocr-panel-content"
-          aria-label={`${isExpanded ? "Collapse" : "Expand"} ${t("图片翻译")}`}
-        >
-          <span aria-hidden="true">{isExpanded ? "−" : "+"}</span>
-        </button>
+    <CollapsiblePanel
+      panel="ocr"
+      title={t("图片翻译")}
+      contentId="ocr-panel-content"
+    >
+      <div className={styles.btnCon}>
+        <div className={styles.targetLanguage}>
+          <label
+            className={styles.targetLanguageLabel}
+            htmlFor="ocr-target-language"
+          >
+            {t("目标语言")}
+          </label>
+          <select
+            id="ocr-target-language"
+            className={`${globalStyles.selectS} ${styles.targetLanguageSelect}`}
+            value={settings.ocrTargetLanguage}
+            onChange={(e) => dispatch(setOcrTargetLanguage(e.target.value))}
+          >
+            {languages.map((language) => (
+              <option key={language.code} value={language.code}>
+                {language.nativeName}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className={styles.actions}>
+          <button
+            type="button"
+            onClick={recognizeClipboardImage}
+            className={globalStyles.button}
+          >
+            {t("剪贴板")}
+          </button>
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className={globalStyles.button}
+          >
+            {t("文件选择")}
+          </button>
+          <button
+            type="button"
+            onClick={handleCaptureClick}
+            className={globalStyles.button}
+            disabled={captureBusy}
+          >
+            {isStreaming ? t("截图") : t("抓屏")}
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept={ACCEPTED_IMAGE_TYPES.join(",")}
+            className={styles.fileInput}
+            onChange={handleFileChange}
+          />
+        </div>
       </div>
-      <div id="ocr-panel-content" hidden={!isExpanded}>
-        <div className={styles.btnCon}>
-          <div className={styles.targetLanguage}>
-            <label
-              className={styles.targetLanguageLabel}
-              htmlFor="ocr-target-language"
-            >
-              {t("目标语言")}
-            </label>
-            <select
-              id="ocr-target-language"
-              className={`${globalStyles.selectS} ${styles.targetLanguageSelect}`}
-              value={settings.ocrTargetLanguage}
-              onChange={(e) => dispatch(setOcrTargetLanguage(e.target.value))}
-            >
-              {languages.map((language) => (
-                <option key={language.code} value={language.code}>
-                  {language.nativeName}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className={styles.actions}>
-            <button
-              type="button"
-              onClick={ocrRecogonition}
-              className={globalStyles.button}
-            >
-              {t("剪贴板")}
-            </button>
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className={globalStyles.button}
-            >
-              {t("文件选择")}
-            </button>
-            <button
-              type="button"
-              onClick={handleCaptureClick}
-              className={globalStyles.button}
-              disabled={captureBusy}
-            >
-              {isStreaming ? t("截图") : t("抓屏")}
-            </button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/png,image/jpeg,image/webp"
-              className={styles.fileInput}
-              onChange={handleFileChange}
-            />
-          </div>
-        </div>
-        <div className={styles.logContainer}>
-          <textarea
-            style={{ width: "42%", height: "200px" }}
-            value={ocr}
-            readOnly
-          ></textarea>
-          ➡
-          <textarea
-            style={{ width: "42%", height: "200px" }}
-            value={trans}
-            readOnly
-          ></textarea>
-        </div>
+      <div className={styles.logContainer}>
+        <textarea
+          style={{ width: "42%", height: "200px" }}
+          value={ocr}
+          readOnly
+        ></textarea>
+        ➡
+        <textarea
+          style={{ width: "42%", height: "200px" }}
+          value={trans}
+          readOnly
+        ></textarea>
+      </div>
 
-        <dialog
-          ref={dialogRef}
-          className={styles.cropDialog}
-          onCancel={(e) => {
-            e.preventDefault();
-            handleCropCancel();
-          }}
-        >
-          {cropImageSrc ? (
-            <ImageCropper
-              imageSrc={cropImageSrc}
-              onConfirm={handleCropConfirm}
-              onCancel={handleCropCancel}
-            />
-          ) : null}
-        </dialog>
-      </div>
-    </div>
+      <dialog
+        ref={dialogRef}
+        className={styles.cropDialog}
+        onCancel={(e) => {
+          e.preventDefault();
+          handleCropCancel();
+        }}
+      >
+        {cropImageSrc ? (
+          <ImageCropper
+            imageSrc={cropImageSrc}
+            onConfirm={handleCropConfirm}
+            onCancel={handleCropCancel}
+          />
+        ) : null}
+      </dialog>
+    </CollapsiblePanel>
   );
 }

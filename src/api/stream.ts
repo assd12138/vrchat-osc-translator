@@ -1,8 +1,7 @@
 import type { Microphone } from "decibri";
-import { translateText } from "@/api/commonRouter";
+import { canUseTranslationTool, translateText } from "@/api/commonRouter";
 import { resolveModel } from "@/api/provider";
 import invoke, { NATIVE_COMMAND } from "@/electron/ipc";
-import { ModelType } from "@/store/api-config";
 import store from "@/store/store";
 import { extractLanguagesFromTemplate } from "@/utils";
 import { sendToVrcChat } from "@/utils/vrc-chat-queue";
@@ -91,9 +90,7 @@ export class StreamTranslationProcessor {
     return translateText(
       resolved,
       text.slice(0, maxChar),
-      resolved.model.type === ModelType.CHAT_COMPLETION &&
-        resolved.model.capabilities.tools &&
-        !apiConfig.batchTranslate,
+      canUseTranslationTool(resolved.model, apiConfig.batchTranslate),
       outputTemplate,
       languages,
     );

@@ -49,12 +49,13 @@ export function rehydrate() {
       ? (storedApiConfig as Partial<ApiConfig>)
       : {};
   // Restore the nested shape in dependency order: providers, then selections, then sanitize.
+  const defaults = createInitialApiConfig();
   const apiConfig = sanitizeApiConfig({
-    ...createInitialApiConfig(),
-    providers: source.providers ?? [],
-    selections: source.selections ?? createInitialApiConfig().selections,
-    translationMode: source.translationMode ?? "transcribe-then-translate",
-    batchTranslate: source.batchTranslate ?? false,
+    ...defaults,
+    providers: source.providers ?? defaults.providers,
+    selections: source.selections ?? defaults.selections,
+    translationMode: source.translationMode ?? defaults.translationMode,
+    batchTranslate: source.batchTranslate ?? defaults.batchTranslate,
   });
   store.dispatch(hydrateApiConfig(apiConfig));
   for (const key in rehydrateMapper) {

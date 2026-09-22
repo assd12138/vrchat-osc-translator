@@ -171,6 +171,14 @@ const translateWithRequests = async (
   );
 };
 
+export const canUseTranslationTool = (
+  model: ApiModel,
+  batchTranslate: boolean,
+): boolean =>
+  model.type === ModelType.CHAT_COMPLETION &&
+  model.capabilities.tools &&
+  !batchTranslate;
+
 /** 根据调用要求，在工具调用与逐语言请求之间选择翻译策略。 */
 export const translateText = (
   resolved: ResolvedModel,
@@ -215,10 +223,7 @@ export const translateRouter = ({
   return translateText(
     resolved,
     text,
-    direct ||
-      (resolved.model.type === ModelType.CHAT_COMPLETION &&
-        resolved.model.capabilities.tools &&
-        !apiConfig.batchTranslate),
+    direct || canUseTranslationTool(resolved.model, apiConfig.batchTranslate),
     outputTemplate,
     languages,
   );
@@ -255,51 +260,41 @@ const buildAudioData = async (file: File, modelId: string) => {
     : base64;
 };
 
+const transcribeWithForm = async (
+  file: File,
+  resolved: ResolvedModel,
+): Promise<string> => {
+  const form = new FormData();
+  form.append("file", file, "audio.wav");
+  form.append("model", resolved.model.modelId);
+  const response = await request(
+    buildProviderEndpoint(resolved.provider.baseURL, resolved.model.type),
+    {
+      method: "POST",
+      body: form,
+      headers: { Authorization: `Bearer ${resolved.provider.apiKey}` },
+    },
+  );
+  const text = (response as { text?: unknown }).text;
+  if (typeof text !== "string")
+    throw new Error("Provider protocol error: missing transcription text");
+  return text;
+};
+
 /** 根据模型类型，通过转写接口或聊天音频输入生成转写文本。 */
 const transcribe = async (
   audio: Float32Array<ArrayBufferLike>,
   resolved: ResolvedModel,
 ): Promise<string> => {
   const file = audioToFile(audio);
-  if (resolved.model.type === ModelType.AUDIO_TRANSCRIPTION) {
-    const form = new FormData();
-    form.append("file", file, "audio.wav");
-    form.append("model", resolved.model.modelId);
-    const response = await request(
-      buildProviderEndpoint(
-        resolved.provider.baseURL,
-        ModelType.AUDIO_TRANSCRIPTION,
-      ),
-      {
-        method: "POST",
-        body: form,
-        headers: { Authorization: `Bearer ${resolved.provider.apiKey}` },
-      },
-    );
-    const text = (response as { text?: unknown }).text;
-    if (typeof text !== "string")
-      throw new Error("Provider protocol error: missing transcription text");
-    return text.replace(/^[\s\S]*?<asr_text>/, "");
-  }
-  if (resolved.model.type === ModelType.MINIMAX_AUDIO_SPEECH_TO_TEXT) {
-    const form = new FormData();
-    form.append("file", file, "audio.wav");
-    form.append("model", resolved.model.modelId);
-    const response = await request(
-      buildProviderEndpoint(
-        resolved.provider.baseURL,
-        ModelType.MINIMAX_AUDIO_SPEECH_TO_TEXT,
-      ),
-      {
-        method: "POST",
-        body: form,
-        headers: { Authorization: `Bearer ${resolved.provider.apiKey}` },
-      },
-    );
-    const text = (response as { text?: unknown }).text;
-    if (typeof text !== "string")
-      throw new Error("Provider protocol error: missing transcription text");
-    return text;
+  if (
+    resolved.model.type === ModelType.AUDIO_TRANSCRIPTION ||
+    resolved.model.type === ModelType.MINIMAX_AUDIO_SPEECH_TO_TEXT
+  ) {
+    const text = await transcribeWithForm(file, resolved);
+    return resolved.model.type === ModelType.AUDIO_TRANSCRIPTION
+      ? text.replace(/^[\s\S]*?<asr_text>/, "")
+      : text;
   }
   const content: object[] = [
     {
@@ -312,7 +307,10 @@ const transcribe = async (
   ];
 
   // 如果模型是同时支持文本的多模态，需要提示模型进行转写而非回答
-  if (resolved?.model?.capabilities?.text) {
+  if (
+    resolved.model.type === ModelType.CHAT_COMPLETION &&
+    resolved.model.capabilities.text
+  ) {
     content.push({
       type: "text",
       text: "Transcribe this audio without adding any answers or translated content.",
@@ -368,9 +366,7 @@ export const processAudioRouter = async ({
       translation: await translateText(
         translationModel,
         transcription,
-        translationModel.model.type === ModelType.CHAT_COMPLETION &&
-          translationModel.model.capabilities.tools &&
-          !apiConfig.batchTranslate,
+        canUseTranslationTool(translationModel.model, apiConfig.batchTranslate),
         outputTemplate,
         languages,
       ),
