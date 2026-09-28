@@ -2,6 +2,7 @@ import type { Microphone } from "decibri";
 import { canUseTranslationTool, translateText } from "@/api/commonRouter";
 import { resolveModel } from "@/api/provider";
 import invoke, { NATIVE_COMMAND } from "@/electron/ipc";
+import type { ModelType } from "@/store/api-config";
 import store from "@/store/store";
 import { extractLanguagesFromTemplate } from "@/utils";
 import { sendToVrcChat } from "@/utils/vrc-chat-queue";
@@ -16,8 +17,12 @@ export interface StreamTranscriptionConfig {
   modelId: string;
   apiKey: string;
   baseURL: string;
-  modelType: string;
+  modelType: StreamModelType;
 }
+
+export type StreamModelType =
+  | ModelType.NARILAB_AUDIO_SPEECH_TO_TEXT
+  | ModelType.QWEN_AUDIO_SPEECH_TO_TEXT_REALTIME;
 
 /** Serializes streamed transcripts while retaining only the newest useful updates. */
 export class StreamTranslationProcessor {

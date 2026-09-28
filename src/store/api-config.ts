@@ -10,6 +10,7 @@ export interface ChatCapabilities {
 
 export enum ModelType {
   NARILAB_AUDIO_SPEECH_TO_TEXT = "narilab-audio-speech-to-text",
+  QWEN_AUDIO_SPEECH_TO_TEXT_REALTIME = "qwen-audio-speech-to-text-realtime",
   MINIMAX_AUDIO_SPEECH_TO_TEXT = "minimax-audio-speech-to-text",
   /** behind is standard openAI standard api format */
   AUDIO_TRANSCRIPTION = "audio-transcription",
@@ -20,6 +21,12 @@ export interface NarilabAudioSpeechToText {
   uid: string;
   modelId: string;
   type: ModelType.NARILAB_AUDIO_SPEECH_TO_TEXT;
+}
+
+export interface QwenAudioSpeechToText {
+  uid: string;
+  modelId: string;
+  type: ModelType.QWEN_AUDIO_SPEECH_TO_TEXT_REALTIME;
 }
 
 /** minimax speech to text api */
@@ -46,7 +53,8 @@ export type ApiModel =
   | AudioTranscriptionModel
   | ChatCompletionModel
   | MinimaxAudioSpeechToText
-  | NarilabAudioSpeechToText;
+  | NarilabAudioSpeechToText
+  | QwenAudioSpeechToText;
 
 export interface ApiProvider {
   uid: string;
@@ -105,6 +113,13 @@ export const createModel = ({
       type: ModelType.NARILAB_AUDIO_SPEECH_TO_TEXT,
     };
   }
+  if (type === ModelType.QWEN_AUDIO_SPEECH_TO_TEXT_REALTIME) {
+    return {
+      uid: crypto.randomUUID(),
+      modelId,
+      type: ModelType.QWEN_AUDIO_SPEECH_TO_TEXT_REALTIME,
+    };
+  }
   return createChatCompletionModel(modelId, capabilities);
 };
 
@@ -156,6 +171,7 @@ export const isModelEligible = (slot: ModelSlot, model: ApiModel): boolean => {
       model.type === ModelType.AUDIO_TRANSCRIPTION ||
       model.type === ModelType.MINIMAX_AUDIO_SPEECH_TO_TEXT ||
       model.type === ModelType.NARILAB_AUDIO_SPEECH_TO_TEXT ||
+      model.type === ModelType.QWEN_AUDIO_SPEECH_TO_TEXT_REALTIME ||
       (model.type === ModelType.CHAT_COMPLETION && model.capabilities.audio)
     );
   }

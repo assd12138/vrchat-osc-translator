@@ -15,6 +15,7 @@ const endpointPaths: Record<ProviderEndpoint, string> = {
   [ModelType.CHAT_COMPLETION]: "/chat/completions",
   [ModelType.MINIMAX_AUDIO_SPEECH_TO_TEXT]: "/speech_to_text",
   [ModelType.NARILAB_AUDIO_SPEECH_TO_TEXT]: "/realtime",
+  [ModelType.QWEN_AUDIO_SPEECH_TO_TEXT_REALTIME]: "/realtime",
 };
 
 /**

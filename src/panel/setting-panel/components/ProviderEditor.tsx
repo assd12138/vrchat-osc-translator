@@ -278,6 +278,9 @@ export default function ProviderEditor({
                 <option value={ModelType.NARILAB_AUDIO_SPEECH_TO_TEXT}>
                   {t("流式转写")}(nariLab) /realtime
                 </option>
+                <option value={ModelType.QWEN_AUDIO_SPEECH_TO_TEXT_REALTIME}>
+                  {t("流式转写")}(qwen-asr-realtime) /realtime
+                </option>
               </select>
             </label>
             {model.type === ModelType.CHAT_COMPLETION && (
