@@ -22,7 +22,8 @@ export interface StreamTranscriptionConfig {
 
 export type StreamModelType =
   | ModelType.NARILAB_AUDIO_SPEECH_TO_TEXT
-  | ModelType.QWEN_AUDIO_SPEECH_TO_TEXT_REALTIME;
+  | ModelType.QWEN_AUDIO_SPEECH_TO_TEXT_REALTIME
+  | ModelType.QWEN_AUDIO_SPEECH_TO_TEXT_INFERENCE;
 
 /** Serializes streamed transcripts while retaining only the newest useful updates. */
 export class StreamTranslationProcessor {

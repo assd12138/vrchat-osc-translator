@@ -46,7 +46,9 @@ export default function AudioPanel() {
       if (
         resolvedConfig.model.type === ModelType.NARILAB_AUDIO_SPEECH_TO_TEXT ||
         resolvedConfig.model.type ===
-          ModelType.QWEN_AUDIO_SPEECH_TO_TEXT_REALTIME
+          ModelType.QWEN_AUDIO_SPEECH_TO_TEXT_REALTIME ||
+        resolvedConfig.model.type ===
+          ModelType.QWEN_AUDIO_SPEECH_TO_TEXT_INFERENCE
       ) {
         startStreamVoice({
           modelId: resolvedConfig.model.modelId,

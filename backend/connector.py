@@ -5,6 +5,7 @@ import socket
 from fastapi import FastAPI, WebSocket
 from thirdApi.narilab import NarilabTranscriptionProvider
 from thirdApi.qwen import QwenTranscriptionProvider
+from thirdApi.qwenInference import QwenInferenceTranscriptionProvider
 from transcription import (
     TranscriptionConfig,
     TranscriptionConfigurationError,
@@ -39,6 +40,7 @@ def register_transcription_provider(provider: TranscriptionProvider) -> None:
 
 register_transcription_provider(NarilabTranscriptionProvider())
 register_transcription_provider(QwenTranscriptionProvider())
+register_transcription_provider(QwenInferenceTranscriptionProvider())
 
 
 @app.get("/health")

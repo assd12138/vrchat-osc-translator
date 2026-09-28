@@ -11,6 +11,7 @@ export interface ChatCapabilities {
 export enum ModelType {
   NARILAB_AUDIO_SPEECH_TO_TEXT = "narilab-audio-speech-to-text",
   QWEN_AUDIO_SPEECH_TO_TEXT_REALTIME = "qwen-audio-speech-to-text-realtime",
+  QWEN_AUDIO_SPEECH_TO_TEXT_INFERENCE = "qwen-audio-speech-to-text-inference",
   MINIMAX_AUDIO_SPEECH_TO_TEXT = "minimax-audio-speech-to-text",
   /** behind is standard openAI standard api format */
   AUDIO_TRANSCRIPTION = "audio-transcription",
@@ -27,6 +28,12 @@ export interface QwenAudioSpeechToText {
   uid: string;
   modelId: string;
   type: ModelType.QWEN_AUDIO_SPEECH_TO_TEXT_REALTIME;
+}
+
+export interface QwenInferenceAudioSpeechToText {
+  uid: string;
+  modelId: string;
+  type: ModelType.QWEN_AUDIO_SPEECH_TO_TEXT_INFERENCE;
 }
 
 /** minimax speech to text api */
@@ -54,7 +61,8 @@ export type ApiModel =
   | ChatCompletionModel
   | MinimaxAudioSpeechToText
   | NarilabAudioSpeechToText
-  | QwenAudioSpeechToText;
+  | QwenAudioSpeechToText
+  | QwenInferenceAudioSpeechToText;
 
 export interface ApiProvider {
   uid: string;
@@ -120,6 +128,13 @@ export const createModel = ({
       type: ModelType.QWEN_AUDIO_SPEECH_TO_TEXT_REALTIME,
     };
   }
+  if (type === ModelType.QWEN_AUDIO_SPEECH_TO_TEXT_INFERENCE) {
+    return {
+      uid: crypto.randomUUID(),
+      modelId,
+      type: ModelType.QWEN_AUDIO_SPEECH_TO_TEXT_INFERENCE,
+    };
+  }
   return createChatCompletionModel(modelId, capabilities);
 };
 
@@ -172,6 +187,7 @@ export const isModelEligible = (slot: ModelSlot, model: ApiModel): boolean => {
       model.type === ModelType.MINIMAX_AUDIO_SPEECH_TO_TEXT ||
       model.type === ModelType.NARILAB_AUDIO_SPEECH_TO_TEXT ||
       model.type === ModelType.QWEN_AUDIO_SPEECH_TO_TEXT_REALTIME ||
+      model.type === ModelType.QWEN_AUDIO_SPEECH_TO_TEXT_INFERENCE ||
       (model.type === ModelType.CHAT_COMPLETION && model.capabilities.audio)
     );
   }
