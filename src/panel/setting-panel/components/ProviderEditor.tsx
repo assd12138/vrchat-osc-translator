@@ -269,6 +269,9 @@ export default function ProviderEditor({
                 <option value={ModelType.AUDIO_TRANSCRIPTION}>
                   {t("语音转写")} /audio/transcriptions
                 </option>
+                <option value={ModelType.AUDIO_CPP_LIVE}>
+                  {t("流式转写")}(audio.cpp) /audio/transcriptions/live
+                </option>
                 <option value={ModelType.CHAT_COMPLETION}>
                   {t("文本补全")} /chat/completions
                 </option>

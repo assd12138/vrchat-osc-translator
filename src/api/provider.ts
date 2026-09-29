@@ -11,6 +11,7 @@ export type ProviderEndpoint = "models" | ModelType;
 
 const endpointPaths: Record<ProviderEndpoint, string> = {
   models: "/models",
+  [ModelType.AUDIO_CPP_LIVE]: "/audio/transcriptions/live",
   [ModelType.AUDIO_TRANSCRIPTION]: "/audio/transcriptions",
   [ModelType.CHAT_COMPLETION]: "/chat/completions",
   [ModelType.MINIMAX_AUDIO_SPEECH_TO_TEXT]: "/speech_to_text",

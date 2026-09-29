@@ -9,6 +9,7 @@ export interface ChatCapabilities {
 }
 
 export enum ModelType {
+  AUDIO_CPP_LIVE = "audio-cpp-live",
   NARILAB_AUDIO_SPEECH_TO_TEXT = "narilab-audio-speech-to-text",
   QWEN_AUDIO_SPEECH_TO_TEXT_REALTIME = "qwen-audio-speech-to-text-realtime",
   QWEN_AUDIO_SPEECH_TO_TEXT_INFERENCE = "qwen-audio-speech-to-text-inference",
@@ -22,6 +23,12 @@ export interface NarilabAudioSpeechToText {
   uid: string;
   modelId: string;
   type: ModelType.NARILAB_AUDIO_SPEECH_TO_TEXT;
+}
+
+export interface AudioCppLiveModel {
+  uid: string;
+  modelId: string;
+  type: ModelType.AUDIO_CPP_LIVE;
 }
 
 export interface QwenAudioSpeechToText {
@@ -57,6 +64,7 @@ export interface ChatCompletionModel {
 }
 
 export type ApiModel =
+  | AudioCppLiveModel
   | AudioTranscriptionModel
   | ChatCompletionModel
   | MinimaxAudioSpeechToText
@@ -106,6 +114,9 @@ export const createModel = ({
 }): ApiModel => {
   if (type === ModelType.AUDIO_TRANSCRIPTION) {
     return createAudioTranscriptionModel(modelId);
+  }
+  if (type === ModelType.AUDIO_CPP_LIVE) {
+    return { uid: crypto.randomUUID(), modelId, type };
   }
   if (type === ModelType.MINIMAX_AUDIO_SPEECH_TO_TEXT) {
     return {
@@ -183,6 +194,7 @@ export const createInitialApiConfig = (): ApiConfig => ({
 export const isModelEligible = (slot: ModelSlot, model: ApiModel): boolean => {
   if (slot === "transcription") {
     return (
+      model.type === ModelType.AUDIO_CPP_LIVE ||
       model.type === ModelType.AUDIO_TRANSCRIPTION ||
       model.type === ModelType.MINIMAX_AUDIO_SPEECH_TO_TEXT ||
       model.type === ModelType.NARILAB_AUDIO_SPEECH_TO_TEXT ||

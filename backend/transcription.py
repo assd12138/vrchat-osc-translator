@@ -55,6 +55,10 @@ class TranscriptionSession(ABC):
         """Release the resources held by this session."""
         raise NotImplementedError
 
+    async def finish_input(self) -> None:
+        """End an input stream while keeping the transcript stream readable."""
+        raise NotImplementedError("This provider cannot finish input independently")
+
 
 class TranscriptionProvider(ABC):
     """Provider interface implemented by each streaming transcription API."""

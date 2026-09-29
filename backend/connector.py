@@ -3,6 +3,7 @@ import json
 import socket
 
 from fastapi import FastAPI, WebSocket
+from thirdApi.audioCpp import AudioCppTranscriptionProvider
 from thirdApi.narilab import NarilabTranscriptionProvider
 from thirdApi.qwen import QwenTranscriptionProvider
 from thirdApi.qwenInference import QwenInferenceTranscriptionProvider
@@ -41,6 +42,7 @@ def register_transcription_provider(provider: TranscriptionProvider) -> None:
 register_transcription_provider(NarilabTranscriptionProvider())
 register_transcription_provider(QwenTranscriptionProvider())
 register_transcription_provider(QwenInferenceTranscriptionProvider())
+register_transcription_provider(AudioCppTranscriptionProvider())
 
 
 @app.get("/health")
@@ -71,11 +73,17 @@ async def receive_config(websocket: WebSocket) -> TranscriptionConfig:
     return TranscriptionConfig.from_payload(payload.get("config"))
 
 
-async def receive_pcm(websocket: WebSocket, session: TranscriptionSession) -> None:
+async def receive_pcm(websocket: WebSocket, session: TranscriptionSession) -> bool:
     while True:
         message = await websocket.receive()
         if message["type"] == "websocket.disconnect":
-            return
+            return False
+
+        text = message.get("text")
+        if text is not None:
+            if json.loads(text).get("type") == "transcription.finish":
+                await session.finish_input()
+                return True
 
         pcm = message.get("bytes")
         if pcm is None:
@@ -100,6 +108,7 @@ async def send_transcripts(
     try:
         async for text in session.transcripts():
             await websocket.send_json({"type": "transcript", "text": text})
+        await websocket.send_json({"type": "done"})
     except Exception as error:
         await send_error(websocket, str(error))
 
@@ -159,11 +168,16 @@ async def transcription(websocket: WebSocket) -> None:
         done, pending = await asyncio.wait(
             {receive_task, send_task}, return_when=asyncio.FIRST_COMPLETED
         )
-        for task in pending:
-            task.cancel()
-        await asyncio.gather(*pending, return_exceptions=True)
-        for task in done:
-            task.result()
+        try:
+            if receive_task in done and receive_task.result():
+                await send_task
+            else:
+                for task in done:
+                    task.result()
+        finally:
+            for task in pending:
+                task.cancel()
+            await asyncio.gather(*pending, return_exceptions=True)
     finally:
         if disconnect_task is not None:
             disconnect_task.cancel()

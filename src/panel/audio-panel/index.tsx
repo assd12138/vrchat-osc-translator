@@ -44,6 +44,7 @@ export default function AudioPanel() {
     if (apiConfig.translationMode === "transcribe-then-translate") {
       const resolvedConfig = resolveModel(apiConfig, "transcription");
       if (
+        resolvedConfig.model.type === ModelType.AUDIO_CPP_LIVE ||
         resolvedConfig.model.type === ModelType.NARILAB_AUDIO_SPEECH_TO_TEXT ||
         resolvedConfig.model.type ===
           ModelType.QWEN_AUDIO_SPEECH_TO_TEXT_REALTIME ||

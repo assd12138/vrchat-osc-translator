@@ -606,6 +606,7 @@ name = "gateway"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "aiohttp" },
     { name = "argparse" },
     { name = "dashscope" },
     { name = "fastapi" },
@@ -621,6 +622,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "aiohttp", specifier = ">=3.14,<4" },
     { name = "argparse", specifier = ">=1.4.0" },
     { name = "dashscope", specifier = ">=1.27.5" },
     { name = "fastapi", specifier = ">=0.141.1" },

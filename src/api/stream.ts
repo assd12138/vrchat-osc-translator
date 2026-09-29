@@ -2,7 +2,7 @@ import type { Microphone } from "decibri";
 import { canUseTranslationTool, translateText } from "@/api/commonRouter";
 import { resolveModel } from "@/api/provider";
 import invoke, { NATIVE_COMMAND } from "@/electron/ipc";
-import type { ModelType } from "@/store/api-config";
+import { ModelType } from "@/store/api-config";
 import store from "@/store/store";
 import { extractLanguagesFromTemplate } from "@/utils";
 import { sendToVrcChat } from "@/utils/vrc-chat-queue";
@@ -21,6 +21,7 @@ export interface StreamTranscriptionConfig {
 }
 
 export type StreamModelType =
+  | ModelType.AUDIO_CPP_LIVE
   | ModelType.NARILAB_AUDIO_SPEECH_TO_TEXT
   | ModelType.QWEN_AUDIO_SPEECH_TO_TEXT_REALTIME
   | ModelType.QWEN_AUDIO_SPEECH_TO_TEXT_INFERENCE;
@@ -116,6 +117,11 @@ const isReadyMessage = (value: unknown): value is { type: "ready" } =>
   value !== null &&
   (value as { type?: unknown }).type === "ready";
 
+const isDoneMessage = (value: unknown): value is { type: "done" } =>
+  typeof value === "object" &&
+  value !== null &&
+  (value as { type?: unknown }).type === "done";
+
 const isErrorMessage = (
   value: unknown,
 ): value is { type: "error"; message: string } =>
@@ -190,6 +196,13 @@ export const streamTranscription = async ({
     microphone.off("data", handleMicrophoneData);
 
     const activeSocket = socket;
+    if (
+      config.modelType === ModelType.AUDIO_CPP_LIVE &&
+      activeSocket?.readyState === WebSocket.OPEN
+    ) {
+      activeSocket.send(JSON.stringify({ type: "transcription.finish" }));
+      return;
+    }
     socket = null;
     closeSocket(activeSocket);
   };
@@ -218,10 +231,10 @@ export const streamTranscription = async ({
     failedSocket: WebSocket,
     reason: unknown,
   ) => {
-    if (stopped || socket !== failedSocket) return;
+    if (socket !== failedSocket) return;
     socket = null;
     closeSocket(failedSocket);
-    scheduleReconnect(reason);
+    if (!stopped) scheduleReconnect(reason);
   };
 
   const connectSocket = async () => {
@@ -310,6 +323,10 @@ export const streamTranscription = async ({
           const message: unknown = JSON.parse(data);
           if (isTranscriptMessage(message)) {
             onTranscript(message.text);
+          } else if (isDoneMessage(message)) {
+            if (socket === nextSocket) socket = null;
+            closeSocket(nextSocket);
+            if (!stopped) scheduleReconnect("Transcription stream finished");
           } else if (isErrorMessage(message)) {
             handleConnectionFailure(nextSocket, new Error(message.message));
           }
