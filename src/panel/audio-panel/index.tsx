@@ -129,7 +129,12 @@ export default function AudioPanel() {
       channels: 1,
       dtype: "int16",
       device: deviceId,
+      noiseSuppression: true,
+      vad: "energy",
     });
+    mic.on("speech", () => setSpeaking(true));
+    mic.on("silence", () => setSpeaking(false));
+    mic.on("end", () => setSpeaking(false));
     const abortController = new AbortController();
     streamAbortController.current = abortController;
     try {
@@ -149,6 +154,7 @@ export default function AudioPanel() {
       eventBus.emit(EventBusEvent.ADD_LOG, t("开始语音识别"));
     } catch (error) {
       mic.stop();
+      setSpeaking(false);
       stopStreamTranscription.current?.();
       stopStreamTranscription.current = null;
       streamMic.current = null;
