@@ -69,7 +69,7 @@ export default function AudioPanel() {
       const vad = await MicVAD.new({
         baseAssetPath: "/vad/",
         onnxWASMBasePath: "/vad/",
-        model: "v5",
+        model: "v6",
         positiveSpeechThreshold: 0.4,
         negativeSpeechThreshold: 0.4,
         minSpeechMs: 400,

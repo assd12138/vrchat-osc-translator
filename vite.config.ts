@@ -20,7 +20,7 @@ export default defineConfig({
           dest: "./vad/",
         },
         {
-          src: "node_modules/@ricky0123/vad-web/dist/silero_vad_v5.onnx",
+          src: "node_modules/@ricky0123/vad-web/dist/silero_vad_v6.onnx",
           dest: "./vad/",
         },
         {
