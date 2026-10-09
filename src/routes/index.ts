@@ -1,5 +1,6 @@
 import { createHashRouter } from "react-router";
 import MixSoundTranslatePanel from "@/panel/mix-sound-translate-panel";
+import SubtitlePanel from "@/panel/subtitle-panel";
 import Root from "./Root";
 
 export default createHashRouter([
@@ -10,5 +11,9 @@ export default createHashRouter([
   {
     path: "/mix-sound-translate",
     Component: MixSoundTranslatePanel,
+  },
+  {
+    path: "/subtitle",
+    Component: SubtitlePanel,
   },
 ]);

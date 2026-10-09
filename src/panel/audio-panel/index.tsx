@@ -9,6 +9,7 @@ import {
   StreamTranslationProcessor,
   streamTranscription,
 } from "@/api/stream";
+import invoke, { NATIVE_COMMAND } from "@/electron/ipc";
 import { ModelType } from "@/store/api-config";
 import store from "@/store/store";
 import { loadMicDevices } from "@/utils";
@@ -190,6 +191,20 @@ export default function AudioPanel() {
     window.location.reload();
   };
 
+  const openSubtitleWindow = async () => {
+    try {
+      const result = await invoke(NATIVE_COMMAND.OPEN_SUBTITLE_WINDOW, undefined);
+      if (result?.success === false) {
+        throw new Error(result.error.message);
+      }
+    } catch (error) {
+      eventBus.emit(
+        EventBusEvent.ADD_LOG,
+        `${t("字幕弹窗打开失败")}: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  };
+
   useEffect(() => {
     const load = async () => {
       const devices = await loadMicDevices();
@@ -249,6 +264,15 @@ export default function AudioPanel() {
         </button>
         <button onClick={refresh} className={globalStyles.button}>
           {t("刷新")}
+        </button>
+        {/* 临时入口：用于预览字幕弹窗样式。 */}
+        <button
+          type="button"
+          onClick={openSubtitleWindow}
+          className={globalStyles.button}
+          disabled={!window.electronAPI}
+        >
+          {t("字幕弹窗")}
         </button>
       </div>
       <div>

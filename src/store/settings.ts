@@ -15,6 +15,11 @@ import {
   REHYDRATE_KEYS,
 } from "./rehydrate/rehydrate-constant";
 import { redux_store } from "./rehydrate/rehydrate-store";
+import {
+  DEFAULT_SUBTITLE_CONFIG,
+  sanitizeSubtitleConfig,
+  type SubtitleConfig,
+} from "./subtitle-config";
 
 export type ThemePreference = "default" | "liquid-glass" | "hand-drawn";
 
@@ -56,6 +61,7 @@ export interface SettingState {
   ocrTargetLanguage: string;
   theme: ThemePreference;
   panelExpansion: PanelExpansionState;
+  subtitleConfig: SubtitleConfig;
 }
 
 export const initialState: SettingState = {
@@ -70,6 +76,7 @@ export const initialState: SettingState = {
   language: "auto",
   ocrTargetLanguage: getInitialOcrTargetLanguage(),
   theme: "default",
+  subtitleConfig: { ...DEFAULT_SUBTITLE_CONFIG },
   panelExpansion: {
     audio: true,
     translation: true,
@@ -220,6 +227,13 @@ const settingsSlice = createSlice({
       state.theme = action.payload;
       redux_store(REHYDRATE_KEYS.SETTING_THEME, action.payload);
     },
+    setSubtitleConfig: (state, action: PayloadAction<Partial<SubtitleConfig>>) => {
+      state.subtitleConfig = sanitizeSubtitleConfig({
+        ...state.subtitleConfig,
+        ...action.payload,
+      });
+      redux_store(REHYDRATE_KEYS.SETTING_SUBTITLE_CONFIG, state.subtitleConfig);
+    },
     setPanelExpansion: (state, action: PayloadAction<PanelExpansionState>) => {
       state.panelExpansion = action.payload;
       redux_store(REHYDRATE_KEYS.SETTING_PANEL_EXPANSION, action.payload);
@@ -250,6 +264,7 @@ export const {
   setLanguage,
   setOcrTargetLanguage,
   setTheme,
+  setSubtitleConfig,
   setPanelExpansion,
   togglePanelExpansion,
   hydrateApiConfig,

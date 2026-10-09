@@ -1,0 +1,428 @@
+/* 单独的字幕路由需要覆盖主界面的底色与装饰背景。 */
+:global(html:root[data-subtitle-window="true"]),
+:global(html:root[data-subtitle-window="true"] body),
+:global(html:root[data-subtitle-window="true"] #root) {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  margin: 0;
+  overflow: hidden;
+  background: transparent;
+  color-scheme: dark;
+}
+
+:global(html:root[data-subtitle-window="true"] body::before),
+:global(html:root[data-subtitle-window="true"] body::after) {
+  content: none;
+  display: none;
+}
+
+.subtitle {
+  box-sizing: border-box;
+  position: relative;
+  display: grid;
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  width: 100%;
+  height: 100%;
+  container-type: inline-size;
+  padding: 16px 58px 48px 28px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: var(--subtitle-background);
+  user-select: none;
+  cursor: var(--subtitle-cursor, grab);
+  touch-action: none;
+  -webkit-app-region: no-drag;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease;
+}
+
+.subtitle[data-dragging="true"] {
+  cursor: grabbing;
+}
+
+.subtitle[data-hovered="true"] {
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.textRegion {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  scroll-behavior: auto;
+}
+
+.subtitle p {
+  margin: 0;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
+}
+
+.original {
+  color: var(--subtitle-original-color);
+  font-size: var(--subtitle-original-font-size);
+  font-weight: var(--subtitle-original-font-weight);
+  opacity: 0.88;
+}
+
+.translated {
+  color: var(--subtitle-translated-color);
+  font-size: var(--subtitle-translated-font-size);
+  font-weight: var(--subtitle-translated-font-weight);
+}
+
+.controls {
+  position: absolute;
+  z-index: 3;
+  bottom: 10px;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 1;
+  visibility: visible;
+  -webkit-app-region: no-drag;
+  transition: opacity 160ms ease;
+}
+
+.subtitle[data-locked="true"] .controls {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.subtitle[data-locked="true"][data-hovered="true"] .controls {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.controlGroup {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+}
+
+.groupLabel {
+  margin: 0 4px;
+  font-size: 12px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.groupLabel[data-target="original"] {
+  color: var(--subtitle-original-color);
+}
+
+.groupLabel[data-target="translated"] {
+  color: var(--subtitle-translated-color);
+}
+
+.controlButton {
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+  transition: background-color 160ms ease;
+}
+
+.controlButton:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.controlButton[aria-pressed="true"] {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.transparencyControl {
+  position: relative;
+}
+
+.transparencyButton {
+  position: relative;
+}
+
+.transparencyButton::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  bottom: 2px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0.9) var(--transparency-level),
+    rgba(255, 255, 255, 0.2) var(--transparency-level)
+  );
+}
+
+.transparencyButton[aria-expanded="true"] {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.transparencyPanel {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 8px);
+  box-sizing: border-box;
+  width: 224px;
+  max-width: calc(100vw - 56px);
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  color: #ffffff;
+  background: rgba(20, 23, 28, 0.97);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  cursor: default;
+}
+
+.transparencyPanel::after {
+  content: "";
+  position: absolute;
+  right: 8px;
+  bottom: -5px;
+  width: 8px;
+  height: 8px;
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  background: #14171c;
+  transform: rotate(45deg);
+}
+
+.transparencyHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 11px;
+  line-height: 16px;
+}
+
+.transparencyHeader output {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.transparencyRange {
+  display: block;
+  box-sizing: border-box;
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  height: 18px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  color: #ffffff;
+  background: transparent;
+  box-shadow: none;
+  cursor: pointer;
+  touch-action: auto;
+}
+
+.transparencyRange::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 4px;
+  background: linear-gradient(to right, #f2f4f8, rgba(255, 255, 255, 0.15));
+}
+
+.transparencyRange:hover,
+.transparencyRange:focus {
+  background: transparent;
+  box-shadow: none;
+}
+
+.transparencyRange::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  margin-top: -4px;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  background: #f2f4f8;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.12);
+}
+
+.transparencyRange:focus-visible {
+  outline: none;
+}
+
+.transparencyEndpoints {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 10px;
+  line-height: 12px;
+}
+
+.colorControl {
+  position: relative;
+}
+
+.colorControl .colorInput {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+}
+
+.colorControl:focus-within {
+  outline: none;
+}
+
+.controlIcon {
+  display: block;
+  width: 20px;
+  height: 20px;
+  filter: brightness(0) invert(1);
+  pointer-events: none;
+}
+
+.close {
+  position: absolute;
+  z-index: 3;
+  top: 10px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+}
+
+.resizeHandle {
+  position: absolute;
+  z-index: 2;
+  -webkit-app-region: no-drag;
+}
+
+.resizeHandle[data-resize-edge="n"],
+.resizeHandle[data-resize-edge="s"] {
+  left: 16px;
+  right: 16px;
+  height: 8px;
+  cursor: ns-resize;
+}
+
+.resizeHandle[data-resize-edge="n"] {
+  top: 0;
+}
+
+.resizeHandle[data-resize-edge="s"] {
+  bottom: 0;
+}
+
+.resizeHandle[data-resize-edge="e"],
+.resizeHandle[data-resize-edge="w"] {
+  top: 16px;
+  bottom: 16px;
+  width: 8px;
+  cursor: ew-resize;
+}
+
+.resizeHandle[data-resize-edge="e"] {
+  right: 0;
+}
+
+.resizeHandle[data-resize-edge="w"] {
+  left: 0;
+}
+
+.resizeHandle[data-resize-edge="ne"],
+.resizeHandle[data-resize-edge="nw"],
+.resizeHandle[data-resize-edge="se"],
+.resizeHandle[data-resize-edge="sw"] {
+  width: 16px;
+  height: 16px;
+}
+
+.resizeHandle[data-resize-edge="ne"],
+.resizeHandle[data-resize-edge="sw"] {
+  cursor: nesw-resize;
+}
+
+.resizeHandle[data-resize-edge="nw"],
+.resizeHandle[data-resize-edge="se"] {
+  cursor: nwse-resize;
+}
+
+.resizeHandle[data-resize-edge="ne"] {
+  top: 0;
+  right: 0;
+}
+
+.resizeHandle[data-resize-edge="nw"] {
+  top: 0;
+  left: 0;
+}
+
+.resizeHandle[data-resize-edge="se"] {
+  bottom: 0;
+  right: 0;
+}
+
+.resizeHandle[data-resize-edge="sw"] {
+  bottom: 0;
+  left: 0;
+}
+
+.controlButton:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.controlButton[aria-pressed="true"]:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+@container (max-width: 460px) {
+  .groupLabel {
+    display: none;
+  }
+
+  .controls .controlButton {
+    width: 24px;
+    height: 24px;
+  }
+
+  .controls .controlIcon {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.controlButton:focus,
+.controlButton:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .subtitle,
+  .controls,
+  .controlButton {
+    transition: none;
+  }
+}

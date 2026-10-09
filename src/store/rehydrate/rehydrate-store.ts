@@ -1,4 +1,5 @@
 import type { ApiConfig } from "../api-config";
+import type { SubtitleConfig } from "../subtitle-config";
 import type {
   PanelExpansionState,
   TranslationPromptTemplate,
@@ -13,6 +14,7 @@ export function redux_store(
     | string[]
     | PanelExpansionState
     | ApiConfig
+    | SubtitleConfig
     | TranslationPromptTemplate[],
 ) {
   if (!rehydrateFlag.flag) return;
