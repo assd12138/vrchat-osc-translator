@@ -1,3 +1,5 @@
+import { languages } from "@/constants/language";
+
 /** Shared provider configuration contract. UIDs are persisted and never derived from display values. */
 export type TranslationMode = "direct" | "transcribe-then-translate";
 
@@ -86,13 +88,21 @@ export interface SelectedModel {
 }
 
 export type ModelSelection = SelectedModel | null;
-export type ModelSlot = "direct" | "transcription" | "translation" | "ocr";
+export type ModelSlot =
+  | "direct"
+  | "transcription"
+  | "translation"
+  | "ocr"
+  | "subtitleTranscription"
+  | "subtitleTranslation";
 
 export interface ApiConfig {
   providers: ApiProvider[];
   translationMode: TranslationMode;
   selections: Record<ModelSlot, ModelSelection>;
   batchTranslate: boolean;
+  /** Subtitle translation always uses plain text without tools or output templates. */
+  subtitleTargetLanguage: string;
 }
 
 export const createApiProvider = (): ApiProvider => ({
@@ -181,8 +191,11 @@ export const createInitialApiConfig = (): ApiConfig => ({
     transcription: null,
     translation: null,
     ocr: null,
+    subtitleTranscription: null,
+    subtitleTranslation: null,
   },
   batchTranslate: false,
+  subtitleTargetLanguage: "zh",
 });
 
 /**
@@ -192,6 +205,14 @@ export const createInitialApiConfig = (): ApiConfig => ({
  * @returns
  */
 export const isModelEligible = (slot: ModelSlot, model: ApiModel): boolean => {
+  if (slot === "subtitleTranscription") {
+    return (
+      model.type === ModelType.AUDIO_CPP_LIVE ||
+      model.type === ModelType.NARILAB_AUDIO_SPEECH_TO_TEXT ||
+      model.type === ModelType.QWEN_AUDIO_SPEECH_TO_TEXT_REALTIME ||
+      model.type === ModelType.QWEN_AUDIO_SPEECH_TO_TEXT_INFERENCE
+    );
+  }
   if (slot === "transcription") {
     return (
       model.type === ModelType.AUDIO_CPP_LIVE ||
@@ -211,7 +232,9 @@ export const isModelEligible = (slot: ModelSlot, model: ApiModel): boolean => {
       model.capabilities.tools
     );
   }
-  if (slot === "translation") return model.capabilities.text;
+  if (slot === "translation" || slot === "subtitleTranslation") {
+    return model.capabilities.text;
+  }
   return (
     model.capabilities.image &&
     model.capabilities.text &&
@@ -292,6 +315,11 @@ export const sanitizeApiConfig = (config: ApiConfig): ApiConfig => {
     translationMode: config.translationMode,
     selections,
     batchTranslate: config.batchTranslate === true,
+    subtitleTargetLanguage: languages.some(
+      ({ code }) => code === config.subtitleTargetLanguage,
+    )
+      ? config.subtitleTargetLanguage
+      : "zh",
   };
 };
 
@@ -300,6 +328,8 @@ const modelSlots: ModelSlot[] = [
   "transcription",
   "translation",
   "ocr",
+  "subtitleTranscription",
+  "subtitleTranslation",
 ];
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>

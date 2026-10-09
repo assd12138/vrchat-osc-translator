@@ -34,7 +34,9 @@ export default function StyleControls({
   const config = useAppSelector((state) => state.settings.subtitleConfig);
   const original = target === "original";
   const groupLabel = t(original ? "原文" : "译文");
-  const fontSize = original ? config.originalFontSize : config.translatedFontSize;
+  const fontSize = original
+    ? config.originalFontSize
+    : config.translatedFontSize;
   const weight = original
     ? config.originalFontWeight
     : config.translatedFontWeight;
@@ -57,7 +59,8 @@ export default function StyleControls({
   };
 
   const toggleBold = () => {
-    const nextWeight: SubtitleFontWeight = weight === "bold" ? "normal" : "bold";
+    const nextWeight: SubtitleFontWeight =
+      weight === "bold" ? "normal" : "bold";
     dispatch(
       setSubtitleConfig(
         original

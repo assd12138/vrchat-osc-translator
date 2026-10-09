@@ -75,7 +75,7 @@
   }
 }
 
-.recordingStatus {
+.recognitionStatus {
   position: relative;
   z-index: 2;
   display: flex;
@@ -135,7 +135,7 @@
   box-shadow: none;
 }
 
-[data-theme="default"] .recordingStatus {
+[data-theme="default"] .recognitionStatus {
   color: var(--lg-text-muted);
   background: #f5f7f9;
   border-color: #d9e0e8;
@@ -173,7 +173,7 @@
   box-shadow: 2px 2px 0 -1px rgba(160, 69, 69, 0.2);
 }
 
-[data-theme="hand-drawn"] .recordingStatus {
+[data-theme="hand-drawn"] .recognitionStatus {
   color: var(--lg-text-muted);
   background: var(--lg-bg-1);
   border: 1px solid var(--ink-light);

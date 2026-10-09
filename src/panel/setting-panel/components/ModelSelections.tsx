@@ -22,7 +22,7 @@ export default function ModelSelections() {
   return (
     <section className={styles.apiChoices}>
       <div className={styles.choiceHeading}>
-        <span>{t("外部API配置")}</span>
+        <span>{t("麦克风和OCR识别配置")}</span>
         <small>{t("从供应商设置中添加模型")}</small>
       </div>
       <ModelSelect slot="ocr" label={t("OCR模型")} />

@@ -17,8 +17,8 @@ import {
 import { redux_store } from "./rehydrate/rehydrate-store";
 import {
   DEFAULT_SUBTITLE_CONFIG,
-  sanitizeSubtitleConfig,
   type SubtitleConfig,
+  sanitizeSubtitleConfig,
 } from "./subtitle-config";
 
 export type ThemePreference = "default" | "liquid-glass" | "hand-drawn";
@@ -45,6 +45,7 @@ const getInitialOcrTargetLanguage = () => {
 
 export interface PanelExpansionState {
   audio: boolean;
+  subtitleRecognition: boolean;
   translation: boolean;
   settings: boolean;
   systemLog: boolean;
@@ -79,6 +80,7 @@ export const initialState: SettingState = {
   subtitleConfig: { ...DEFAULT_SUBTITLE_CONFIG },
   panelExpansion: {
     audio: true,
+    subtitleRecognition: true,
     translation: true,
     settings: true,
     systemLog: true,
@@ -174,6 +176,10 @@ const settingsSlice = createSlice({
       state.apiConfig.translationMode = action.payload;
       persistApiConfig(state);
     },
+    setSubtitleTargetLanguage: (state, action: PayloadAction<string>) => {
+      state.apiConfig.subtitleTargetLanguage = action.payload;
+      persistApiConfig(state);
+    },
     setModelSelection: (
       state,
       action: PayloadAction<{ slot: ModelSlot; selection: ModelSelection }>,
@@ -227,7 +233,10 @@ const settingsSlice = createSlice({
       state.theme = action.payload;
       redux_store(REHYDRATE_KEYS.SETTING_THEME, action.payload);
     },
-    setSubtitleConfig: (state, action: PayloadAction<Partial<SubtitleConfig>>) => {
+    setSubtitleConfig: (
+      state,
+      action: PayloadAction<Partial<SubtitleConfig>>,
+    ) => {
       state.subtitleConfig = sanitizeSubtitleConfig({
         ...state.subtitleConfig,
         ...action.payload,
@@ -235,8 +244,11 @@ const settingsSlice = createSlice({
       redux_store(REHYDRATE_KEYS.SETTING_SUBTITLE_CONFIG, state.subtitleConfig);
     },
     setPanelExpansion: (state, action: PayloadAction<PanelExpansionState>) => {
-      state.panelExpansion = action.payload;
-      redux_store(REHYDRATE_KEYS.SETTING_PANEL_EXPANSION, action.payload);
+      state.panelExpansion = {
+        ...initialState.panelExpansion,
+        ...action.payload,
+      };
+      redux_store(REHYDRATE_KEYS.SETTING_PANEL_EXPANSION, state.panelExpansion);
     },
     togglePanelExpansion: (
       state,
@@ -258,6 +270,7 @@ export const {
   setSelectedTranslationPrompt,
   setBatchTranslate,
   setTranslationMode,
+  setSubtitleTargetLanguage,
   setModelSelection,
   upsertProvider,
   removeProvider,

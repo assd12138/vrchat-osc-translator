@@ -58,6 +58,8 @@ export function rehydrate() {
     selections: source.selections ?? defaults.selections,
     translationMode: source.translationMode ?? defaults.translationMode,
     batchTranslate: source.batchTranslate ?? defaults.batchTranslate,
+    subtitleTargetLanguage:
+      source.subtitleTargetLanguage ?? defaults.subtitleTargetLanguage,
   });
   store.dispatch(hydrateApiConfig(apiConfig));
   for (const key in rehydrateMapper) {

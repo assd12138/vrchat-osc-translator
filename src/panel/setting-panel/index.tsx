@@ -10,6 +10,7 @@ import globalStyles from "../../styles/index.module.css";
 import CollapsiblePanel from "../CollapsiblePanel";
 import ModelSelections from "./components/ModelSelections";
 import ProviderSettings from "./components/ProviderSettings";
+import SubtitleModelSelections from "./components/SubtitleModelSelections";
 
 export default function SettingPanel() {
   const settings = useAppSelector((state) => state.settings);
@@ -52,6 +53,7 @@ export default function SettingPanel() {
         <option value="hand-drawn">{t("手绘风格")}</option>
       </select>
       <ModelSelections />
+      <SubtitleModelSelections />
     </CollapsiblePanel>
   );
 }

@@ -118,7 +118,8 @@ export async function showSubtitleWindow(owner: BrowserWindow): Promise<void> {
     }, 16);
   };
   const stopFromRenderer = (event: IpcMainEvent) => {
-    if (!win.isDestroyed() && event.sender === win.webContents) stopInteraction();
+    if (!win.isDestroyed() && event.sender === win.webContents)
+      stopInteraction();
   };
   ipcMain.on("subtitle-window:drag-start", startDrag);
   ipcMain.on("subtitle-window:resize-start", startResize);
@@ -134,7 +135,10 @@ export async function showSubtitleWindow(owner: BrowserWindow): Promise<void> {
     stopInteraction();
     ipcMain.removeListener("subtitle-window:drag-start", startDrag);
     ipcMain.removeListener("subtitle-window:resize-start", startResize);
-    ipcMain.removeListener("subtitle-window:interaction-stop", stopFromRenderer);
+    ipcMain.removeListener(
+      "subtitle-window:interaction-stop",
+      stopFromRenderer,
+    );
     owner.removeListener("closed", closeWithOwner);
     if (subtitleWindow === win) subtitleWindow = null;
   });

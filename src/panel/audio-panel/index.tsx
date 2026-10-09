@@ -9,7 +9,6 @@ import {
   StreamTranslationProcessor,
   streamTranscription,
 } from "@/api/stream";
-import invoke, { NATIVE_COMMAND } from "@/electron/ipc";
 import { ModelType } from "@/store/api-config";
 import store from "@/store/store";
 import { loadMicDevices } from "@/utils";
@@ -17,6 +16,7 @@ import { sendToVrcChat } from "@/utils/vrc-chat-queue";
 import globalStyles from "../../styles/index.module.css";
 import eventBus, { EventBusEvent } from "../../utils/event-bus";
 import CollapsiblePanel from "../CollapsiblePanel";
+import RecognitionControls from "../RecognitionControls";
 import styles from "./index.module.css";
 
 export default function AudioPanel() {
@@ -187,24 +187,6 @@ export default function AudioPanel() {
     eventBus.emit(EventBusEvent.ADD_LOG, t("停止语音识别"));
   };
 
-  const refresh = () => {
-    window.location.reload();
-  };
-
-  const openSubtitleWindow = async () => {
-    try {
-      const result = await invoke(NATIVE_COMMAND.OPEN_SUBTITLE_WINDOW, undefined);
-      if (result?.success === false) {
-        throw new Error(result.error.message);
-      }
-    } catch (error) {
-      eventBus.emit(
-        EventBusEvent.ADD_LOG,
-        `${t("字幕弹窗打开失败")}: ${error instanceof Error ? error.message : String(error)}`,
-      );
-    }
-  };
-
   useEffect(() => {
     const load = async () => {
       const devices = await loadMicDevices();
@@ -250,67 +232,28 @@ export default function AudioPanel() {
   return (
     <CollapsiblePanel
       panel="audio"
-      title={t("语音识别控制")}
+      title={t("麦克风识别")}
       icon="🎙️"
       contentId="audio-panel-content"
       collapseDisabled={recording || translating}
     >
       <div className={styles.buttongroup}>
-        <button onClick={start} className={globalStyles.button}>
+        <button type="button" onClick={start} className={globalStyles.button}>
           {t("开始")}
         </button>
-        <button onClick={stop} className={globalStyles.button}>
+        <button type="button" onClick={stop} className={globalStyles.button}>
           {t("停止")}
         </button>
-        <button onClick={refresh} className={globalStyles.button}>
-          {t("刷新")}
-        </button>
-        {/* 临时入口：用于预览字幕弹窗样式。 */}
-        <button
-          type="button"
-          onClick={openSubtitleWindow}
-          className={globalStyles.button}
-          disabled={!window.electronAPI}
-        >
-          {t("字幕弹窗")}
-        </button>
       </div>
-      <div>
-        <select
-          disabled={recording}
-          className={globalStyles.selectS}
-          name="microphones"
-          id="mic"
-          value={deviceId}
-          onChange={(value) => {
-            setDeviceId(value.target.value);
-          }}
-        >
-          {micDevices.map((device) => (
-            <option key={device.deviceId} value={device.deviceId}>
-              {device.label}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className={styles.recordingStatus}>
-        <span
-          className={[
-            styles.statusIndicator,
-            !recording && styles.statusInactive,
-            speaking && styles.statusSpeaking,
-            !speaking && styles.statusPausing,
-          ]
-            .filter(Boolean)
-            .join(" ")}
-        ></span>
-        <span>
-          {t("录音状态")}：
-          <span>
-            {!recording ? t("未录音") : speaking ? t("说话中") : t("无声音")}
-          </span>
-        </span>
-      </div>
+      <RecognitionControls
+        deviceSelectId="mic"
+        deviceLabel={t("麦克风")}
+        devices={micDevices}
+        deviceId={deviceId ?? ""}
+        onDeviceChange={setDeviceId}
+        recognizing={recording}
+        speaking={speaking}
+      />
       <div className={styles.manualInput}>
         <input
           type="text"
