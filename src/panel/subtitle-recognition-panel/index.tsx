@@ -1,16 +1,128 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import {
+  createSubtitleRecognitionSession,
+  type SubtitleRecognitionSession,
+} from "@/api/subtitle-stream";
 import invoke, { NATIVE_COMMAND } from "@/electron/ipc";
 import globalStyles from "@/styles/index.module.css";
 import eventBus, { EventBusEvent } from "@/utils/event-bus";
+import {
+  type DisplayAudioCapture,
+  DisplayAudioUnavailableError,
+  startDisplayAudioCapture,
+} from "@/utils/display-audio";
 import styles from "../audio-panel/index.module.css";
 import CollapsiblePanel from "../CollapsiblePanel";
-import RecognitionControls from "../RecognitionControls";
+import RecognitionStatus from "../RecognitionStatus";
+import panelStyles from "./index.module.css";
 
 export default function SubtitleRecognitionPanel() {
   const { t } = useTranslation();
-  const [speakerDevices, setSpeakerDevices] = useState<MediaDeviceInfo[]>([]);
-  const [deviceId, setDeviceId] = useState("default");
+  const captureRef = useRef<DisplayAudioCapture | null>(null);
+  const sessionRef = useRef<AbortController | null>(null);
+  const recognitionRef = useRef<SubtitleRecognitionSession | null>(null);
+  const mountedRef = useRef(true);
+  const [starting, setStarting] = useState(false);
+  const [connecting, setConnecting] = useState(false);
+  const [capturing, setCapturing] = useState(false);
+  const [speaking, setSpeaking] = useState(false);
+  const [sourceName, setSourceName] = useState("");
+  const [audioLevel, setAudioLevel] = useState(0);
+  const [audioSeconds, setAudioSeconds] = useState(0);
+
+  const finishCapture = () => {
+    sessionRef.current?.abort();
+    sessionRef.current = null;
+    recognitionRef.current?.stop();
+    recognitionRef.current = null;
+    captureRef.current?.stop();
+    captureRef.current = null;
+    if (mountedRef.current) {
+      setStarting(false);
+      setConnecting(false);
+      setCapturing(false);
+      setSpeaking(false);
+      setAudioLevel(0);
+    }
+  };
+
+  const start = async () => {
+    if (sessionRef.current) return;
+    const controller = new AbortController();
+    sessionRef.current = controller;
+    setStarting(true);
+    setSourceName("");
+    setAudioSeconds(0);
+    let collectedSeconds = 0;
+
+    try {
+      // 配置校验同步完成，随后直接发起共享请求以保留点击的用户激活状态。
+      const recognition = createSubtitleRecognitionSession(controller.signal);
+      recognitionRef.current = recognition;
+      const capture = await startDisplayAudioCapture({
+        signal: controller.signal,
+        onChunk: (chunk) => {
+          if (sessionRef.current !== controller || !mountedRef.current) return;
+          collectedSeconds += chunk.pcm.byteLength / 2 / chunk.sampleRate;
+          setAudioSeconds(Math.floor(collectedSeconds));
+          setAudioLevel(chunk.peak);
+          setSpeaking(chunk.rms >= 0.006);
+          try {
+            recognition.pushAudio(chunk);
+          } catch (error) {
+            finishCapture();
+            console.error("[字幕识别] 音频格式错误", error);
+            eventBus.emit(EventBusEvent.ADD_LOG, t("字幕识别失败"));
+            return;
+          }
+          eventBus.emit(EventBusEvent.SUBTITLE_AUDIO_CHUNK, chunk);
+        },
+        onEnded: () => {
+          if (sessionRef.current !== controller) return;
+          finishCapture();
+          eventBus.emit(EventBusEvent.ADD_LOG, t("字幕音频共享已结束"));
+        },
+        onError: (error) => {
+          if (sessionRef.current !== controller) return;
+          finishCapture();
+          eventBus.emit(
+            EventBusEvent.ADD_LOG,
+            `${t("字幕音频采集失败")}: ${error.message}`,
+          );
+        },
+      });
+      if (sessionRef.current !== controller || !mountedRef.current) {
+        capture.stop();
+        return;
+      }
+      captureRef.current = capture;
+      setSourceName(capture.sourceName);
+      setCapturing(true);
+      setConnecting(true);
+      await recognition.connect();
+      if (sessionRef.current !== controller || !mountedRef.current) return;
+      setStarting(false);
+      setConnecting(false);
+      eventBus.emit(EventBusEvent.ADD_LOG, t("开始字幕音频采集"));
+    } catch (error) {
+      if (sessionRef.current !== controller) return;
+      finishCapture();
+      const message = error instanceof DisplayAudioUnavailableError
+        ? t("未获取到系统音频")
+        : error instanceof Error ? error.message : String(error);
+      console.error("[字幕识别] 启动失败", error);
+      eventBus.emit(EventBusEvent.ADD_LOG, `${t("字幕识别失败")}: ${message}`);
+    }
+  };
+
+  const stop = () => {
+    const wasCapturing = capturing;
+    finishCapture();
+    if (wasCapturing) {
+      eventBus.emit(EventBusEvent.ADD_LOG, t("停止字幕音频采集"));
+    }
+  };
 
   const openSubtitleWindow = async () => {
     try {
@@ -30,51 +142,17 @@ export default function SubtitleRecognitionPanel() {
   };
 
   useEffect(() => {
-    let active = true;
-    const mediaDevices = navigator.mediaDevices;
-    if (!mediaDevices) return;
-
-    const loadSpeakers = async () => {
-      try {
-        const devices = await mediaDevices.enumerateDevices();
-        if (active) {
-          const speakers = devices.filter(
-            (device) => device.kind === "audiooutput",
-          );
-          setSpeakerDevices(speakers);
-          setDeviceId((selected) =>
-            speakers.some((device) => device.deviceId === selected)
-              ? selected
-              : "default",
-          );
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    void loadSpeakers();
-    mediaDevices.addEventListener("devicechange", loadSpeakers);
+    mountedRef.current = true;
     return () => {
-      active = false;
-      mediaDevices.removeEventListener("devicechange", loadSpeakers);
+      mountedRef.current = false;
+      sessionRef.current?.abort();
+      sessionRef.current = null;
+      recognitionRef.current?.stop();
+      recognitionRef.current = null;
+      captureRef.current?.stop();
+      captureRef.current = null;
     };
   }, []);
-
-  const devices = [
-    {
-      deviceId: "default",
-      label:
-        speakerDevices.find((device) => device.deviceId === "default")?.label ||
-        t("系统默认扬声器"),
-    },
-    ...speakerDevices
-      .filter((device) => device.deviceId !== "default")
-      .map((device, index) => ({
-        deviceId: device.deviceId,
-        label: device.label || `${t("系统扬声器")} ${index + 1}`,
-      })),
-  ];
 
   return (
     <CollapsiblePanel
@@ -82,13 +160,25 @@ export default function SubtitleRecognitionPanel() {
       title={t("字幕识别")}
       icon="🔊"
       contentId="subtitle-recognition-panel-content"
+      collapseDisabled={starting || capturing}
     >
-      {/* 先复刻界面，识别入口待配置逻辑确定后接入。 */}
       <div className={styles.buttongroup}>
-        <button type="button" className={globalStyles.button} disabled>
-          {t("开始")}
+        <button
+          type="button"
+          onClick={start}
+          className={globalStyles.button}
+          disabled={starting || capturing}
+        >
+          {starting
+            ? connecting ? t("连接识别服务中") : t("选择共享源中")
+            : t("开始")}
         </button>
-        <button type="button" className={globalStyles.button} disabled>
+        <button
+          type="button"
+          onClick={stop}
+          className={globalStyles.button}
+          disabled={!starting && !capturing}
+        >
           {t("停止")}
         </button>
         <button
@@ -100,13 +190,17 @@ export default function SubtitleRecognitionPanel() {
           {t("打开字幕")}
         </button>
       </div>
-      <RecognitionControls
-        deviceSelectId="subtitle-speaker"
-        deviceLabel={t("系统扬声器")}
-        devices={devices}
-        deviceId={deviceId}
-        onDeviceChange={setDeviceId}
-      />
+      <RecognitionStatus recognizing={capturing} speaking={speaking} />
+      {(capturing || audioSeconds > 0) && (
+        <div className={panelStyles.captureInfo}>
+          {sourceName && <span>{t("共享源")}：{sourceName}</span>}
+          <label className={panelStyles.level}>
+            {t("音量")}
+            <meter min={0} max={1} value={audioLevel} />
+          </label>
+          <span>{t("已采集音频时长", { seconds: audioSeconds })}</span>
+        </div>
+      )}
     </CollapsiblePanel>
   );
 }

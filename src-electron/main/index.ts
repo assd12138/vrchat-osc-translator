@@ -135,17 +135,19 @@ function focusMainWindow() {
 
 function registerScreenPickerHandler() {
   // 拦截渲染进程的 getDisplayMedia 请求，弹出模态选择器让用户选择屏幕或窗口。
-  // 始终忽略音频：回调只包含 video。
   session.defaultSession.setDisplayMediaRequestHandler(
-    async (_request, callback) => {
+    async (request, callback) => {
       if (!mainWindow || mainWindow.isDestroyed()) {
         callback({});
         return;
       }
       try {
-        const source = await showScreenPicker(mainWindow);
-        if (source) {
-          callback({ video: source });
+        const result = await showScreenPicker(mainWindow, request.audioRequested);
+        if (result) {
+          callback({
+            video: result.source,
+            ...(result.shareAudio ? { audio: "loopback" as const } : {}),
+          });
         } else {
           callback({});
         }

@@ -26,12 +26,38 @@ export type StreamModelType =
   | ModelType.QWEN_AUDIO_SPEECH_TO_TEXT_REALTIME
   | ModelType.QWEN_AUDIO_SPEECH_TO_TEXT_INFERENCE;
 
+export type PcmAudioData = ArrayBuffer | Int16Array | Float32Array;
+export type SubscribePcmAudio = (
+  listener: (chunk: PcmAudioData) => void,
+) => () => void;
+
+interface StreamTranslationOptions {
+  translate?: (text: string, signal: AbortSignal) => Promise<string>;
+  onTranslation?: (translation: string, transcription: string) => void;
+  signal?: AbortSignal;
+}
+
 /** Serializes streamed transcripts while retaining only the newest useful updates. */
 export class StreamTranslationProcessor {
   private pending: string[] = [];
   private translating = false;
+  private stopped = false;
+  private requestController: AbortController | null = null;
+
+  constructor(private readonly options: StreamTranslationOptions = {}) {
+    if (options.signal?.aborted) this.stopped = true;
+    else options.signal?.addEventListener("abort", this.stop, { once: true });
+  }
+
+  stop = () => {
+    this.stopped = true;
+    this.pending = [];
+    this.requestController?.abort();
+    this.options.signal?.removeEventListener("abort", this.stop);
+  };
 
   push(text: string) {
+    if (this.stopped) return;
     if (text === "") {
       if (this.pending.length === MAX_PENDING_TRANSLATIONS) {
         this.pending.shift();
@@ -67,24 +93,41 @@ export class StreamTranslationProcessor {
   }
 
   private async translate(text: string) {
+    if (this.stopped) return;
     this.translating = true;
+    const controller = new AbortController();
+    this.requestController = controller;
+    let timeout: ReturnType<typeof setTimeout> | undefined;
     try {
       const translation = await Promise.race([
-        this.translateText(text),
+        this.options.translate
+          ? this.options.translate(text, controller.signal)
+          : this.translateText(text),
         new Promise<never>((_, reject) => {
-          setTimeout(
-            () => reject(new Error("Stream translation timed out")),
+          timeout = setTimeout(
+            () => {
+              controller.abort();
+              reject(new Error("Stream translation timed out"));
+            },
             TRANSLATION_TIMEOUT_MS,
           );
         }),
       ]);
-      sendToVrcChat(translation);
+      if (!this.stopped) {
+        if (this.options.onTranslation) {
+          this.options.onTranslation(translation, text);
+        } else {
+          sendToVrcChat(translation);
+        }
+      }
     } catch (error) {
-      console.error("Stream translation failed", error);
+      if (!this.stopped) console.error("Stream translation failed", error);
     } finally {
+      if (timeout !== undefined) clearTimeout(timeout);
+      if (this.requestController === controller) this.requestController = null;
       this.translating = false;
       const next = this.pending.shift();
-      if (next !== undefined) void this.translate(next);
+      if (!this.stopped && next !== undefined) void this.translate(next);
     }
   }
 
@@ -130,13 +173,14 @@ const isErrorMessage = (
   (value as { type?: unknown }).type === "error" &&
   typeof (value as { message?: unknown }).message === "string";
 
-export const streamTranscription = async ({
-  microphone,
+/** 将任意 PCM 数据源接入现有本地转写通道，包括连接配置和断线重连。 */
+export const streamPcmTranscription = async ({
+  subscribeAudio,
   config,
   onTranscript,
   signal,
 }: {
-  microphone: Microphone;
+  subscribeAudio: SubscribePcmAudio;
   config: StreamTranscriptionConfig;
   onTranscript: (text: string) => void;
   signal?: AbortSignal;
@@ -150,6 +194,8 @@ export const streamTranscription = async ({
   let reconnectAttempt = 0;
   let reconnecting = false;
   let stopped = false;
+  let unsubscribeAudio: (() => void) | null = null;
+  let finishTimer: ReturnType<typeof setTimeout> | null = null;
   const socketCleanups = new WeakMap<WebSocket, () => void>();
 
   const createAbortError = () => new DOMException("Aborted", "AbortError");
@@ -172,7 +218,7 @@ export const streamTranscription = async ({
     reconnectTimer = null;
   };
 
-  const handleMicrophoneData = (chunk: Int16Array | Float32Array) => {
+  const handleAudioData = (chunk: PcmAudioData) => {
     const activeSocket = socket;
     if (
       stopped ||
@@ -193,14 +239,27 @@ export const streamTranscription = async ({
     stopped = true;
     clearReconnectTimer();
     signal?.removeEventListener("abort", handleAbort);
-    microphone.off("data", handleMicrophoneData);
+    unsubscribeAudio?.();
+    unsubscribeAudio = null;
 
     const activeSocket = socket;
     if (
       config.modelType === ModelType.AUDIO_CPP_LIVE &&
       activeSocket?.readyState === WebSocket.OPEN
     ) {
-      activeSocket.send(JSON.stringify({ type: "transcription.finish" }));
+      try {
+        activeSocket.send(JSON.stringify({ type: "transcription.finish" }));
+      } catch {
+        socket = null;
+        closeSocket(activeSocket);
+        return;
+      }
+      // 服务端未返回 done 时也要释放 socket，避免停止后的会话残留。
+      finishTimer = setTimeout(() => {
+        finishTimer = null;
+        if (socket === activeSocket) socket = null;
+        closeSocket(activeSocket);
+      }, 5_000);
       return;
     }
     socket = null;
@@ -321,9 +380,13 @@ export const streamTranscription = async ({
         if (typeof data !== "string") return;
         try {
           const message: unknown = JSON.parse(data);
-          if (isTranscriptMessage(message)) {
+          if (isTranscriptMessage(message) && !signal?.aborted) {
             onTranscript(message.text);
           } else if (isDoneMessage(message)) {
+            if (finishTimer !== null) {
+              clearTimeout(finishTimer);
+              finishTimer = null;
+            }
             if (socket === nextSocket) socket = null;
             closeSocket(nextSocket);
             if (!stopped) scheduleReconnect("Transcription stream finished");
@@ -380,10 +443,35 @@ export const streamTranscription = async ({
 
   try {
     await connectSocket();
-    microphone.on("data", handleMicrophoneData);
+    unsubscribeAudio = subscribeAudio(handleAudioData);
+    if (stopped || signal?.aborted) {
+      unsubscribeAudio();
+      unsubscribeAudio = null;
+      throw createAbortError();
+    }
     return stop;
   } catch (error) {
     stop();
     throw error;
   }
 };
+
+/** 麦克风适配器保留原调用方式，底层传输与字幕共享 PCM 转写通道。 */
+export const streamTranscription = ({
+  microphone,
+  ...options
+}: {
+  microphone: Microphone;
+  config: StreamTranscriptionConfig;
+  onTranscript: (text: string) => void;
+  signal?: AbortSignal;
+}): Promise<() => void> =>
+  streamPcmTranscription({
+    ...options,
+    subscribeAudio: (listener) => {
+      microphone.on("data", listener);
+      return () => {
+        microphone.off("data", listener);
+      };
+    },
+  });

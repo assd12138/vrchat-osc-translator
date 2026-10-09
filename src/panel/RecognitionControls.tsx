@@ -1,6 +1,5 @@
-import { useTranslation } from "react-i18next";
 import globalStyles from "@/styles/index.module.css";
-import styles from "./audio-panel/index.module.css";
+import RecognitionStatus from "./RecognitionStatus";
 
 interface RecognitionControlsProps {
   deviceSelectId: string;
@@ -21,8 +20,6 @@ export default function RecognitionControls({
   recognizing = false,
   speaking = false,
 }: RecognitionControlsProps) {
-  const { t } = useTranslation();
-
   return (
     <>
       <div>
@@ -42,25 +39,7 @@ export default function RecognitionControls({
           ))}
         </select>
       </div>
-      <div className={styles.recognitionStatus} role="status">
-        <span
-          aria-hidden="true"
-          className={[
-            styles.statusIndicator,
-            !recognizing
-              ? styles.statusInactive
-              : speaking
-                ? styles.statusSpeaking
-                : styles.statusPausing,
-          ].join(" ")}
-        />
-        <span>
-          {t("识别状态")}：
-          <span>
-            {!recognizing ? t("未识别") : speaking ? t("识别中") : t("无声音")}
-          </span>
-        </span>
-      </div>
+      <RecognitionStatus recognizing={recognizing} speaking={speaking} />
     </>
   );
 }

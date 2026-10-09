@@ -4,6 +4,7 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: 任意传输数据，无需定义 */
 export enum EventBusEvent {
   ADD_LOG = "ADD_LOG",
+  SUBTITLE_AUDIO_CHUNK = "SUBTITLE_AUDIO_CHUNK",
 }
 
 type EventBusHandler = (data: any) => void;

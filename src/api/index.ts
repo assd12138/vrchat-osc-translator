@@ -2,6 +2,10 @@
 const request = async (url: string, options: RequestInit = {}) => {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 60000);
+  const externalSignal = options.signal;
+  const handleAbort = () => controller.abort();
+  if (externalSignal?.aborted) controller.abort();
+  else externalSignal?.addEventListener("abort", handleAbort, { once: true });
 
   try {
     const response = await fetch(url, {
@@ -18,12 +22,17 @@ const request = async (url: string, options: RequestInit = {}) => {
     }
     return await response.json();
   } catch (error) {
-    if (error instanceof Error && error.name === "AbortError") {
+    if (
+      error instanceof Error &&
+      error.name === "AbortError" &&
+      !externalSignal?.aborted
+    ) {
       console.error("Request timed out");
     }
     throw error;
   } finally {
     clearTimeout(timeoutId);
+    externalSignal?.removeEventListener("abort", handleAbort);
   }
 };
 

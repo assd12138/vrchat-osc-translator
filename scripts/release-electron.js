@@ -126,6 +126,9 @@ async function buildElectron() {
       mac: {
         target: "dmg",
         category: "public.app-category.productivity",
+        extendInfo: {
+          NSAudioCaptureUsageDescription: "Collect system audio to translate chat.",
+        },
       },
       // extraResources is copied beside app.asar under process.resourcesPath.
       extraResources: [

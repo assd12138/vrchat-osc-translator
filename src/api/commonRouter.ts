@@ -23,7 +23,7 @@ export type ResolvedModel = { provider: ApiProvider; model: ApiModel };
 export const configurationError = (message: string): Error =>
   new Error(`Provider configuration error: ${message}`);
 
-const postChat = (resolved: ResolvedModel, body: object) => {
+const postChat = (resolved: ResolvedModel, body: object, signal?: AbortSignal) => {
   let extraBody = {};
   if (
     isBehaviorActive(resolved.model.modelId, BEHAVIOR.THINKING_TYPE_DISABLED) ||
@@ -49,6 +49,7 @@ const postChat = (resolved: ResolvedModel, body: object) => {
     buildProviderEndpoint(resolved.provider.baseURL, ModelType.CHAT_COMPLETION),
     {
       method: "POST",
+      signal,
       body: JSON.stringify({
         model: resolved.model.modelId,
         ...body,
@@ -139,6 +140,44 @@ const translateWithTool = async (
   );
 };
 
+const translateToLanguage = async (
+  resolved: ResolvedModel,
+  text: string,
+  language: string,
+  promptTemplate: string,
+  signal?: AbortSignal,
+): Promise<string> => {
+  const response = await postChat(
+    resolved,
+    {
+      messages: [
+        {
+          role: "user",
+          content: generateTranslationPrompt(text, [language], promptTemplate),
+        },
+      ],
+      temperature: 0.7,
+    },
+    signal,
+  );
+  return getMessageContent(response);
+};
+
+/** 字幕固定逐语言请求纯文本结果，不使用工具调用、输出模板或 VRChat 字数限制。 */
+export const translateSubtitleText = (
+  resolved: ResolvedModel,
+  text: string,
+  targetLanguage: string,
+  signal?: AbortSignal,
+): Promise<string> =>
+  translateToLanguage(
+    resolved,
+    text,
+    targetLanguage,
+    getSelectedTranslationPromptContent(store.getState().settings),
+    signal,
+  );
+
 const translateWithRequests = async (
   resolved: ResolvedModel,
   text: string,
@@ -148,20 +187,13 @@ const translateWithRequests = async (
 ) => {
   const values = await Promise.all(
     languages.map(async (language) => {
-      const response = await postChat(resolved, {
-        messages: [
-          {
-            role: "user",
-            content: generateTranslationPrompt(
-              text,
-              [language],
-              promptTemplate,
-            ),
-          },
-        ],
-        temperature: 0.7,
-      });
-      return [language, getMessageContent(response)] as const;
+      const translation = await translateToLanguage(
+        resolved,
+        text,
+        language,
+        promptTemplate,
+      );
+      return [language, translation] as const;
     }),
   );
   return applyTranslationTemplate(

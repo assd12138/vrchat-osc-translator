@@ -80,6 +80,10 @@
     font-size: 13px;
   }
   .empty { flex: 1; display: none; align-items: center; justify-content: center; color: #888; }
+  .audio-options { padding: 12px 16px; border-top: 1px solid #333; }
+  .audio-options[hidden] { display: none; }
+  .audio-options label { display: flex; align-items: center; gap: 8px; }
+  .audio-options small { display: block; margin-top: 6px; color: #aaa; line-height: 1.5; }
 </style>
 </head>
 <body>
@@ -92,19 +96,27 @@
   </div>
   <div class="grid" id="grid"></div>
   <div class="empty" id="empty">没有可用源</div>
+  <div class="audio-options" id="audioOptions" hidden>
+    <label><input type="checkbox" id="shareAudio" checked>共享系统音频</label>
+    <small>将获取整个系统播放的声音，不采集麦克风；选择窗口不会将音频限定到该窗口。</small>
+  </div>
 </div>
 <script>
   (function () {
     var grid = document.getElementById('grid');
     var empty = document.getElementById('empty');
     var cancelBtn = document.getElementById('cancelBtn');
+    var audioOptions = document.getElementById('audioOptions');
+    var shareAudio = document.getElementById('shareAudio');
 
     cancelBtn.addEventListener('click', function () { window.pickerAPI.cancel(); });
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') { window.pickerAPI.cancel(); }
     });
 
-    window.pickerAPI.onSources(function (sources) {
+    window.pickerAPI.onSources(function (data) {
+      var sources = data.sources;
+      audioOptions.hidden = !data.audioRequested;
       if (!sources || sources.length === 0) {
         empty.style.display = 'flex';
         grid.style.display = 'none';
@@ -116,7 +128,9 @@
         card.type = 'button';
         card.className = 'card';
         card.addEventListener('click', (function (id) {
-          return function () { window.pickerAPI.select(id); };
+          return function () {
+            window.pickerAPI.select({ id: id, shareAudio: !audioOptions.hidden && shareAudio.checked });
+          };
         })(s.id));
 
         var thumb = document.createElement('div');
