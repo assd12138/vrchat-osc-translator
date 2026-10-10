@@ -1,8 +1,5 @@
 import type { ApiConfig } from "../api-config";
-import type {
-  PanelExpansionState,
-  TranslationPromptTemplate,
-} from "../settings";
+import type { TranslationPromptTemplate } from "../settings";
 import type { SubtitleConfig } from "../subtitle-config";
 import { REDUX_STORAGE_KEY, rehydrateFlag } from "./rehydrate-constant";
 
@@ -12,7 +9,6 @@ export function redux_store(
     | string
     | boolean
     | string[]
-    | PanelExpansionState
     | ApiConfig
     | SubtitleConfig
     | TranslationPromptTemplate[],

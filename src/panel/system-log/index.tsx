@@ -1,9 +1,8 @@
 import { format } from "date-fns";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { SectionCard } from "@/components/ui";
 import eventBus, { EventBusEvent } from "../../utils/event-bus";
-import CollapsiblePanel from "../CollapsiblePanel";
-import styles from "./index.module.css";
 
 export default function SystemLog() {
   const { t } = useTranslation();
@@ -26,20 +25,22 @@ export default function SystemLog() {
     };
   }, []);
   return (
-    <CollapsiblePanel
-      panel="systemLog"
-      title={t("系统日志")}
-      icon="📋"
-      contentId="system-log-panel-content"
-    >
-      <div className={styles.logContainer}>
+    <SectionCard title={t("运行记录")}>
+      {logs.length === 0 && (
+        <div className="empty-state">
+          <p className="text-muted">{t("暂无日志")}</p>
+        </div>
+      )}
+      <div className="log-list">
         {logs.map((log) => (
-          <div key={log.id} className={styles.logItem}>
-            <div>[{format(log.time, "HH:mm:ss")}]</div>
+          <div key={log.id} className="log-row">
+            <time dateTime={log.time.toISOString()}>
+              {format(log.time, "HH:mm:ss")}
+            </time>
             <div>{log.content}</div>
           </div>
         ))}
       </div>
-    </CollapsiblePanel>
+    </SectionCard>
   );
 }

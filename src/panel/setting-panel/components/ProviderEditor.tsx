@@ -1,6 +1,15 @@
+import {
+  Button,
+  Description,
+  FieldError,
+  Input,
+  Label,
+  TextField,
+} from "@heroui/react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { discoverModels, normalizeBaseURL } from "@/api/provider";
+import { CheckField, SectionCard, SelectField } from "@/components/ui";
 import {
   type ApiModel,
   type ApiProvider,
@@ -11,7 +20,6 @@ import {
 } from "@/store/api-config";
 import { useAppDispatch, useAppSelector } from "@/store/hook";
 import { upsertProvider } from "@/store/settings";
-import styles from "../index.module.css";
 import { capabilityTranslationKeys } from "./ModelSelect";
 
 export default function ProviderEditor({
@@ -32,7 +40,6 @@ export default function ProviderEditor({
   const [fetchState, setFetchState] = useState<
     "idle" | "loading" | "empty" | "success" | "error"
   >("idle");
-  const [openCandidate, setOpenCandidate] = useState<string | null>(null);
   const identifierError = !draft.identifier.trim()
     ? t("供应商标识必填")
     : !isProviderIdentifierAvailable(draft.identifier, providers, draft.uid)
@@ -76,187 +83,181 @@ export default function ProviderEditor({
     );
     onDone();
   };
+  const typeOptions = [
+    {
+      value: ModelType.AUDIO_TRANSCRIPTION,
+      label: `${t("语音转写")} /audio/transcriptions`,
+    },
+    {
+      value: ModelType.AUDIO_CPP_LIVE,
+      label: `${t("流式转写")}(audio.cpp) /audio/transcriptions/live`,
+    },
+    {
+      value: ModelType.CHAT_COMPLETION,
+      label: `${t("文本补全")} /chat/completions`,
+    },
+    {
+      value: ModelType.MINIMAX_AUDIO_SPEECH_TO_TEXT,
+      label: `${t("语音转写")}(minimax) /speech_to_text`,
+    },
+    {
+      value: ModelType.NARILAB_AUDIO_SPEECH_TO_TEXT,
+      label: `${t("流式转写")}(nariLab) /realtime`,
+    },
+    {
+      value: ModelType.QWEN_AUDIO_SPEECH_TO_TEXT_REALTIME,
+      label: `${t("流式转写")}(qwen-asr-realtime) /realtime`,
+    },
+    {
+      value: ModelType.QWEN_AUDIO_SPEECH_TO_TEXT_INFERENCE,
+      label: `${t("流式转写")}(qwen-audio / fun-asr) /inference`,
+    },
+  ];
   return (
-    <form className={styles.editor}>
-      <div className={styles.editorIntro}>
-        <button type="button" className={styles.backButton} onClick={onDone}>
+    <form
+      className="field-stack"
+      onSubmit={(event) => {
+        event.preventDefault();
+        save();
+      }}
+    >
+      <div className="toolbar between">
+        <Button variant="ghost" onPress={onDone}>
           ← {t("返回列表")}
-        </button>
-        <span>{provider.identifier ? t("编辑供应商") : t("新建供应商")}</span>
-      </div>
-      <div className={styles.profileGrid}>
-        <label>
-          <span>{t("供应商标识")}</span>
-          <input
-            autoFocus
-            value={draft.identifier}
-            onChange={(e) => set("identifier", e.target.value)}
-            aria-invalid={!!identifierError}
-          />
-          {identifierError && (
-            <small className={styles.inlineError}>{identifierError}</small>
-          )}
-        </label>
-        <label>
-          <span>Base URL</span>
-          <input
-            value={draft.baseURL}
-            placeholder="https://api.openai.com/v1"
-            onChange={(e) => set("baseURL", e.target.value)}
-            aria-invalid={!draft.baseURL.trim()}
-          />
-          {!draft.baseURL.trim() ? (
-            <small className={styles.inlineError}>{t("Base URL必填")}</small>
-          ) : (
-            <small>{t("填写到 /v1，不要尾斜杠")}</small>
-          )}
-        </label>
-        <label className={styles.keyField}>
-          <span>API Key</span>
-          <div>
-            <input
-              type={showKey ? "text" : "password"}
-              defaultValue={draft.apiKey}
-              onChange={(e) => set("apiKey", e.target.value)}
-              aria-invalid={!draft.apiKey.trim()}
-            />
-            <button
-              type="button"
-              onClick={() => setShowKey(!showKey)}
-              aria-label={showKey ? t("隐藏API Key") : t("显示API Key")}
-            >
-              <span
-                aria-hidden="true"
-                className={`${styles.keyIcon} ${showKey ? styles.keyIconHidden : styles.keyIconVisible}`}
-              />
-            </button>
-          </div>
-          <small className={styles.inlineError}>{t("API Key必填")}</small>
-        </label>
-      </div>
-      <div className={styles.discovery}>
-        <button
-          type="button"
-          onClick={discover}
-          disabled={fetchState === "loading"}
-        >
-          {fetchState === "loading" ? t("获取中") : t("获取模型列表")}
-        </button>
-        <span aria-live="polite">
-          {fetchState === "success" && t("已获取模型")}
-          {fetchState === "empty" && t("没有可用模型")}
-          {fetchState === "error" && t("请先填写Base URL和API Key，或检查连接")}
+        </Button>
+        <span className="text-muted">
+          {provider.identifier ? t("编辑供应商") : t("新建供应商")}
         </span>
       </div>
-      <div className={styles.modelsHeader}>
-        <div className={styles.modelsHeaderInfo}>
-          <span>{t("模型")}</span>
-          <small>{t("能力按实际接口填写")}</small>
+      <SectionCard title={t("编辑供应商档案")}>
+        <div className="form-grid">
+          <TextField
+            value={draft.identifier}
+            onChange={(value) => set("identifier", value)}
+            isInvalid={!!identifierError}
+          >
+            <Label>{t("供应商标识")}</Label>
+            <Input autoFocus />
+            <FieldError>{identifierError}</FieldError>
+          </TextField>
+          <TextField
+            value={draft.baseURL}
+            onChange={(value) => set("baseURL", value)}
+            isInvalid={!draft.baseURL.trim()}
+          >
+            <Label>Base URL</Label>
+            <Input placeholder="https://api.openai.com/v1" />
+            <Description>{t("填写到 /v1，不要尾斜杠")}</Description>
+            <FieldError>{t("Base URL必填")}</FieldError>
+          </TextField>
+          <TextField
+            className="full-width"
+            value={draft.apiKey}
+            onChange={(value) => set("apiKey", value)}
+            isInvalid={!draft.apiKey.trim()}
+          >
+            <Label>API Key</Label>
+            <div className="inline-field">
+              <Input type={showKey ? "text" : "password"} autoComplete="off" />
+              <Button variant="secondary" onPress={() => setShowKey(!showKey)}>
+                {showKey ? t("隐藏API Key") : t("显示API Key")}
+              </Button>
+            </div>
+            <FieldError>{t("API Key必填")}</FieldError>
+          </TextField>
         </div>
-        <button
-          type="button"
-          onClick={() =>
+        <div className="toolbar">
+          <Button
+            variant="secondary"
+            onPress={discover}
+            isDisabled={fetchState === "loading"}
+          >
+            {fetchState === "loading" ? t("获取中") : t("获取模型列表")}
+          </Button>
+          <span className="text-muted" aria-live="polite">
+            {fetchState === "success" && t("已获取模型")}
+            {fetchState === "empty" && t("没有可用模型")}
+            {fetchState === "error" &&
+              t("请先填写Base URL和API Key，或检查连接")}
+          </span>
+        </div>
+      </SectionCard>
+      <div className="toolbar between">
+        <div>
+          <h2 className="font-semibold">{t("模型")}</h2>
+          <p className="text-muted">{t("能力按实际接口填写")}</p>
+        </div>
+        <Button
+          variant="secondary"
+          onPress={() =>
             set("models", [...draft.models, createChatCompletionModel()])
           }
         >
           + {t("增加模型")}
-        </button>
+        </Button>
       </div>
-      <div className={styles.modelList}>
-        {draft.models.length === 0 && (
-          <div className={styles.modelEmpty}>
-            {t("还没有模型，可手动增加或先获取列表")}
-          </div>
-        )}
-        {draft.models.map((model) => (
-          <div className={styles.modelCard} key={model.uid}>
-            <div className={styles.modelTop}>
-              <label className={styles.modelIdField}>
-                <span>{t("模型名称")}</span>
-                <input
-                  value={model.modelId}
-                  aria-invalid={!model.modelId.trim()}
-                  onChange={(e) =>
-                    updateModel(model.uid, {
-                      ...model,
-                      modelId: e.target.value,
-                    })
-                  }
-                />
-                {!model.modelId.trim() && (
-                  <small className={styles.inlineError}>
-                    {t("模型名称必填")}
-                  </small>
-                )}
-              </label>
-              <div className={styles.candidateWrap}>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setOpenCandidate(
-                      openCandidate === model.uid ? null : model.uid,
-                    )
-                  }
-                >
-                  {t("候选模型")} ▾
-                </button>
-                {openCandidate === model.uid && (
-                  <div className={styles.candidateMenu}>
-                    <div className={styles.candidateMenuHeader}>
-                      <strong>{t("候选模型")}</strong>
-                      <button
-                        type="button"
-                        onClick={() => setOpenCandidate(null)}
-                        aria-label={t("关闭")}
-                      >
-                        ×
-                      </button>
-                    </div>
-                    {candidates?.length ? (
-                      candidates.map((candidate) => (
-                        <button
-                          type="button"
-                          key={candidate}
-                          onClick={() => {
-                            updateModel(model.uid, {
-                              ...model,
-                              modelId: candidate,
-                            });
-                            setOpenCandidate(null);
-                          }}
-                        >
-                          {candidate}
-                        </button>
-                      ))
-                    ) : (
-                      <p>{t("先获取模型列表，或手动输入模型名称")}</p>
-                    )}
-                  </div>
-                )}
-              </div>
-              <button
-                type="button"
-                className={styles.removeModel}
-                onClick={() =>
-                  set(
-                    "models",
-                    draft.models.filter((m) => m.uid !== model.uid),
-                  )
-                }
-                aria-label={t("删除模型")}
-              >
-                ×
-              </button>
-            </div>
-            <label className={styles.typePicker}>
-              <span>{t("模型类型")}</span>
-              <select
+      {draft.models.length === 0 && (
+        <p className="text-muted">{t("还没有模型，可手动增加或先获取列表")}</p>
+      )}
+      {draft.models.map((model, index) => (
+        <SectionCard
+          key={model.uid}
+          title={`${t("模型")} ${index + 1}`}
+          actions={
+            <Button
+              size="sm"
+              variant="danger-soft"
+              onPress={() =>
+                set(
+                  "models",
+                  draft.models.filter((item) => item.uid !== model.uid),
+                )
+              }
+            >
+              {t("删除模型")}
+            </Button>
+          }
+        >
+          <div className="form-grid">
+            <TextField
+              value={model.modelId}
+              isInvalid={!model.modelId.trim()}
+              onChange={(value) =>
+                updateModel(model.uid, { ...model, modelId: value })
+              }
+            >
+              <Label>{t("模型名称")}</Label>
+              <Input />
+              <FieldError>{t("模型名称必填")}</FieldError>
+            </TextField>
+            <SelectField
+              label={t("候选模型")}
+              value={candidates?.includes(model.modelId) ? model.modelId : ""}
+              isDisabled={!candidates?.length}
+              placeholder={t("候选模型")}
+              description={
+                !candidates?.length
+                  ? t("先获取模型列表，或手动输入模型名称")
+                  : undefined
+              }
+              options={(candidates ?? []).map((value) => ({
+                value,
+                label: value,
+              }))}
+              onChange={(value) =>
+                updateModel(model.uid, { ...model, modelId: value })
+              }
+            />
+            <div className="full-width">
+              <SelectField
+                label={t("模型类型")}
                 value={model.type}
-                onChange={(e) =>
+                options={typeOptions}
+                onChange={(value) =>
                   updateModel(model.uid, {
                     ...createModel({
                       modelId: model.modelId,
-                      type: e.target.value as ModelType,
+                      type: value as ModelType,
                       capabilities:
                         model.type === ModelType.CHAT_COMPLETION
                           ? model.capabilities
@@ -265,64 +266,39 @@ export default function ProviderEditor({
                     uid: model.uid,
                   })
                 }
-              >
-                <option value={ModelType.AUDIO_TRANSCRIPTION}>
-                  {t("语音转写")} /audio/transcriptions
-                </option>
-                <option value={ModelType.AUDIO_CPP_LIVE}>
-                  {t("流式转写")}(audio.cpp) /audio/transcriptions/live
-                </option>
-                <option value={ModelType.CHAT_COMPLETION}>
-                  {t("文本补全")} /chat/completions
-                </option>
-                <option value={ModelType.MINIMAX_AUDIO_SPEECH_TO_TEXT}>
-                  {t("语音转写")}(minimax) /speech_to_text
-                </option>
-                <option value={ModelType.NARILAB_AUDIO_SPEECH_TO_TEXT}>
-                  {t("流式转写")}(nariLab) /realtime
-                </option>
-                <option value={ModelType.QWEN_AUDIO_SPEECH_TO_TEXT_REALTIME}>
-                  {t("流式转写")}(qwen-asr-realtime) /realtime
-                </option>
-                <option value={ModelType.QWEN_AUDIO_SPEECH_TO_TEXT_INFERENCE}>
-                  {t("流式转写")}(qwen-audio / fun-asr) /inference
-                </option>
-              </select>
-            </label>
-            {model.type === ModelType.CHAT_COMPLETION && (
-              <div className={styles.capabilities}>
-                {(["audio", "image", "text", "tools"] as const).map(
-                  (capability) => (
-                    <label key={capability}>
-                      <input
-                        type="checkbox"
-                        checked={model.capabilities[capability]}
-                        onChange={(e) =>
-                          updateModel(model.uid, {
-                            ...model,
-                            capabilities: {
-                              ...model.capabilities,
-                              [capability]: e.target.checked,
-                            },
-                          })
-                        }
-                      />
-                      {t(capabilityTranslationKeys[capability])}
-                    </label>
-                  ),
-                )}
-              </div>
-            )}
+              />
+            </div>
           </div>
-        ))}
-      </div>
-      <div className={styles.editorActions}>
-        <button type="button" onClick={onDone}>
+          {model.type === ModelType.CHAT_COMPLETION && (
+            <div className="toolbar">
+              {(["audio", "image", "text", "tools"] as const).map(
+                (capability) => (
+                  <CheckField
+                    key={capability}
+                    isSelected={model.capabilities[capability]}
+                    onChange={(selected) =>
+                      updateModel(model.uid, {
+                        ...model,
+                        capabilities: {
+                          ...model.capabilities,
+                          [capability]: selected,
+                        },
+                      })
+                    }
+                  >
+                    {t(capabilityTranslationKeys[capability])}
+                  </CheckField>
+                ),
+              )}
+            </div>
+          )}
+        </SectionCard>
+      ))}
+      <div className="toolbar">
+        <Button type="submit">{t("保存")}</Button>
+        <Button variant="secondary" onPress={onDone}>
           {t("取消")}
-        </button>
-        <button type="submit" onClick={save} className={styles.primaryButton}>
-          {t("保存")}
-        </button>
+        </Button>
       </div>
     </form>
   );

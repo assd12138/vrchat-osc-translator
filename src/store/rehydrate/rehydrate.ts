@@ -8,7 +8,7 @@ import {
   setLanguage,
   setOcrTargetLanguage,
   setOutputTemplate,
-  setPanelExpansion,
+  setPanelOrder,
   setSelectedTranslationPrompt,
   setSubtitleConfig,
   setTranslationPromptTemplates,
@@ -28,7 +28,7 @@ export const rehydrateMapper = {
     setSelectedTranslationPrompt,
   [REHYDRATE_KEYS.SETTING_LANGUAGE]: setLanguage,
   [REHYDRATE_KEYS.SETTING_OCR_TARGET_LANGUAGE]: setOcrTargetLanguage,
-  [REHYDRATE_KEYS.SETTING_PANEL_EXPANSION]: setPanelExpansion,
+  [REHYDRATE_KEYS.SETTING_PANEL_ORDER]: setPanelOrder,
   [REHYDRATE_KEYS.SETTING_SUBTITLE_CONFIG]: setSubtitleConfig,
 };
 
@@ -69,8 +69,11 @@ export function rehydrate() {
   obj[REHYDRATE_KEYS.SETTING_API_CONFIG] = apiConfig;
   obj[REHYDRATE_KEYS.SETTING_SUBTITLE_CONFIG] =
     store.getState().settings.subtitleConfig;
+  obj[REHYDRATE_KEYS.SETTING_PANEL_ORDER] =
+    store.getState().settings.panelOrder;
   // 移除废弃的持久化key
   for (const key of [
+    "SETTING_PANEL_EXPANSION",
     "SETTING_THEME",
     "SETTING_TRANSCRIPTION_URL",
     "SETTING_TRANSCRIPTION_MODEL",

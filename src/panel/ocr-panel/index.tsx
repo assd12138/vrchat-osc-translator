@@ -1,12 +1,11 @@
+import { Button, Label, TextArea, TextField } from "@heroui/react";
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { transformOCRRouter } from "@/api/commonRouter";
+import { SectionCard, SelectField } from "@/components/ui";
 import { languages } from "@/constants/language";
 import { useAppDispatch, useAppSelector } from "../../store/hook";
 import { setOcrTargetLanguage } from "../../store/settings";
-import globalStyles from "../../styles/index.module.css";
-import CollapsiblePanel from "../CollapsiblePanel";
-import styles from "./index.module.css";
 
 const ACCEPTED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp"];
 
@@ -70,69 +69,46 @@ export default function OcrPanel() {
   };
 
   return (
-    <CollapsiblePanel
-      panel="ocr"
-      title={t("图片翻译")}
-      contentId="ocr-panel-content"
-    >
-      <div className={styles.btnCon}>
-        <div className={styles.targetLanguage}>
-          <label
-            className={styles.targetLanguageLabel}
-            htmlFor="ocr-target-language"
-          >
-            {t("目标语言")}
-          </label>
-          <select
-            id="ocr-target-language"
-            className={`${globalStyles.selectS} ${styles.targetLanguageSelect}`}
-            value={settings.ocrTargetLanguage}
-            onChange={(e) => dispatch(setOcrTargetLanguage(e.target.value))}
-          >
-            {languages.map((language) => (
-              <option key={language.code} value={language.code}>
-                {language.nativeName}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className={styles.actions}>
-          <button
-            type="button"
-            onClick={recognizeClipboardImage}
-            className={globalStyles.button}
-          >
-            {t("剪贴板")}
-          </button>
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className={globalStyles.button}
+    <>
+      <SectionCard title={t("图片来源")}>
+        <SelectField
+          label={t("目标语言")}
+          value={settings.ocrTargetLanguage}
+          onChange={(value) => dispatch(setOcrTargetLanguage(value))}
+          options={languages.map((language) => ({
+            value: language.code,
+            label: language.nativeName,
+          }))}
+        />
+        <div className="toolbar">
+          <Button onPress={recognizeClipboardImage}>{t("剪贴板")}</Button>
+          <Button
+            variant="secondary"
+            onPress={() => fileInputRef.current?.click()}
           >
             {t("文件选择")}
-          </button>
+          </Button>
           <input
             ref={fileInputRef}
             type="file"
             accept={ACCEPTED_IMAGE_TYPES.join(",")}
-            className={styles.fileInput}
+            hidden
             onChange={handleFileChange}
           />
         </div>
-      </div>
-      <div className={styles.logContainer}>
-        <textarea
-          style={{ width: "42%", height: "200px" }}
-          value={ocr}
-          readOnly
-        ></textarea>
-        ➡
-        <textarea
-          style={{ width: "42%", height: "200px" }}
-          value={trans}
-          readOnly
-        ></textarea>
-      </div>
-    </CollapsiblePanel>
+      </SectionCard>
+      <SectionCard title={t("翻译结果")}>
+        <div className="form-grid">
+          <TextField isReadOnly value={ocr}>
+            <Label>{t("原文")}</Label>
+            <TextArea rows={10} />
+          </TextField>
+          <TextField isReadOnly value={trans}>
+            <Label>{t("译文")}</Label>
+            <TextArea rows={10} />
+          </TextField>
+        </div>
+      </SectionCard>
+    </>
   );
 }

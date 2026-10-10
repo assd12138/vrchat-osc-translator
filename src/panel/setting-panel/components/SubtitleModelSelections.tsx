@@ -1,8 +1,8 @@
 import { useTranslation } from "react-i18next";
+import { SectionCard, SelectField } from "@/components/ui";
 import { languages } from "@/constants/language";
 import { useAppDispatch, useAppSelector } from "@/store/hook";
 import { setSubtitleTargetLanguage } from "@/store/settings";
-import styles from "../index.module.css";
 import ModelSelect from "./ModelSelect";
 
 export default function SubtitleModelSelections() {
@@ -13,27 +13,21 @@ export default function SubtitleModelSelections() {
   );
 
   return (
-    <section className={styles.apiChoices}>
-      <div className={styles.choiceHeading}>
-        <span>{t("字幕API配置")}</span>
-      </div>
-      <ModelSelect slot="subtitleTranscription" label={t("转写模型")} />
-      <ModelSelect slot="subtitleTranslation" label={t("翻译模型")} />
-      <label className={styles.selectionField}>
-        <span>{t("目标语言")}</span>
-        <select
+    <SectionCard title={t("字幕API配置")} hideHeading>
+      <div className="settings-rows">
+        <ModelSelect slot="subtitleTranscription" label={t("转写模型")} />
+        <ModelSelect slot="subtitleTranslation" label={t("翻译模型")} />
+        <SelectField
+          layout="row"
+          label={t("目标语言")}
           value={targetLanguage}
-          onChange={(event) =>
-            dispatch(setSubtitleTargetLanguage(event.target.value))
-          }
-        >
-          {languages.map((language) => (
-            <option key={language.code} value={language.code}>
-              {language.nativeName}
-            </option>
-          ))}
-        </select>
-      </label>
-    </section>
+          onChange={(value) => dispatch(setSubtitleTargetLanguage(value))}
+          options={languages.map((language) => ({
+            value: language.code,
+            label: language.nativeName,
+          }))}
+        />
+      </div>
+    </SectionCard>
   );
 }

@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { SelectField } from "@/components/ui";
 import {
   getEligibleProviderModels,
   isSelectionValid,
@@ -6,7 +7,6 @@ import {
 } from "@/store/api-config";
 import { useAppDispatch, useAppSelector } from "@/store/hook";
 import { setModelSelection } from "@/store/settings";
-import styles from "../index.module.css";
 
 const capabilityTranslationKeys = {
   audio: "语音",
@@ -43,42 +43,37 @@ export default function ModelSelect({
     !!selectedProvider.apiKey.trim() &&
     !!selectedModel?.modelId.trim();
   return (
-    <label className={styles.selectionField}>
-      <span>
-        {label}
-        {!selectionReady && (
-          <b className={styles.requiredMark} title={t("需要选择模型")}>
-            !
-          </b>
-        )}
-      </span>
-      <select
-        value={selected ? `${selected.providerUid}:${selected.modelUid}` : ""}
-        onChange={(e) => {
-          const [providerUid, modelUid] = e.target.value.split(":");
-          dispatch(
-            setModelSelection({
-              slot,
-              selection:
-                providerUid && modelUid ? { providerUid, modelUid } : null,
-            }),
-          );
-        }}
-      >
-        <option value="">{t("选择模型")}</option>
-        {getEligibleProviderModels(slot, config.providers).map(
-          ({ provider, models }) => (
-            <optgroup key={provider.uid} label={provider.identifier}>
-              {models.map((model) => (
-                <option key={model.uid} value={`${provider.uid}:${model.uid}`}>
-                  {model.modelId || t("未命名模型")}
-                </option>
-              ))}
-            </optgroup>
-          ),
-        )}
-      </select>
-    </label>
+    <SelectField
+      layout="row"
+      label={label}
+      isInvalid={!selectionReady}
+      description={!selectionReady ? t("需要选择模型") : undefined}
+      placeholder={t("选择模型")}
+      value={
+        selected ? `${selected.providerUid}:${selected.modelUid}` : "unselected"
+      }
+      onChange={(value) => {
+        const [providerUid, modelUid] = value.split(":");
+        dispatch(
+          setModelSelection({
+            slot,
+            selection:
+              providerUid && modelUid ? { providerUid, modelUid } : null,
+          }),
+        );
+      }}
+      options={[{ value: "unselected", label: t("选择模型") }]}
+      groups={getEligibleProviderModels(slot, config.providers).map(
+        ({ provider, models }) => ({
+          id: provider.uid,
+          label: provider.identifier,
+          options: models.map((model) => ({
+            value: `${provider.uid}:${model.uid}`,
+            label: model.modelId || t("未命名模型"),
+          })),
+        }),
+      )}
+    />
   );
 }
 

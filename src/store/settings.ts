@@ -11,6 +11,11 @@ import {
   type TranslationMode,
 } from "./api-config";
 import {
+  DEFAULT_PANEL_ORDER,
+  type PanelId,
+  sanitizePanelOrder,
+} from "./navigation";
+import {
   REDUX_STORAGE_KEY,
   REHYDRATE_KEYS,
 } from "./rehydrate/rehydrate-constant";
@@ -41,15 +46,6 @@ const getInitialOcrTargetLanguage = () => {
     : "zh";
 };
 
-export interface PanelExpansionState {
-  audio: boolean;
-  subtitleRecognition: boolean;
-  translation: boolean;
-  settings: boolean;
-  systemLog: boolean;
-  ocr: boolean;
-}
-
 export interface SettingState {
   /** Deepwork provider configuration. This is the only persisted API configuration. */
   apiConfig: ApiConfig;
@@ -58,7 +54,7 @@ export interface SettingState {
   selectedTranslationPromptId: string;
   language: string;
   ocrTargetLanguage: string;
-  panelExpansion: PanelExpansionState;
+  panelOrder: PanelId[];
   subtitleConfig: SubtitleConfig;
 }
 
@@ -74,14 +70,7 @@ export const initialState: SettingState = {
   language: "auto",
   ocrTargetLanguage: getInitialOcrTargetLanguage(),
   subtitleConfig: { ...DEFAULT_SUBTITLE_CONFIG },
-  panelExpansion: {
-    audio: true,
-    subtitleRecognition: true,
-    translation: true,
-    settings: true,
-    systemLog: true,
-    ocr: true,
-  },
+  panelOrder: [...DEFAULT_PANEL_ORDER],
 };
 
 const persistApiConfig = (state: SettingState) => {
@@ -235,20 +224,9 @@ const settingsSlice = createSlice({
       });
       redux_store(REHYDRATE_KEYS.SETTING_SUBTITLE_CONFIG, state.subtitleConfig);
     },
-    setPanelExpansion: (state, action: PayloadAction<PanelExpansionState>) => {
-      state.panelExpansion = {
-        ...initialState.panelExpansion,
-        ...action.payload,
-      };
-      redux_store(REHYDRATE_KEYS.SETTING_PANEL_EXPANSION, state.panelExpansion);
-    },
-    togglePanelExpansion: (
-      state,
-      action: PayloadAction<keyof PanelExpansionState>,
-    ) => {
-      const panel = action.payload;
-      state.panelExpansion[panel] = !state.panelExpansion[panel];
-      redux_store(REHYDRATE_KEYS.SETTING_PANEL_EXPANSION, state.panelExpansion);
+    setPanelOrder: (state, action: PayloadAction<PanelId[]>) => {
+      state.panelOrder = sanitizePanelOrder(action.payload);
+      redux_store(REHYDRATE_KEYS.SETTING_PANEL_ORDER, state.panelOrder);
     },
   },
 });
@@ -269,8 +247,7 @@ export const {
   setLanguage,
   setOcrTargetLanguage,
   setSubtitleConfig,
-  setPanelExpansion,
-  togglePanelExpansion,
+  setPanelOrder,
   hydrateApiConfig,
   reinit,
 } = settingsSlice.actions;

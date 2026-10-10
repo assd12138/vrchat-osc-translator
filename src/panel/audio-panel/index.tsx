@@ -1,3 +1,4 @@
+import { Button, Input, Label, TextField } from "@heroui/react";
 import { MicVAD } from "@ricky0123/vad-web";
 import { Microphone } from "decibri";
 import { useEffect, useRef, useState } from "react";
@@ -13,15 +14,13 @@ import {
   StreamTranslationProcessor,
   streamTranscription,
 } from "@/api/stream";
+import { SectionCard, SelectField } from "@/components/ui";
 import { isStreamModelType } from "@/store/api-config";
 import store from "@/store/store";
 import { loadMicDevices } from "@/utils";
 import { sendToVrcChat } from "@/utils/vrc-chat-queue";
-import globalStyles from "../../styles/index.module.css";
 import eventBus, { EventBusEvent } from "../../utils/event-bus";
-import CollapsiblePanel from "../CollapsiblePanel";
 import RecognitionStatus from "../RecognitionStatus";
-import styles from "./index.module.css";
 
 export default function AudioPanel() {
   const { t } = useTranslation();
@@ -233,61 +232,53 @@ export default function AudioPanel() {
   };
 
   return (
-    <CollapsiblePanel
-      panel="audio"
-      title={t("麦克风识别")}
-      icon="🎙️"
-      contentId="audio-panel-content"
-      collapseDisabled={recording || translating}
-    >
-      <div className={styles.buttongroup}>
-        <button type="button" onClick={start} className={globalStyles.button}>
-          {t("开始")}
-        </button>
-        <button type="button" onClick={stop} className={globalStyles.button}>
-          {t("停止")}
-        </button>
-      </div>
-      <div>
-        <select
-          disabled={recording}
-          className={globalStyles.selectS}
-          name="mic"
-          id="mic"
-          aria-label={t("麦克风")}
+    <>
+      <SectionCard
+        title={t("语音采集")}
+        description={t("语音翻译并发送至VRChat")}
+      >
+        <div className="toolbar">
+          <Button onPress={start}>{t("开始")}</Button>
+          <Button variant="secondary" onPress={stop}>
+            {t("停止")}
+          </Button>
+        </div>
+        <SelectField
+          label={t("麦克风")}
           value={deviceId ?? ""}
-          onChange={(event) => setDeviceId(event.target.value)}
-        >
-          {micDevices.map((device) => (
-            <option key={device.deviceId} value={device.deviceId}>
-              {device.label}
-            </option>
-          ))}
-        </select>
-      </div>
-      <RecognitionStatus recognizing={recording} speaking={speaking} />
-      <div className={styles.manualInput}>
-        <input
-          type="text"
-          className={globalStyles.input}
-          value={manualText}
-          onChange={(e) => setManualText(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              handleManualTranslate();
-            }
-          }}
-          placeholder={t("输入文本手动翻译")}
-          disabled={translating}
+          onChange={setDeviceId}
+          isDisabled={recording}
+          placeholder={t("麦克风")}
+          options={micDevices.map((device) => ({
+            value: device.deviceId,
+            label: device.label || t("麦克风"),
+          }))}
         />
-        <button
-          onClick={handleManualTranslate}
-          className={globalStyles.button}
-          disabled={translating || !manualText.trim()}
+        <RecognitionStatus recognizing={recording} speaking={speaking} />
+      </SectionCard>
+      <SectionCard title={t("手动翻译")}>
+        <TextField
+          isDisabled={translating}
+          value={manualText}
+          onChange={setManualText}
         >
-          {translating ? t("翻译中...") : t("翻译发送")}
-        </button>
-      </div>
-    </CollapsiblePanel>
+          <Input
+            placeholder={t("输入文本手动翻译")}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" && !event.nativeEvent.isComposing)
+                handleManualTranslate();
+            }}
+          />
+        </TextField>
+        <div className="toolbar">
+          <Button
+            onPress={handleManualTranslate}
+            isDisabled={translating || !manualText.trim()}
+          >
+            {translating ? t("翻译中...") : t("翻译发送")}
+          </Button>
+        </div>
+      </SectionCard>
+    </>
   );
 }

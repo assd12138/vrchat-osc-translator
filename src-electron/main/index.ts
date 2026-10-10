@@ -94,8 +94,13 @@ function registerProtocol() {
 
 function createMainWindow() {
   const options: BrowserWindowConstructorOptions = {
-    width: 450,
-    height: 600,
+    width: 1080,
+    height: 760,
+    minWidth: 800,
+    minHeight: 600,
+    titleBarStyle: "hidden",
+    trafficLightPosition: { x: 16, y: 16 },
+    backgroundColor: "#f7f8fa",
     autoHideMenuBar: true,
     title: "VRChat-Translator",
     webPreferences: {
@@ -104,6 +109,15 @@ function createMainWindow() {
   };
 
   mainWindow = new BrowserWindow(options);
+  const notifyWindowState = () => {
+    if (!mainWindow || mainWindow.isDestroyed()) return;
+    mainWindow.webContents.send("main-window:state", {
+      platform: process.platform,
+      maximized: mainWindow.isMaximized(),
+    });
+  };
+  mainWindow.on("maximize", notifyWindowState);
+  mainWindow.on("unmaximize", notifyWindowState);
 
   if (isDev) {
     // 开发环境加载Vite开发服务器

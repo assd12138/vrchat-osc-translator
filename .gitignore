@@ -30,6 +30,9 @@ release
 # Claude Code
 .claude/
 
+# codex
+.codex/
+
 stats.html
 
 #不上传C++编译结果文件

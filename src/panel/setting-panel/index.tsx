@@ -1,11 +1,11 @@
 import i18next from "i18next";
 import { useTranslation } from "react-i18next";
+import { SectionCard, SelectField } from "@/components/ui";
 import { useAppDispatch, useAppSelector } from "../../store/hook";
 import { setLanguage } from "../../store/settings";
-import globalStyles from "../../styles/index.module.css";
-import CollapsiblePanel from "../CollapsiblePanel";
+import TranslationPanel from "../translation-panel";
 import ModelSelections from "./components/ModelSelections";
-import ProviderSettings from "./components/ProviderSettings";
+import PromptSettings from "./components/PromptSettings";
 import SubtitleModelSelections from "./components/SubtitleModelSelections";
 
 export default function SettingPanel() {
@@ -19,27 +19,26 @@ export default function SettingPanel() {
   };
 
   return (
-    <CollapsiblePanel
-      panel="settings"
-      title={t("系统设置")}
-      icon="⚙️"
-      contentId="settings-panel-content"
-      actions={<ProviderSettings />}
-    >
-      <label className={globalStyles.labelS}>{t("应用语言")}</label>
-      <select
-        className={globalStyles.selectS}
-        value={settings.language}
-        onChange={(e) => handleLanguageChange(e.target.value)}
-      >
-        <option value="auto">Auto</option>
-        <option value="en">English</option>
-        <option value="zh">中文</option>
-        <option value="ja">日本語</option>
-        <option value="ko">한국어</option>
-      </select>
+    <>
+      <SectionCard title={t("系统设置")} hideHeading>
+        <SelectField
+          layout="row"
+          label={t("应用语言")}
+          value={settings.language}
+          onChange={handleLanguageChange}
+          options={[
+            { value: "auto", label: "Auto" },
+            { value: "en", label: "English" },
+            { value: "zh", label: "中文" },
+            { value: "ja", label: "日本語" },
+            { value: "ko", label: "한국어" },
+          ]}
+        />
+      </SectionCard>
       <ModelSelections />
       <SubtitleModelSelections />
-    </CollapsiblePanel>
+      <TranslationPanel />
+      <PromptSettings />
+    </>
   );
 }

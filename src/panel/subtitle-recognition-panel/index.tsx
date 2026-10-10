@@ -1,17 +1,15 @@
+import { Button, Label, ProgressBar } from "@heroui/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { createSubtitleRecognitionSession } from "@/api/subtitle-stream";
+import { SectionCard } from "@/components/ui";
 import invoke, { NATIVE_COMMAND } from "@/electron/ipc";
-import globalStyles from "@/styles/index.module.css";
 import {
   DisplayAudioUnavailableError,
   startDisplayAudioCapture,
 } from "@/utils/display-audio";
 import eventBus, { EventBusEvent } from "@/utils/event-bus";
-import styles from "../audio-panel/index.module.css";
-import CollapsiblePanel from "../CollapsiblePanel";
 import RecognitionStatus from "../RecognitionStatus";
-import panelStyles from "./index.module.css";
 
 type RecognitionPhase = "idle" | "starting" | "connecting" | "recognizing";
 
@@ -130,53 +128,46 @@ export default function SubtitleRecognitionPanel() {
   }, [finishCapture]);
 
   return (
-    <CollapsiblePanel
-      panel="subtitleRecognition"
-      title={t("字幕识别")}
-      icon="🔊"
-      contentId="subtitle-recognition-panel-content"
-      collapseDisabled={active}
+    <SectionCard
+      title={t("系统音频")}
+      description={t("识别系统音频并显示实时字幕")}
     >
-      <div className={styles.buttongroup}>
-        <button
-          type="button"
-          onClick={start}
-          className={globalStyles.button}
-          disabled={active}
-        >
+      <div className="toolbar">
+        <Button onPress={start} isDisabled={active}>
           {phase === "starting"
             ? t("启动识别中")
             : phase === "connecting"
               ? t("连接识别服务中")
               : t("开始")}
-        </button>
-        <button
-          type="button"
-          onClick={stop}
-          className={globalStyles.button}
-          disabled={!active}
-        >
+        </Button>
+        <Button variant="secondary" onPress={stop} isDisabled={!active}>
           {t("停止")}
-        </button>
-        <button
-          type="button"
-          onClick={openSubtitleWindow}
-          className={globalStyles.button}
-          disabled={!window.electronAPI}
+        </Button>
+        <Button
+          variant="outline"
+          onPress={openSubtitleWindow}
+          isDisabled={!window.electronAPI}
         >
           {t("打开字幕")}
-        </button>
+        </Button>
       </div>
       <RecognitionStatus
         recognizing={phase === "recognizing"}
         speaking={speaking}
       />
       {capturing && (
-        <label className={panelStyles.level}>
-          {t("音量")}
-          <meter min={0} max={1} value={audioLevel} />
-        </label>
+        <ProgressBar
+          value={audioLevel}
+          minValue={0}
+          maxValue={1}
+          aria-label={t("音量")}
+        >
+          <Label>{t("音量")}</Label>
+          <ProgressBar.Track>
+            <ProgressBar.Fill />
+          </ProgressBar.Track>
+        </ProgressBar>
       )}
-    </CollapsiblePanel>
+    </SectionCard>
   );
 }

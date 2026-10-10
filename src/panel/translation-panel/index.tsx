@@ -1,84 +1,74 @@
-import { useRef } from "react";
+import { Button, Chip, Label, Modal, TextArea, TextField } from "@heroui/react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useAppDispatch, useAppSelector } from "../../store/hook";
-import { setOutputTemplate } from "../../store/settings";
-import globalStyles from "../../styles/index.module.css";
-import { extractLanguagesFromTemplate } from "../../utils";
-import CollapsiblePanel from "../CollapsiblePanel";
-import PromptSettings from "../setting-panel/components/PromptSettings";
+import { SectionCard } from "@/components/ui";
+import { useAppDispatch, useAppSelector } from "@/store/hook";
+import { setOutputTemplate } from "@/store/settings";
+import { extractLanguagesFromTemplate } from "@/utils";
 import TranslationTemplateHelper from "../translation-template-helper";
-import styles from "./index.module.css";
 
 export default function TranslationPanel() {
   const dispatch = useAppDispatch();
   const { t } = useTranslation();
-  const dialogRef = useRef<HTMLDialogElement>(null);
+  const [open, setOpen] = useState(false);
   const outputTemplate = useAppSelector(
     (state) => state.settings.outputTemplate,
   );
-
-  const detectedLanguages = extractLanguagesFromTemplate(outputTemplate);
-
-  const handleTemplateChange = (template: string) => {
-    dispatch(setOutputTemplate(template));
-  };
-
-  const openDialog = () => {
-    dialogRef.current?.showModal();
-  };
-
-  const closeDialog = () => {
-    dialogRef.current?.close();
-  };
-
-  const handleTemplateConfirm = (template: string) => {
-    dispatch(setOutputTemplate(template));
-    closeDialog();
-  };
-
+  const detectedLanguages = useMemo(
+    () => extractLanguagesFromTemplate(outputTemplate),
+    [outputTemplate],
+  );
   return (
-    <CollapsiblePanel
-      panel="translation"
-      title={t("翻译设置")}
-      icon="🌐"
-      contentId="translation-panel-content"
-      actions={<PromptSettings />}
-    >
-      {/* Detected Languages Preview */}
-      <label className={globalStyles.labelS}>{t("检测到的语言")}</label>
-      <div className={styles.detectedLanguages}>
-        {detectedLanguages.length > 0 ? (
-          <textarea
-            disabled
-            className={styles.transTemplate}
-            value={detectedLanguages.join("|")}
-          />
+    <SectionCard title={t("翻译设置")} hideHeading>
+      <TextField
+        value={outputTemplate}
+        className="settings-template"
+        onChange={(value) => dispatch(setOutputTemplate(value))}
+      >
+        <div className="settings-template-heading">
+          <Label>{t("输出模板")}</Label>
+          <Button size="sm" variant="secondary" onPress={() => setOpen(true)}>
+            {t("模板生成器")}
+          </Button>
+        </div>
+        <TextArea rows={5} placeholder={t("模板placeholder")} />
+      </TextField>
+      <div className="toolbar">
+        <span className="text-muted">{t("检测到的语言")}</span>
+        {detectedLanguages.length ? (
+          detectedLanguages.map((code) => (
+            <Chip key={code} size="sm" variant="soft" color="accent">
+              <Chip.Label>{code}</Chip.Label>
+            </Chip>
+          ))
         ) : (
-          <span className={styles.warningText}>{t("未检测到语言占位符")}</span>
+          <span className="text-warning text-xs">
+            {t("未检测到语言占位符")}
+          </span>
         )}
       </div>
-
-      {/* Output Template Section */}
-      <label className={globalStyles.labelS}>{t("输出模板")}</label>
-      <textarea
-        style={{ height: "140px" }}
-        onChange={(e) => handleTemplateChange(e.target.value)}
-        value={outputTemplate}
-        className={styles.transTemplate}
-        placeholder={t("模板placeholder")}
-      ></textarea>
-      <button onClick={openDialog} className={styles.templateGeneratorButton}>
-        {t("模板生成器")}
-      </button>
-
-      {/* Template Helper Dialog */}
-      <dialog ref={dialogRef} className={styles.templateHelperDialog}>
-        <TranslationTemplateHelper
-          initialValue={detectedLanguages}
-          onConfirm={handleTemplateConfirm}
-          onCancel={closeDialog}
-        />
-      </dialog>
-    </CollapsiblePanel>
+      <Modal isOpen={open} onOpenChange={setOpen}>
+        <Modal.Backdrop>
+          <Modal.Container size="lg" scroll="inside">
+            <Modal.Dialog>
+              <Modal.CloseTrigger />
+              <Modal.Header>
+                <Modal.Heading>{t("模板生成器")}</Modal.Heading>
+              </Modal.Header>
+              <Modal.Body>
+                <TranslationTemplateHelper
+                  initialValue={detectedLanguages}
+                  onConfirm={(value) => {
+                    dispatch(setOutputTemplate(value));
+                    setOpen(false);
+                  }}
+                  onCancel={() => setOpen(false)}
+                />
+              </Modal.Body>
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
+      </Modal>
+    </SectionCard>
   );
 }

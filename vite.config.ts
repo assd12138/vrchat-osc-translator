@@ -1,4 +1,5 @@
 import path from "node:path";
+import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { codeInspectorPlugin } from "code-inspector-plugin";
 import { visualizer } from "rollup-plugin-visualizer";
@@ -9,6 +10,7 @@ import { viteStaticCopy } from "vite-plugin-static-copy";
 export default defineConfig({
   base: "./",
   plugins: [
+    tailwindcss(),
     codeInspectorPlugin({
       bundler: "vite",
     }),

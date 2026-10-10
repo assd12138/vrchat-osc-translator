@@ -2,6 +2,7 @@
 import { contextBridge, type IpcRendererEvent, ipcRenderer } from "electron";
 import type { SubtitleResult } from "../shared/subtitle.types";
 import { camelToSnake } from "../shared/utils";
+import type { WindowState } from "../shared/window.types";
 
 const ipcApi: Record<string, any> = {};
 // 定义要暴露的 API 函数名列表 (驼峰式)
@@ -10,6 +11,8 @@ const apiFunctions = [
   "send_to_vrc_chat",
   "get_local_service",
   "open_subtitle_window",
+  "get_window_state",
+  "control_window",
 ];
 
 // 动态生成 API 对象
@@ -61,4 +64,10 @@ ipcApi.stopSubtitleInteraction = () => {
   ipcRenderer.send("subtitle-window:interaction-stop");
 };
 
+ipcApi.onWindowState = (callback: (state: WindowState) => void) => {
+  const listener = (_event: IpcRendererEvent, state: WindowState) =>
+    callback(state);
+  ipcRenderer.on("main-window:state", listener);
+  return () => ipcRenderer.removeListener("main-window:state", listener);
+};
 contextBridge.exposeInMainWorld("electronAPI", ipcApi);

@@ -1,4 +1,8 @@
 import type { SubtitleResult } from "../../src-electron/shared/subtitle.types";
+import type {
+  WindowAction,
+  WindowState,
+} from "../../src-electron/shared/window.types";
 
 export type { SubtitleResult } from "../../src-electron/shared/subtitle.types";
 
@@ -23,6 +27,8 @@ export enum NATIVE_COMMAND {
   OPEN_EXTERNAL = "open_external",
   GET_LOCAL_SERVICE = "get_local_service",
   OPEN_SUBTITLE_WINDOW = "open_subtitle_window",
+  GET_WINDOW_STATE = "get_window_state",
+  CONTROL_WINDOW = "control_window",
 }
 
 interface CommandArgsMap {
@@ -30,12 +36,16 @@ interface CommandArgsMap {
   [NATIVE_COMMAND.OPEN_EXTERNAL]: OPEN_EXTERNAL_REQUEST;
   [NATIVE_COMMAND.GET_LOCAL_SERVICE]: undefined;
   [NATIVE_COMMAND.OPEN_SUBTITLE_WINDOW]: undefined;
+  [NATIVE_COMMAND.GET_WINDOW_STATE]: undefined;
+  [NATIVE_COMMAND.CONTROL_WINDOW]: { action: WindowAction };
 }
 
 interface CommandReturnMap {
   [NATIVE_COMMAND.SEND_TO_VRC_CHAT]: undefined;
   [NATIVE_COMMAND.OPEN_EXTERNAL]: undefined;
   [NATIVE_COMMAND.GET_LOCAL_SERVICE]: LocalService | null;
+  [NATIVE_COMMAND.GET_WINDOW_STATE]: WindowState;
+  [NATIVE_COMMAND.CONTROL_WINDOW]: undefined;
   [NATIVE_COMMAND.OPEN_SUBTITLE_WINDOW]:
     | undefined
     | { success: false; error: { message: string } };
@@ -65,6 +75,7 @@ type ElectronAPI = {
   startSubtitleDrag: () => void;
   startSubtitleResize: (edge: SubtitleResizeEdge) => void;
   stopSubtitleInteraction: () => void;
+  onWindowState: (callback: (state: WindowState) => void) => () => void;
 };
 
 export default function invoke<T extends NATIVE_COMMAND>(
@@ -75,5 +86,8 @@ export default function invoke<T extends NATIVE_COMMAND>(
     return Promise.reject(new Error("Electron preload API is unavailable"));
   }
 
-  return window.electronAPI[command](args);
+  const handler = window.electronAPI[command] as unknown as (
+    args: CommandArgsMap[T],
+  ) => Promise<CommandReturnMap[T]>;
+  return handler(args);
 }
