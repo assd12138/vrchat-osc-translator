@@ -88,10 +88,10 @@ export default function ProviderEditor({
       value: ModelType.AUDIO_TRANSCRIPTION,
       label: `${t("语音转写")} /audio/transcriptions`,
     },
-    {
-      value: ModelType.AUDIO_CPP_LIVE,
-      label: `${t("流式转写")}(audio.cpp) /audio/transcriptions/live`,
-    },
+    // {
+    //   value: ModelType.AUDIO_CPP_LIVE,
+    //   label: `${t("流式转写")}(audio.cpp) /audio/transcriptions/live`,
+    // },
     {
       value: ModelType.CHAT_COMPLETION,
       label: `${t("文本补全")} /chat/completions`,

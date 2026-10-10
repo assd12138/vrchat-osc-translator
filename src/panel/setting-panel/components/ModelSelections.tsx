@@ -37,11 +37,11 @@ export default function ModelSelections() {
           ]}
         />
         {config.translationMode === "direct" ? (
-          <ModelSelect slot="direct" label={t("直接翻译模型")} />
+          <ModelSelect slot="direct" label={t("语音直接翻译模型")} />
         ) : (
           <>
-            <ModelSelect slot="transcription" label={t("转写模型")} />
-            <ModelSelect slot="translation" label={t("翻译模型")} />
+            <ModelSelect slot="transcription" label={t("语音转写模型")} />
+            <ModelSelect slot="translation" label={t("语音翻译模型")} />
             {showBatch && (
               <Switch
                 className="settings-switch"
