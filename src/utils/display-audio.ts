@@ -9,11 +9,6 @@ export interface SubtitleAudioChunk {
   peak: number;
 }
 
-export interface DisplayAudioCapture {
-  sourceName: string;
-  stop: () => void;
-}
-
 export class DisplayAudioUnavailableError extends Error {
   constructor() {
     super("No live system audio track was returned");
@@ -27,13 +22,13 @@ interface DisplayAudioCaptureOptions {
   onError: (error: Error) => void;
 }
 
-/** 选择共享源，使用 Web Audio 重采样为 16 kHz 单声道 PCM，每 100ms 输出一块。 */
+/** 由 Electron 自动授权系统音频，重采样为 16 kHz 单声道 PCM，每 100ms 输出一块。 */
 export async function startDisplayAudioCapture({
   signal,
   onChunk,
   onEnded,
   onError,
-}: DisplayAudioCaptureOptions): Promise<DisplayAudioCapture> {
+}: DisplayAudioCaptureOptions): Promise<void> {
   if (signal.aborted) throw new DOMException("Capture cancelled", "AbortError");
   // getDisplayMedia 必须包含视频；保留视频轨以维持共享会话，但不解析画面。
   const stream = await navigator.mediaDevices.getDisplayMedia({
@@ -123,7 +118,6 @@ export async function startDisplayAudioCapture({
     if (!audioTracks.some((track) => track.readyState === "live")) {
       throw new DisplayAudioUnavailableError();
     }
-    return { sourceName: stream.getVideoTracks()[0]?.label || "", stop };
   } catch (error) {
     stop();
     throw error;

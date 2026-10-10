@@ -4,6 +4,7 @@ import {
   app,
   BrowserWindow,
   type BrowserWindowConstructorOptions,
+  desktopCapturer,
   net,
   protocol,
   session,
@@ -13,7 +14,6 @@ import {
   startLocalServiceDiscovery,
   stopLocalServiceDiscovery,
 } from "./utils/local-service-discovery";
-import { showScreenPicker } from "./utils/screen-picker";
 
 // 判断是否为开发环境
 const isDev = process.env.NODE_ENV === "development" || !app.isPackaged;
@@ -133,24 +133,35 @@ function focusMainWindow() {
   mainWindow.focus();
 }
 
-function registerScreenPickerHandler() {
-  // 拦截渲染进程的 getDisplayMedia 请求，弹出模态选择器让用户选择屏幕或窗口。
+function registerSystemAudioCaptureHandler() {
+  // 字幕只使用系统音频；视频源取第一个屏幕，以满足 getDisplayMedia 的要求。
   session.defaultSession.setDisplayMediaRequestHandler(
     async (request, callback) => {
-      if (!mainWindow || mainWindow.isDestroyed()) {
+      const owner = mainWindow;
+      if (
+        !owner ||
+        owner.isDestroyed() ||
+        request.frame !== owner.webContents.mainFrame ||
+        !request.audioRequested
+      ) {
         callback({});
         return;
       }
       try {
-        const result = await showScreenPicker(mainWindow, request.audioRequested);
-        if (result) {
-          callback({
-            video: result.source,
-            ...(result.shareAudio ? { audio: "loopback" as const } : {}),
-          });
-        } else {
+        const sources = await desktopCapturer.getSources({
+          types: ["screen"],
+          thumbnailSize: { width: 0, height: 0 },
+        });
+        const source = sources[0];
+        if (
+          !source ||
+          owner.isDestroyed() ||
+          request.frame !== owner.webContents.mainFrame
+        ) {
           callback({});
+          return;
         }
+        callback({ video: source, audio: "loopback" });
       } catch (err) {
         console.error("Display media handler error:", err);
         callback({});
@@ -178,7 +189,7 @@ if (!hasSingleInstanceLock) {
     startLocalServiceDiscovery();
     registerProtocol();
     createMainWindow();
-    registerScreenPickerHandler();
+    registerSystemAudioCaptureHandler();
 
     // 后端通过异步 spawn 启动，不让它进入窗口创建的首轮启动路径。
     setImmediate(startPackagedBackend);

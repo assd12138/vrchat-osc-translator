@@ -1,5 +1,6 @@
 import path from "node:path";
 import { BrowserWindow, type IpcMainEvent, ipcMain, screen } from "electron";
+import type { SubtitleResult } from "../../shared/subtitle.types";
 
 let subtitleWindow: BrowserWindow | null = null;
 
@@ -123,6 +124,19 @@ export async function showSubtitleWindow(owner: BrowserWindow): Promise<void> {
     if (!win.isDestroyed() && event.sender === win.webContents)
       stopInteraction();
   };
+  const forwardResult = (event: IpcMainEvent, result: SubtitleResult) => {
+    if (
+      win.isDestroyed() ||
+      event.sender !== owner.webContents ||
+      !result ||
+      typeof result.origin !== "string" ||
+      typeof result.translation !== "string"
+    ) {
+      return;
+    }
+    win.webContents.send("subtitle-window:result", result);
+  };
+  ipcMain.on("subtitle-window:result", forwardResult);
   ipcMain.on("subtitle-window:drag-start", startDrag);
   ipcMain.on("subtitle-window:resize-start", startResize);
   ipcMain.on("subtitle-window:interaction-stop", stopFromRenderer);
@@ -135,6 +149,7 @@ export async function showSubtitleWindow(owner: BrowserWindow): Promise<void> {
   win.once("closed", () => {
     clearInterval(hoverTimer);
     stopInteraction();
+    ipcMain.removeListener("subtitle-window:result", forwardResult);
     ipcMain.removeListener("subtitle-window:drag-start", startDrag);
     ipcMain.removeListener("subtitle-window:resize-start", startResize);
     ipcMain.removeListener(

@@ -41,6 +41,10 @@ export function createSubtitleRecognitionSession(
         translation: translatedText,
         targetLanguage,
       });
+      window.electronAPI?.sendSubtitleResult({
+        origin: originalText,
+        translation: translatedText,
+      });
     },
   });
 

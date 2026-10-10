@@ -2,6 +2,7 @@ import {
   type CSSProperties,
   useEffect,
   useLayoutEffect,
+  useReducer,
   useRef,
   useState,
 } from "react";
@@ -12,6 +13,7 @@ import unlockIcon from "@/images/unlock.svg";
 import { useAppSelector } from "@/store/hook";
 import styles from "./index.module.css";
 import StyleControls from "./StyleControls";
+import { initialSubtitleTextState, receiveSubtitleResult } from "./subtitle-text";
 import TransparencyControl from "./TransparencyControl";
 
 const RESIZE_EDGES: SubtitleResizeEdge[] = [
@@ -38,6 +40,8 @@ const RESIZE_CURSORS: Record<SubtitleResizeEdge, string> = {
 export default function SubtitlePanel() {
   const { t } = useTranslation();
   const config = useAppSelector((state) => state.settings.subtitleConfig);
+  const [{ confirmOriginText, confirmTranslationText, current }, receiveResult] =
+    useReducer(receiveSubtitleResult, initialSubtitleTextState);
   const [hovered, setHovered] = useState(false);
   const [locked, setLocked] = useState(false);
   const [transparencyOpen, setTransparencyOpen] = useState(false);
@@ -89,6 +93,7 @@ export default function SubtitlePanel() {
   }, []);
 
   useEffect(() => window.electronAPI?.onSubtitleHover(setHovered), []);
+  useEffect(() => window.electronAPI?.onSubtitleResult(receiveResult), []);
 
   useEffect(() => {
     const stop = () => {
@@ -170,12 +175,12 @@ export default function SubtitlePanel() {
     >
       <div className={styles.textRegion} ref={originalRegionRef}>
         <p className={styles.original}>
-          This is a preview of the original subtitle.
+          {`${confirmOriginText}\n${current?.origin ?? ""}`}
         </p>
       </div>
       <div className={styles.textRegion} ref={translatedRegionRef}>
         <p className={styles.translated}>
-          这是字幕译文的预览，按住黑色区域可以拖动窗口。
+          {`${confirmTranslationText}\n${current?.translation ?? ""}`}
         </p>
       </div>
       <div

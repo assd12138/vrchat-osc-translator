@@ -13,7 +13,7 @@ import CollapsiblePanel from "../CollapsiblePanel";
 import RecognitionStatus from "../RecognitionStatus";
 import panelStyles from "./index.module.css";
 
-type RecognitionPhase = "idle" | "selecting" | "connecting" | "recognizing";
+type RecognitionPhase = "idle" | "starting" | "connecting" | "recognizing";
 
 export default function SubtitleRecognitionPanel() {
   const { t } = useTranslation();
@@ -21,9 +21,7 @@ export default function SubtitleRecognitionPanel() {
   const mountedRef = useRef(true);
   const [phase, setPhase] = useState<RecognitionPhase>("idle");
   const [speaking, setSpeaking] = useState(false);
-  const [sourceName, setSourceName] = useState("");
   const [audioLevel, setAudioLevel] = useState(0);
-  const [audioSeconds, setAudioSeconds] = useState(0);
   const active = phase !== "idle";
   const capturing = phase === "connecting" || phase === "recognizing";
 
@@ -42,20 +40,15 @@ export default function SubtitleRecognitionPanel() {
     if (sessionRef.current) return;
     const controller = new AbortController();
     sessionRef.current = controller;
-    setPhase("selecting");
-    setSourceName("");
-    setAudioSeconds(0);
-    let collectedSeconds = 0;
+    setPhase("starting");
 
     try {
       // 配置校验同步完成，随后直接发起共享请求以保留点击的用户激活状态。
       const recognition = createSubtitleRecognitionSession(controller.signal);
-      const capture = await startDisplayAudioCapture({
+      await startDisplayAudioCapture({
         signal: controller.signal,
         onChunk: (chunk) => {
           if (sessionRef.current !== controller || !mountedRef.current) return;
-          collectedSeconds += chunk.pcm.byteLength / 2 / chunk.sampleRate;
-          setAudioSeconds(Math.floor(collectedSeconds));
           setAudioLevel(chunk.peak);
           setSpeaking(chunk.rms >= 0.006);
           try {
@@ -84,7 +77,6 @@ export default function SubtitleRecognitionPanel() {
       if (sessionRef.current !== controller || !mountedRef.current) {
         return;
       }
-      setSourceName(capture.sourceName);
       setPhase("connecting");
       await recognition.connect();
       if (sessionRef.current !== controller || !mountedRef.current) return;
@@ -152,8 +144,8 @@ export default function SubtitleRecognitionPanel() {
           className={globalStyles.button}
           disabled={active}
         >
-          {phase === "selecting"
-            ? t("选择共享源中")
+          {phase === "starting"
+            ? t("启动识别中")
             : phase === "connecting"
               ? t("连接识别服务中")
               : t("开始")}
@@ -179,15 +171,11 @@ export default function SubtitleRecognitionPanel() {
         recognizing={phase === "recognizing"}
         speaking={speaking}
       />
-      {(capturing || audioSeconds > 0) && (
-        <div className={panelStyles.captureInfo}>
-          {sourceName && <span>{t("共享源")}：{sourceName}</span>}
-          <label className={panelStyles.level}>
-            {t("音量")}
-            <meter min={0} max={1} value={audioLevel} />
-          </label>
-          <span>{t("已采集音频时长", { seconds: audioSeconds })}</span>
-        </div>
+      {capturing && (
+        <label className={panelStyles.level}>
+          {t("音量")}
+          <meter min={0} max={1} value={audioLevel} />
+        </label>
       )}
     </CollapsiblePanel>
   );

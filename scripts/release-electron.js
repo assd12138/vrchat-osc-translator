@@ -91,7 +91,6 @@ async function buildMainAndPreload() {
     format: "cjs",
     sourcemap: false,
     minify: true,
-    loader: { ".html": "text" },
   };
   await Promise.all([
     build({
@@ -103,11 +102,6 @@ async function buildMainAndPreload() {
       ...publicConfig,
       entryPoints: [path.join(srcPath, "./preload/index.ts")],
       outfile: path.join(distPath, "./preload/index.cjs"),
-    }),
-    build({
-      ...publicConfig,
-      entryPoints: [path.join(srcPath, "./preload/screen-picker.ts")],
-      outfile: path.join(distPath, "./preload/screen-picker.cjs"),
     }),
   ]);
 }

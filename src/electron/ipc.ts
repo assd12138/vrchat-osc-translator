@@ -1,3 +1,7 @@
+import type { SubtitleResult } from "../../src-electron/shared/subtitle.types";
+
+export type { SubtitleResult } from "../../src-electron/shared/subtitle.types";
+
 declare global {
   interface Window {
     electronAPI?: ElectronAPI;
@@ -55,6 +59,8 @@ type ElectronAPI = {
     arg: CommandArgsMap[K],
   ) => Promise<CommandReturnMap[K]>;
 } & {
+  sendSubtitleResult: (result: SubtitleResult) => void;
+  onSubtitleResult: (callback: (result: SubtitleResult) => void) => () => void;
   onSubtitleHover: (callback: (hovered: boolean) => void) => () => void;
   startSubtitleDrag: () => void;
   startSubtitleResize: (edge: SubtitleResizeEdge) => void;

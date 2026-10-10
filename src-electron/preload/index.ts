@@ -1,5 +1,6 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: 通用代码，真正的调用部分类型需要在渲染端约束 */
 import { contextBridge, type IpcRendererEvent, ipcRenderer } from "electron";
+import type { SubtitleResult } from "../shared/subtitle.types";
 import { camelToSnake } from "../shared/utils";
 
 const ipcApi: Record<string, any> = {};
@@ -34,6 +35,19 @@ ipcApi.onSubtitleHover = (callback: (hovered: boolean) => void) => {
   callback(subtitleHovered);
   return () => {
     ipcRenderer.removeListener("subtitle-window:hover", listener);
+  };
+};
+
+ipcApi.sendSubtitleResult = (result: SubtitleResult) => {
+  ipcRenderer.send("subtitle-window:result", result);
+};
+ipcApi.onSubtitleResult = (callback: (result: SubtitleResult) => void) => {
+  const listener = (_event: IpcRendererEvent, result: SubtitleResult) => {
+    callback(result);
+  };
+  ipcRenderer.on("subtitle-window:result", listener);
+  return () => {
+    ipcRenderer.removeListener("subtitle-window:result", listener);
   };
 };
 
