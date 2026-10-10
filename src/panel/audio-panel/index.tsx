@@ -1,4 +1,4 @@
-import { Button, Input, Label, TextField } from "@heroui/react";
+import { Button, Input, TextField } from "@heroui/react";
 import { MicVAD } from "@ricky0123/vad-web";
 import { Microphone } from "decibri";
 import { useEffect, useRef, useState } from "react";
