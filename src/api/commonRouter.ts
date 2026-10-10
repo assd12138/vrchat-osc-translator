@@ -24,7 +24,11 @@ export type ResolvedModel = { provider: ApiProvider; model: ApiModel };
 export const configurationError = (message: string): Error =>
   new Error(`Provider configuration error: ${message}`);
 
-const postChat = (resolved: ResolvedModel, body: object, signal?: AbortSignal) => {
+const postChat = (
+  resolved: ResolvedModel,
+  body: object,
+  signal?: AbortSignal,
+) => {
   let extraBody = {};
   if (
     isBehaviorActive(resolved.model.modelId, BEHAVIOR.THINKING_TYPE_DISABLED) ||
@@ -135,7 +139,10 @@ const translateWithTool = async (
       messages: [{ role: "user", content }],
       temperature: 0.7,
       tools: [generateTranslationTool(languages)],
-      tool_choice: { type: "function", function: { name: translationToolName } },
+      tool_choice: {
+        type: "function",
+        function: { name: translationToolName },
+      },
     },
     signal,
   );

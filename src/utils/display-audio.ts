@@ -32,7 +32,11 @@ export async function startDisplayAudioCapture({
   if (signal.aborted) throw new DOMException("Capture cancelled", "AbortError");
   // getDisplayMedia 必须包含视频；保留视频轨以维持共享会话，但不解析画面。
   const stream = await navigator.mediaDevices.getDisplayMedia({
-    video: { frameRate: { ideal: 1 }, width: { ideal: 320 }, height: { ideal: 180 } },
+    video: {
+      frameRate: { ideal: 1 },
+      width: { ideal: 320 },
+      height: { ideal: 180 },
+    },
     audio: {
       echoCancellation: false,
       noiseSuppression: false,
@@ -87,7 +91,10 @@ export async function startDisplayAudioCapture({
     signal.addEventListener("abort", stop, { once: true });
     for (const track of tracks) track.addEventListener("ended", handleEnded);
 
-    context = new AudioContext({ sampleRate: 16000, latencyHint: "interactive" });
+    context = new AudioContext({
+      sampleRate: 16000,
+      latencyHint: "interactive",
+    });
     const sampleRate = context.sampleRate;
     await context.audioWorklet.addModule(processorUrl);
     checkActive();
@@ -102,7 +109,12 @@ export async function startDisplayAudioCapture({
       event: MessageEvent<{ pcm: ArrayBuffer; rms: number; peak: number }>,
     ) => {
       if (!stopped) {
-        onChunk({ ...event.data, sampleRate, channels: 1, format: "pcm_s16le" });
+        onChunk({
+          ...event.data,
+          sampleRate,
+          channels: 1,
+          format: "pcm_s16le",
+        });
       }
     };
     processor.onprocessorerror = () => {

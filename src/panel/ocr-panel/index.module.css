@@ -1,6 +1,4 @@
-/* ============================================================
-   ocr-panel
-   ============================================================ */
+/* OCR controls and status */
 
 .btnCon {
   position: relative;
@@ -51,12 +49,6 @@
   margin-bottom: 0;
 }
 
-@media (max-width: 360px) {
-  .actions > button {
-    flex-basis: 100%;
-  }
-}
-
 .logContainer {
   position: relative;
   z-index: 2;
@@ -66,28 +58,14 @@
   flex-wrap: wrap;
   padding: 10px 12px;
   border-radius: var(--lg-radius-sm);
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  color: var(--lg-text-muted);
+  border: 1px solid #d9e0e8;
   font-size: 13px;
-}
-
-/* ---- Default theme ---- */
-[data-theme="default"] .logContainer {
   color: var(--lg-text-muted);
   background: #f5f7f9;
-  border-color: #d9e0e8;
 }
 
-/* ---- Hand-drawn theme ---- */
-[data-theme="hand-drawn"] .logContainer {
-  color: var(--lg-text-muted);
-  background: var(--lg-bg-1);
-  border: 1px solid var(--ink-light);
-  border-radius: 6px 8px 5px 7px;
-  box-shadow: 2px 3px 0 -1px rgba(45, 58, 71, 0.06);
-}
-
-[data-theme="hand-drawn"] .btnCon .button {
-  /* inherits from shared button */
+@media (max-width: 360px) {
+  .actions > button {
+    flex-basis: 100%;
+  }
 }

@@ -13,7 +13,10 @@ import unlockIcon from "@/images/unlock.svg";
 import { useAppSelector } from "@/store/hook";
 import styles from "./index.module.css";
 import StyleControls from "./StyleControls";
-import { initialSubtitleTextState, receiveSubtitleResult } from "./subtitle-text";
+import {
+  initialSubtitleTextState,
+  receiveSubtitleResult,
+} from "./subtitle-text";
 import TransparencyControl from "./TransparencyControl";
 
 const RESIZE_EDGES: SubtitleResizeEdge[] = [
@@ -40,8 +43,10 @@ const RESIZE_CURSORS: Record<SubtitleResizeEdge, string> = {
 export default function SubtitlePanel() {
   const { t } = useTranslation();
   const config = useAppSelector((state) => state.settings.subtitleConfig);
-  const [{ confirmOriginText, confirmTranslationText, current }, receiveResult] =
-    useReducer(receiveSubtitleResult, initialSubtitleTextState);
+  const [
+    { confirmOriginText, confirmTranslationText, current },
+    receiveResult,
+  ] = useReducer(receiveSubtitleResult, initialSubtitleTextState);
   const [hovered, setHovered] = useState(false);
   const [locked, setLocked] = useState(false);
   const [transparencyOpen, setTransparencyOpen] = useState(false);

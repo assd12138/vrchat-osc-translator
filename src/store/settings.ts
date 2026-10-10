@@ -21,8 +21,6 @@ import {
   sanitizeSubtitleConfig,
 } from "./subtitle-config";
 
-export type ThemePreference = "default" | "liquid-glass" | "hand-drawn";
-
 export const DEFAULT_TRANSLATION_PROMPT_ID = "default";
 export const DEFAULT_TRANSLATION_PROMPT_CONTENT =
   "Translate the text within the brackets into #target, without additional explanation and brackets it self, if the content is already in the target language, output the original text.\n\n[#text]";
@@ -60,7 +58,6 @@ export interface SettingState {
   selectedTranslationPromptId: string;
   language: string;
   ocrTargetLanguage: string;
-  theme: ThemePreference;
   panelExpansion: PanelExpansionState;
   subtitleConfig: SubtitleConfig;
 }
@@ -76,7 +73,6 @@ export const initialState: SettingState = {
   selectedTranslationPromptId: DEFAULT_TRANSLATION_PROMPT_ID,
   language: "auto",
   ocrTargetLanguage: getInitialOcrTargetLanguage(),
-  theme: "default",
   subtitleConfig: { ...DEFAULT_SUBTITLE_CONFIG },
   panelExpansion: {
     audio: true,
@@ -229,10 +225,6 @@ const settingsSlice = createSlice({
       state.ocrTargetLanguage = action.payload;
       redux_store(REHYDRATE_KEYS.SETTING_OCR_TARGET_LANGUAGE, action.payload);
     },
-    setTheme: (state, action: PayloadAction<ThemePreference>) => {
-      state.theme = action.payload;
-      redux_store(REHYDRATE_KEYS.SETTING_THEME, action.payload);
-    },
     setSubtitleConfig: (
       state,
       action: PayloadAction<Partial<SubtitleConfig>>,
@@ -276,7 +268,6 @@ export const {
   removeProvider,
   setLanguage,
   setOcrTargetLanguage,
-  setTheme,
   setSubtitleConfig,
   setPanelExpansion,
   togglePanelExpansion,

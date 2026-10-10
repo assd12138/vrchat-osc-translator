@@ -24,15 +24,15 @@ export function receiveSubtitleResult(
   result: SubtitleResult,
 ): SubtitleTextState {
   const { current } = state;
-  if (
-    !current ||
-    calculateAsrSimilarity(current.origin, result.origin) > 0.6
-  ) {
+  if (!current || calculateAsrSimilarity(current.origin, result.origin) > 0.6) {
     return { ...state, current: result };
   }
 
   return {
-    confirmOriginText: appendConfirmedText(state.confirmOriginText, current.origin),
+    confirmOriginText: appendConfirmedText(
+      state.confirmOriginText,
+      current.origin,
+    ),
     confirmTranslationText: appendConfirmedText(
       state.confirmTranslationText,
       current.translation,

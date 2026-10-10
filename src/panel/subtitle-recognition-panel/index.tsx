@@ -3,11 +3,11 @@ import { useTranslation } from "react-i18next";
 import { createSubtitleRecognitionSession } from "@/api/subtitle-stream";
 import invoke, { NATIVE_COMMAND } from "@/electron/ipc";
 import globalStyles from "@/styles/index.module.css";
-import eventBus, { EventBusEvent } from "@/utils/event-bus";
 import {
   DisplayAudioUnavailableError,
   startDisplayAudioCapture,
 } from "@/utils/display-audio";
+import eventBus, { EventBusEvent } from "@/utils/event-bus";
 import styles from "../audio-panel/index.module.css";
 import CollapsiblePanel from "../CollapsiblePanel";
 import RecognitionStatus from "../RecognitionStatus";

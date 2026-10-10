@@ -85,13 +85,10 @@ export class StreamTranslationProcessor {
       const translation = await Promise.race([
         this.options.translate(text, controller.signal),
         new Promise<never>((_, reject) => {
-          timeout = setTimeout(
-            () => {
-              controller.abort();
-              reject(new Error("Stream translation timed out"));
-            },
-            TRANSLATION_TIMEOUT_MS,
-          );
+          timeout = setTimeout(() => {
+            controller.abort();
+            reject(new Error("Stream translation timed out"));
+          }, TRANSLATION_TIMEOUT_MS);
         }),
       ]);
       if (!this.stopped) {

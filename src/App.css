@@ -1,131 +1,23 @@
-/* ============================================================
-   Liquid Glass · Global Stage
-   ------------------------------------------------------------
-   Pure CSS (no external assets). Layers:
-   1. Base dark canvas
-   2. Slowly drifting aurora light-blobs (animated radial gradients)
-   3. Fine grain/noise via layered subtle gradients
-   4. Scrollbar + form-control polish for native elements
-   5. prefers-reduced-motion safety net
-   ============================================================ */
-
+/* Default application palette and global controls */
 :root {
-  /* ---- Core palette (cool midnight) ---- */
-  --lg-bg-0: #05070d;
-  --lg-bg-1: #0a0e1a;
-  --lg-bg-2: #111726;
-
-  /* Glass surface tokens */
-  --glass-tint: 255, 255, 255; /* white tint */
-  --glass-alpha: 0.06; /* base fill */
-  --glass-alpha-hi: 0.12; /* hover/elevated */
-  --glass-border: 255, 255, 255;
-  --glass-border-alpha: 0.18;
-  --glass-highlight: 255, 255, 255;
-
-  /* Text scale */
-  --lg-text: rgba(240, 244, 255, 0.96);
-  --lg-text-muted: rgba(214, 222, 240, 0.62);
-  --lg-text-faint: rgba(200, 210, 232, 0.4);
-
-  /* Accent (a soft cyan→violet gradient is reused across UI) */
-  --lg-accent-1: #5eead4; /* teal */
-  --lg-accent-2: #818cf8; /* indigo */
-  --lg-accent-3: #c084fc; /* violet */
-
-  /* Status */
-  --lg-ok: #34d399;
-  --lg-warn: #fbbf24;
-  --lg-err: #f87171;
-
-  /* Radii */
-  --lg-radius: 18px;
-  --lg-radius-sm: 12px;
-  --lg-radius-pill: 999px;
-
-  /* Shadow */
-  --lg-shadow-soft:
-    0 1px 0 rgba(255, 255, 255, 0.06) inset,
-    0 10px 30px -12px rgba(0, 0, 0, 0.65);
-  --lg-shadow-pop:
-    0 1px 0 rgba(255, 255, 255, 0.1) inset,
-    0 20px 50px -15px rgba(0, 0, 0, 0.75);
-
-  /* Motion */
-  --lg-ease: cubic-bezier(0.22, 1, 0.36, 1);
-  --lg-fast: 160ms;
-  --lg-med: 280ms;
-  --lg-slow: 900ms;
-
-  color-scheme: dark;
-}
-
-/* ============================================================
-   Default theme — a quiet, opaque desktop utility surface
-   ============================================================ */
-:root[data-theme="default"] {
   --lg-bg-0: #f4f6f8;
   --lg-bg-1: #ffffff;
   --lg-bg-2: #e9edf2;
-  --glass-tint: 255, 255, 255;
-  --glass-alpha: 1;
-  --glass-alpha-hi: 1;
-  --glass-border: 213, 220, 229;
-  --glass-border-alpha: 1;
-  --glass-highlight: 255, 255, 255;
+
   --lg-text: #1f2937;
   --lg-text-muted: #526174;
   --lg-text-faint: #7b8796;
+
   --lg-accent-1: #1769c2;
   --lg-accent-2: #315fbd;
-  --lg-accent-3: #6755b8;
   --lg-ok: #16835d;
   --lg-warn: #a86600;
   --lg-err: #bd3636;
-  --lg-shadow-soft: 0 1px 2px rgba(15, 23, 42, 0.06);
-  --lg-shadow-pop: 0 6px 18px rgba(15, 23, 42, 0.1);
-  color-scheme: light;
-}
 
-/* ============================================================
-   Hand-drawn theme — warm paper + ink sketch lines
-   ============================================================ */
-:root[data-theme="hand-drawn"] {
-  /* Warm paper palette */
-  --lg-bg-0: #f5f1eb;
-  --lg-bg-1: #faf8f4;
-  --lg-bg-2: #efe9e1;
-  --paper-tint: 245, 241, 235;
-  --paper-alpha: 1;
-
-  /* Ink lines */
-  --ink-dark: #2d3a47;
-  --ink-medium: #4a5662;
-  --ink-light: #6b7a88;
-  --lg-text: #2d3a47;
-  --lg-text-muted: #4a5662;
-  --lg-text-faint: #6b7a88;
-
-  /* Hand-drawn accents (warm earth tones) */
-  --lg-accent-1: #6b5b3c;
-  --lg-accent-2: #8b7355;
-  --lg-accent-3: #a08968;
-  --lg-ok: #5a7a4a;
-  --lg-warn: #9b7038;
-  --lg-err: #a04545;
-
-  /* Irregular radii (slightly uneven) */
-  --lg-radius: 15px 17px 14px 16px;
-  --lg-radius-sm: 8px 10px 7px 9px;
+  --lg-radius: 18px;
+  --lg-radius-sm: 12px;
   --lg-radius-pill: 999px;
-
-  /* Paper shadows (lifted, slightly off-center) */
-  --lg-shadow-soft:
-    3px 4px 0 -1px rgba(45, 58, 71, 0.08), 5px 6px 0 -2px rgba(45, 58, 71, 0.05);
-  --lg-shadow-pop:
-    4px 5px 0 -1px rgba(45, 58, 71, 0.12),
-    7px 8px 0 -2px rgba(45, 58, 71, 0.08),
-    10px 11px 0 -3px rgba(45, 58, 71, 0.04);
+  --lg-shadow-soft: 0 1px 2px rgba(15, 23, 42, 0.06);
 
   color-scheme: light;
 }
@@ -141,18 +33,8 @@ html body {
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
-
   color: var(--lg-text);
-
-  /* Base vertical wash */
   background-color: var(--lg-bg-0);
-  background-image: linear-gradient(
-    180deg,
-    var(--lg-bg-1) 0%,
-    var(--lg-bg-0) 55%,
-    var(--lg-bg-2) 100%
-  );
-
   font-family:
     -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", "PingFang SC",
     "Hiragino Sans", "Microsoft YaHei", system-ui, sans-serif;
@@ -160,111 +42,6 @@ html body {
   text-rendering: optimizeLegibility;
 }
 
-:root[data-theme="default"] body {
-  color: var(--lg-text);
-  background-color: var(--lg-bg-0);
-  background-image: none;
-}
-
-:root[data-theme="hand-drawn"] body {
-  color: var(--lg-text);
-  background-color: var(--lg-bg-0);
-  background-image:
-/* Paper grain texture via subtle diagonal lines */
-    repeating-linear-gradient(
-      45deg,
-      transparent,
-      transparent 2px,
-      rgba(255, 252, 245, 0.02) 2px,
-      rgba(255, 252, 245, 0.02) 4px
-    ),
-    /* Subtle horizontal paper lines */
-    repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 18px,
-      rgba(45, 58, 71, 0.015) 18px,
-      rgba(45, 58, 71, 0.015) 19px
-    );
-}
-
-/* ---- Drifting aurora light-blobs (the "liquid" atmosphere) ---- */
-body::before {
-  content: "";
-  position: fixed;
-  inset: -20vmax;
-  z-index: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(
-      38vmax 38vmax at 18% 22%,
-      rgba(94, 234, 212, 0.18),
-      transparent 60%
-    ),
-    radial-gradient(
-      42vmax 42vmax at 82% 18%,
-      rgba(129, 140, 248, 0.2),
-      transparent 62%
-    ),
-    radial-gradient(
-      46vmax 46vmax at 70% 88%,
-      rgba(192, 132, 252, 0.16),
-      transparent 64%
-    ),
-    radial-gradient(
-      30vmax 30vmax at 12% 78%,
-      rgba(56, 189, 248, 0.12),
-      transparent 60%
-    );
-  filter: saturate(120%) blur(8px);
-  animation: lg-aurora 28s var(--lg-ease) infinite alternate;
-}
-
-/* ---- Fine grain/sheen overlay ---- */
-body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background-image:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, transparent 12%),
-    repeating-linear-gradient(
-      45deg,
-      rgba(255, 255, 255, 0.012) 0px,
-      rgba(255, 255, 255, 0.012) 1px,
-      transparent 1px,
-      transparent 3px
-    );
-  mix-blend-mode: overlay;
-  opacity: 0.55;
-}
-
-:root[data-theme="default"] body::before,
-:root[data-theme="default"] body::after {
-  content: none;
-  display: none;
-}
-
-:root[data-theme="hand-drawn"] body::before,
-:root[data-theme="hand-drawn"] body::after {
-  content: none;
-  display: none;
-}
-
-@keyframes lg-aurora {
-  0% {
-    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
-  }
-  50% {
-    transform: translate3d(-2%, 1.5%, 0) rotate(2deg) scale(1.04);
-  }
-  100% {
-    transform: translate3d(2.5%, -2%, 0) rotate(-2deg) scale(1.02);
-  }
-}
-
-/* ---- Stage container: keeps panels above the aurora ---- */
 .container {
   position: relative;
   z-index: 1;
@@ -273,111 +50,60 @@ body::after {
   max-width: 560px;
 }
 
-/* ============================================================
-   Scrollbars — thin, frosted, macOS-like
-   ============================================================ */
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+  scrollbar-color: #aeb8c5 #eef1f5;
 }
 
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
 }
+
 ::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.28),
-    rgba(255, 255, 255, 0.12)
-  );
-  border-radius: var(--lg-radius-pill);
-  border: 2px solid transparent;
-  background-clip: padding-box;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.42),
-    rgba(255, 255, 255, 0.2)
-  );
-  background-clip: padding-box;
-}
-
-:root[data-theme="default"] * {
-  scrollbar-color: #aeb8c5 #eef1f5;
-}
-
-:root[data-theme="default"] ::-webkit-scrollbar-track {
   background: #eef1f5;
 }
 
-:root[data-theme="default"] ::-webkit-scrollbar-thumb,
-:root[data-theme="default"] ::-webkit-scrollbar-thumb:hover {
+::-webkit-scrollbar-thumb,
+::-webkit-scrollbar-thumb:hover {
   background: #aeb8c5;
+  border-radius: var(--lg-radius-pill);
   border: 2px solid #eef1f5;
   background-clip: padding-box;
 }
 
-:root[data-theme="hand-drawn"] * {
-  scrollbar-color: var(--ink-medium) var(--lg-bg-1);
-}
-
-:root[data-theme="hand-drawn"] ::-webkit-scrollbar-track {
-  background: var(--lg-bg-1);
-}
-
-:root[data-theme="hand-drawn"] ::-webkit-scrollbar-thumb,
-:root[data-theme="hand-drawn"] ::-webkit-scrollbar-thumb:hover {
-  background: var(--ink-medium);
-  border: 2px solid var(--lg-bg-1);
-  border-radius: 6px 8px 5px 7px;
-  background-clip: padding-box;
-}
-
-/* ============================================================
-   Global native form-control polish (selects, inputs, textareas)
-   These complement the CSS-module classes; they target elements
-   so panels without explicit classes still inherit the look.
-   ============================================================ */
-input,
-textarea,
-select {
+/* Keep native controls consistent with controls styled by CSS modules. */
+:root input,
+:root textarea,
+:root select {
   font-family: inherit;
   color: var(--lg-text);
-  background-color: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background-color: #ffffff;
+  border: 1px solid #c8d1dc;
   border-radius: var(--lg-radius-sm);
-  transition:
-    border-color var(--lg-fast) var(--lg-ease),
-    box-shadow var(--lg-fast) var(--lg-ease),
-    background-color var(--lg-fast) var(--lg-ease);
+  box-shadow: none;
+  transition: none;
 }
 
-input::placeholder,
-textarea::placeholder {
-  color: var(--lg-text-faint);
+:root input::placeholder,
+:root textarea::placeholder {
+  color: #8792a1;
 }
 
-input:hover,
-textarea:hover,
-select:hover {
-  border-color: rgba(255, 255, 255, 0.24);
-  background-color: rgba(255, 255, 255, 0.06);
+:root input:hover,
+:root textarea:hover,
+:root select:hover {
+  background-color: #ffffff;
+  border-color: #9facbb;
 }
 
-input:focus,
-textarea:focus,
-select:focus {
+:root input:focus,
+:root textarea:focus,
+:root select:focus {
   outline: none;
-  border-color: rgba(129, 140, 248, 0.65);
-  background-color: rgba(255, 255, 255, 0.08);
-  box-shadow:
-    0 0 0 3px rgba(129, 140, 248, 0.18),
-    0 0 0 1px rgba(129, 140, 248, 0.35) inset;
+  background-color: #ffffff;
+  border-color: var(--lg-accent-1);
+  box-shadow: 0 0 0 3px rgba(23, 105, 194, 0.16);
 }
 
 input:disabled,
@@ -388,13 +114,12 @@ select:disabled {
   filter: saturate(0.6);
 }
 
-select option {
-  background-color: var(--lg-bg-2);
+:root select option {
   color: var(--lg-text);
+  background-color: #ffffff;
 }
 
-/* Checkboxes: a quiet glass pill, accent-tinted when checked */
-input[type="checkbox"] {
+:root input[type="checkbox"] {
   appearance: none;
   -webkit-appearance: none;
   width: 18px;
@@ -403,175 +128,34 @@ input[type="checkbox"] {
   display: inline-grid;
   place-content: center;
   cursor: pointer;
-  background-color: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  transition:
-    background-color var(--lg-fast) var(--lg-ease),
-    border-color var(--lg-fast) var(--lg-ease);
+  background-color: #ffffff;
+  border: 1px solid #aeb9c7;
+  box-shadow: none;
+  transition: none;
 }
-input[type="checkbox"]::before {
+
+:root input[type="checkbox"]::before {
   content: "";
   width: 10px;
   height: 10px;
   transform: scale(0);
-  transition: transform var(--lg-fast) var(--lg-ease);
   border-radius: 3px;
-  background: linear-gradient(135deg, var(--lg-accent-1), var(--lg-accent-2));
-  box-shadow: 0 0 8px rgba(94, 234, 212, 0.6);
-}
-input[type="checkbox"]:checked {
-  background-color: rgba(129, 140, 248, 0.18);
-  border-color: rgba(129, 140, 248, 0.55);
-}
-input[type="checkbox"]:checked::before {
-  transform: scale(1);
-}
-
-/* ---- Global anchor/link touch-up ---- */
-a {
-  color: var(--lg-accent-1);
-  transition: color var(--lg-fast) var(--lg-ease);
-}
-
-:root[data-theme="default"] input,
-:root[data-theme="default"] textarea,
-:root[data-theme="default"] select {
-  color: var(--lg-text);
-  background-color: #ffffff;
-  border-color: #c8d1dc;
-  box-shadow: none;
-  transition: none;
-}
-
-:root[data-theme="default"] input::placeholder,
-:root[data-theme="default"] textarea::placeholder {
-  color: #8792a1;
-}
-
-:root[data-theme="default"] input:hover,
-:root[data-theme="default"] textarea:hover,
-:root[data-theme="default"] select:hover {
-  background-color: #ffffff;
-  border-color: #9facbb;
-}
-
-:root[data-theme="default"] input:focus,
-:root[data-theme="default"] textarea:focus,
-:root[data-theme="default"] select:focus {
-  background-color: #ffffff;
-  border-color: var(--lg-accent-1);
-  box-shadow: 0 0 0 3px rgba(23, 105, 194, 0.16);
-}
-
-:root[data-theme="default"] select option {
-  color: var(--lg-text);
-  background-color: #ffffff;
-}
-
-:root[data-theme="default"] input[type="checkbox"] {
-  background-color: #ffffff;
-  border-color: #aeb9c7;
-  box-shadow: none;
-  transition: none;
-}
-
-:root[data-theme="default"] input[type="checkbox"]::before {
   background: var(--lg-accent-1);
-  box-shadow: none;
-  transition: none;
 }
 
-:root[data-theme="default"] input[type="checkbox"]:checked {
+:root input[type="checkbox"]:checked {
   background-color: #e8f1fc;
   border-color: var(--lg-accent-1);
 }
 
-:root[data-theme="default"] a {
-  color: var(--lg-accent-1);
-  transition: none;
-}
-
-/* ---- Hand-drawn form controls ---- */
-:root[data-theme="hand-drawn"] input,
-:root[data-theme="hand-drawn"] textarea,
-:root[data-theme="hand-drawn"] select {
-  color: var(--lg-text);
-  background-color: var(--lg-bg-1);
-  border: 1.5px solid var(--ink-medium);
-  border-radius: 5px 7px 6px 8px;
-  box-shadow: none;
-  transition: none;
-}
-
-:root[data-theme="hand-drawn"] input::placeholder,
-:root[data-theme="hand-drawn"] textarea::placeholder {
-  color: var(--lg-text-faint);
-}
-
-:root[data-theme="hand-drawn"] input:hover,
-:root[data-theme="hand-drawn"] textarea:hover,
-:root[data-theme="hand-drawn"] select:hover {
-  background-color: var(--lg-bg-1);
-  border-color: var(--ink-dark);
-}
-
-:root[data-theme="hand-drawn"] input:focus,
-:root[data-theme="hand-drawn"] textarea:focus,
-:root[data-theme="hand-drawn"] select:focus {
-  background-color: var(--lg-bg-1);
-  border-color: var(--ink-dark);
-  box-shadow: 2px 2px 0 -1px rgba(45, 58, 71, 0.1);
-}
-
-:root[data-theme="hand-drawn"] select {
-  border-radius: 5px 7px 6px 8px;
-}
-
-:root[data-theme="hand-drawn"] select option {
-  color: var(--lg-text);
-  background-color: var(--lg-bg-1);
-}
-
-:root[data-theme="hand-drawn"] input[type="checkbox"] {
-  background-color: var(--lg-bg-1);
-  border: 1.5px solid var(--ink-medium);
-  border-radius: 4px 6px 3px 5px;
-  box-shadow: none;
-  transition: none;
-}
-
-:root[data-theme="hand-drawn"] input[type="checkbox"]::before {
-  content: "";
-  width: 8px;
-  height: 8px;
-  transform: scale(0);
-  transition: none;
-  border-radius: 1px;
-  background: var(--lg-accent-1);
-  box-shadow: none;
-}
-
-:root[data-theme="hand-drawn"] input[type="checkbox"]:checked {
-  background-color: var(--lg-bg-1);
-  border-color: var(--ink-dark);
-}
-
-:root[data-theme="hand-drawn"] input[type="checkbox"]:checked::before {
+:root input[type="checkbox"]:checked::before {
   transform: scale(1);
-  /* Hand-drawn checkmark via SVG */
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 12 12'><path d='M2 6c1 1.5 3 3 5 4' stroke='%236b5b3c' stroke-width='2' stroke-linecap='round' fill='none'/><path d='M7 4c1 1.5 2 3 3 4' stroke='%236b5b3c' stroke-width='2' stroke-linecap='round' fill='none' stroke-dasharray='1 1'/></svg>");
 }
 
-:root[data-theme="hand-drawn"] a {
+:root a {
   color: var(--lg-accent-1);
-  text-decoration-color: var(--ink-light);
-  text-underline-offset: 2px;
-  transition: none;
 }
 
-/* ============================================================
-   Reduced motion: freeze the aurora, keep everything legible
-   ============================================================ */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -580,22 +164,5 @@ a {
     animation-iteration-count: 1;
     transition-duration: 0.001ms;
     scroll-behavior: auto;
-  }
-  body::before {
-    animation: none;
-  }
-}
-
-/* ============================================================
-   Fallback: if backdrop-filter is unsupported, lift the opacity
-   so glass surfaces remain readable.
-   ============================================================ */
-@supports not (
-    (backdrop-filter: blur(10px)) or
-    (-webkit-backdrop-filter: blur(10px))
-  ) {
-  :root:not([data-theme="default"]) {
-    --glass-alpha: 0.2;
-    --glass-alpha-hi: 0.3;
   }
 }

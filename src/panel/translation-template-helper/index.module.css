@@ -1,7 +1,4 @@
-/* ============================================================
-   translation-template-helper — full glass table + actions
-   Lives inside the <dialog> (already a glass modal).
-   ============================================================ */
+/* Translation template helper table and actions */
 
 .container {
   position: relative;
@@ -12,202 +9,55 @@
   padding: 18px 18px 16px;
   overflow-y: auto;
   box-sizing: border-box;
-
-  /* helper sits inside dialog; wrap its own glass so table scrolls */
   border-radius: var(--lg-radius);
-  background: linear-gradient(
-    135deg,
-    rgba(var(--glass-tint), var(--glass-alpha-hi)),
-    rgba(var(--glass-tint), var(--glass-alpha))
-  );
-  border: 1px solid rgba(var(--glass-border), var(--glass-border-alpha));
-  box-shadow: var(--lg-shadow-soft);
-  -webkit-backdrop-filter: blur(26px) saturate(160%);
-  backdrop-filter: blur(26px) saturate(160%);
+  border: 1px solid #cfd7e1;
+  background: #ffffff;
+  box-shadow: none;
 }
 
-/* ---- Action buttons (semantic, glassy) ---- */
-.closeButton,
-.cancelButton,
+.closeButton {
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: var(--lg-radius-pill);
+  border: 1px solid #bd3636;
+  margin-bottom: 14px;
+  align-self: flex-start;
+  box-shadow: none;
+  transition: none;
+  color: #ffffff;
+  background: #bd3636;
+}
+
+.cancelButton {
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: var(--lg-radius-pill);
+  border: 1px solid #bd3636;
+  box-shadow: none;
+  transition: none;
+  color: #ffffff;
+  background: #bd3636;
+}
+
 .confirmButton {
   padding: 8px 18px;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   border-radius: var(--lg-radius-pill);
-  transition:
-    transform var(--lg-fast) var(--lg-ease),
-    box-shadow var(--lg-fast) var(--lg-ease),
-    filter var(--lg-fast) var(--lg-ease);
-}
-.closeButton,
-.cancelButton {
-  color: #fff;
-  border: 1px solid rgba(248, 113, 113, 0.5);
-  background: linear-gradient(
-    180deg,
-    rgba(248, 113, 113, 0.32),
-    rgba(248, 113, 113, 0.14)
-  );
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.18) inset;
-}
-.closeButton:hover,
-.cancelButton:hover {
-  transform: translateY(-1px);
-  filter: brightness(1.1);
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.25) inset,
-    0 10px 22px -10px rgba(248, 113, 113, 0.6);
-}
-.confirmButton {
-  color: #04110d;
-  border: 1px solid rgba(94, 234, 212, 0.6);
-  background: linear-gradient(135deg, var(--lg-accent-1), var(--lg-accent-2));
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.4) inset,
-    0 10px 22px -10px rgba(94, 234, 212, 0.6);
-}
-.confirmButton:hover {
-  transform: translateY(-1px);
-  filter: brightness(1.08);
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.5) inset,
-    0 14px 28px -10px rgba(129, 140, 248, 0.7);
-}
-.confirmButton:focus-visible,
-.cancelButton:focus-visible,
-.closeButton:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.3);
-}
-
-/* ---- Table: dark glass grid ---- */
-.table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  font-size: 13px;
-  border-radius: var(--lg-radius-sm);
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(0, 0, 0, 0.18);
-}
-
-.headerRow {
-  /* applied on <tr> */
-  background: linear-gradient(
-    180deg,
-    rgba(129, 140, 248, 0.2),
-    rgba(129, 140, 248, 0.06)
-  );
-}
-
-.checkboxCell,
-.headerCell,
-.codeCell,
-.dataCell,
-.centerCell {
-  padding: 8px 10px;
-  text-align: left;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  color: var(--lg-text-muted);
-}
-
-.checkboxCell {
-  width: 50px;
-  text-align: center;
-}
-.codeCell {
-  width: 110px;
-  font-family: ui-monospace, Menlo, monospace;
-  color: var(--lg-text);
-}
-.centerCell {
-  text-align: center;
-}
-
-.headerCell {
-  font-weight: 700;
-  color: var(--lg-text);
-  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
-}
-
-.table tbody tr:last-child td {
-  border-bottom: none;
-}
-
-/* Row states */
-.rowEven,
-.rowOdd {
-  cursor: pointer;
-  transition: background-color var(--lg-fast) var(--lg-ease);
-}
-.rowEven {
-  background: rgba(255, 255, 255, 0.015);
-}
-.rowOdd {
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.rowEven:hover,
-.rowOdd:hover {
-  background: rgba(129, 140, 248, 0.12);
-}
-
-.rowSelected {
-  cursor: pointer;
-  background: linear-gradient(
-    180deg,
-    rgba(94, 234, 212, 0.2),
-    rgba(129, 140, 248, 0.14)
-  );
-  box-shadow: inset 3px 0 0 var(--lg-accent-1);
-}
-.rowSelected:hover {
-  background: linear-gradient(
-    180deg,
-    rgba(94, 234, 212, 0.26),
-    rgba(129, 140, 248, 0.18)
-  );
-}
-
-/* ---- Footer button group ---- */
-.buttonGroup {
-  margin-top: 16px;
-  display: flex;
-  gap: 10px;
-}
-
-.closeButton {
-  margin-bottom: 14px;
-  align-self: flex-start;
-}
-
-/* ---- Default theme ---- */
-[data-theme="default"] .container {
-  background: #ffffff;
-  border-color: #cfd7e1;
-  box-shadow: none;
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
-}
-
-[data-theme="default"] .closeButton,
-[data-theme="default"] .cancelButton,
-[data-theme="default"] .confirmButton {
+  border: 1px solid var(--lg-accent-1);
   box-shadow: none;
   transition: none;
-}
-
-[data-theme="default"] .closeButton,
-[data-theme="default"] .cancelButton {
   color: #ffffff;
-  background: #bd3636;
-  border-color: #bd3636;
+  background: var(--lg-accent-1);
 }
 
-[data-theme="default"] .closeButton:hover,
-[data-theme="default"] .cancelButton:hover {
+.closeButton:hover,
+.cancelButton:hover {
   background: #a92e2e;
   border-color: #a92e2e;
   box-shadow: none;
@@ -215,13 +65,7 @@
   transform: none;
 }
 
-[data-theme="default"] .confirmButton {
-  color: #ffffff;
-  background: var(--lg-accent-1);
-  border-color: var(--lg-accent-1);
-}
-
-[data-theme="default"] .confirmButton:hover {
+.confirmButton:hover {
   background: #115aa7;
   border-color: #115aa7;
   box-shadow: none;
@@ -229,176 +73,104 @@
   transform: none;
 }
 
-[data-theme="default"] .confirmButton:focus-visible,
-[data-theme="default"] .cancelButton:focus-visible,
-[data-theme="default"] .closeButton:focus-visible {
+.confirmButton:focus-visible,
+.cancelButton:focus-visible,
+.closeButton:focus-visible {
+  outline: none;
   box-shadow: 0 0 0 3px rgba(23, 105, 194, 0.2);
 }
 
-[data-theme="default"] .table {
-  border-color: #d1d9e3;
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+  border-radius: var(--lg-radius-sm);
+  overflow: hidden;
+  border: 1px solid #d1d9e3;
   background: #ffffff;
 }
 
-[data-theme="default"] .headerRow {
+.headerRow {
   background: #edf3f8;
 }
 
-[data-theme="default"] .checkboxCell,
-[data-theme="default"] .headerCell,
-[data-theme="default"] .codeCell,
-[data-theme="default"] .dataCell,
-[data-theme="default"] .centerCell {
+.checkboxCell {
+  padding: 8px 10px;
+  border-bottom: 1px solid #e0e6ed;
+  width: 50px;
+  text-align: center;
   color: var(--lg-text-muted);
-  border-bottom-color: #e0e6ed;
 }
 
-[data-theme="default"] .codeCell,
-[data-theme="default"] .headerCell {
+.headerCell {
+  padding: 8px 10px;
+  text-align: left;
+  border-bottom: 1px solid #e0e6ed;
+  font-weight: 700;
   color: var(--lg-text);
   text-shadow: none;
 }
 
-[data-theme="default"] .rowEven {
+.codeCell {
+  padding: 8px 10px;
+  text-align: left;
+  border-bottom: 1px solid #e0e6ed;
+  width: 110px;
+  font-family: ui-monospace, Menlo, monospace;
+  color: var(--lg-text);
+  text-shadow: none;
+}
+
+.dataCell {
+  padding: 8px 10px;
+  text-align: left;
+  border-bottom: 1px solid #e0e6ed;
+  color: var(--lg-text-muted);
+}
+
+.centerCell {
+  padding: 8px 10px;
+  border-bottom: 1px solid #e0e6ed;
+  text-align: center;
+  color: var(--lg-text-muted);
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.rowEven {
+  cursor: pointer;
   background: #ffffff;
-}
-
-[data-theme="default"] .rowOdd {
-  background: #f7f9fb;
-}
-
-[data-theme="default"] .rowEven:hover,
-[data-theme="default"] .rowOdd:hover {
-  background: #eef5fc;
-}
-
-[data-theme="default"] .rowEven,
-[data-theme="default"] .rowOdd,
-[data-theme="default"] .rowSelected {
   transition: none;
 }
 
-[data-theme="default"] .rowSelected,
-[data-theme="default"] .rowSelected:hover {
+.rowOdd {
+  cursor: pointer;
+  background: #f7f9fb;
+  transition: none;
+}
+
+.rowEven:hover,
+.rowOdd:hover {
+  background: #eef5fc;
+}
+
+.rowSelected {
+  cursor: pointer;
+  transition: none;
   background: #e3f0fc;
   box-shadow: inset 3px 0 0 var(--lg-accent-1);
 }
 
-/* ---- Hand-drawn theme ---- */
-[data-theme="hand-drawn"] .container {
-  background: var(--lg-bg-1);
-  border: 1.5px solid var(--ink-medium);
-  border-radius: 10px 12px 8px 11px;
-  box-shadow: 4px 5px 0 -2px rgba(45, 58, 71, 0.1);
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
-}
-
-[data-theme="hand-drawn"] .closeButton,
-[data-theme="hand-drawn"] .cancelButton,
-[data-theme="hand-drawn"] .confirmButton {
-  box-shadow: 2px 3px 0 -1px rgba(45, 58, 71, 0.1);
-  transition: none;
-}
-
-[data-theme="hand-drawn"] .closeButton,
-[data-theme="hand-drawn"] .cancelButton {
-  color: var(--lg-bg-1);
-  background: var(--lg-err);
-  border: 1.5px solid #8a3535;
-  border-radius: 8px 10px 7px 9px;
-}
-
-[data-theme="hand-drawn"] .closeButton:hover,
-[data-theme="hand-drawn"] .cancelButton:hover {
-  background: #8a3535;
-  border-color: #7a2525;
-  box-shadow: 3px 4px 0 -1px rgba(160, 69, 69, 0.2);
-  filter: none;
-  transform: none;
-}
-
-[data-theme="hand-drawn"] .confirmButton {
-  color: var(--lg-bg-1);
-  background: var(--lg-accent-1);
-  border: 1.5px solid var(--lg-accent-2);
-  border-radius: 10px 12px 9px 11px;
-}
-
-[data-theme="hand-drawn"] .confirmButton:hover {
-  background: var(--lg-accent-2);
-  border-color: var(--lg-accent-3);
-  box-shadow: 3px 4px 0 -1px rgba(107, 91, 60, 0.2);
-  filter: none;
-  transform: none;
-}
-
-[data-theme="hand-drawn"] .confirmButton:focus-visible,
-[data-theme="hand-drawn"] .cancelButton:focus-visible,
-[data-theme="hand-drawn"] .closeButton:focus-visible {
-  box-shadow: 2px 2px 0 0 rgba(45, 58, 71, 0.15);
-}
-
-[data-theme="hand-drawn"] .table {
-  border: 1.5px solid var(--ink-medium);
-  border-radius: 6px 8px 5px 7px;
-  background: var(--lg-bg-1);
-  box-shadow: 2px 3px 0 -1px rgba(45, 58, 71, 0.08);
-}
-
-[data-theme="hand-drawn"] .headerRow {
-  background: linear-gradient(90deg, var(--lg-bg-2), var(--lg-bg-1));
-  border-bottom: 1.5px solid var(--ink-light);
-}
-
-[data-theme="hand-drawn"] .checkboxCell,
-[data-theme="hand-drawn"] .headerCell,
-[data-theme="hand-drawn"] .codeCell,
-[data-theme="hand-drawn"] .dataCell,
-[data-theme="hand-drawn"] .centerCell {
-  color: var(--lg-text-muted);
-  border-bottom: 1px dashed rgba(107, 122, 136, 0.25);
-}
-
-[data-theme="hand-drawn"] .checkboxCell {
-  border-radius: 4px 6px 3px 5px;
-}
-
-[data-theme="hand-drawn"] .codeCell,
-[data-theme="hand-drawn"] .headerCell {
-  color: var(--ink-dark);
-  font-weight: 600;
-}
-
-[data-theme="hand-drawn"] .rowEven {
-  background: var(--lg-bg-1);
-}
-
-[data-theme="hand-drawn"] .rowOdd {
-  background: rgba(245, 241, 235, 0.6);
-}
-
-[data-theme="hand-drawn"] .rowEven:hover,
-[data-theme="hand-drawn"] .rowOdd:hover {
-  background: rgba(245, 241, 235, 0.85);
-}
-
-[data-theme="hand-drawn"] .rowEven,
-[data-theme="hand-drawn"] .rowOdd,
-[data-theme="hand-drawn"] .rowSelected {
-  transition: none;
-}
-
-[data-theme="hand-drawn"] .rowSelected,
-[data-theme="hand-drawn"] .rowSelected:hover {
-  background: rgba(235, 231, 225, 0.9);
+.rowSelected:hover {
+  background: #e3f0fc;
   box-shadow: inset 3px 0 0 var(--lg-accent-1);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .rowEven,
-  .rowOdd,
-  .rowSelected {
-    transition: none;
-  }
+.buttonGroup {
+  margin-top: 16px;
+  display: flex;
+  gap: 10px;
 }

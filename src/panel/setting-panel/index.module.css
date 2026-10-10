@@ -10,13 +10,9 @@
   gap: 10px;
   margin-top: 18px;
   padding: 14px;
-  border: 1px solid rgba(124, 145, 180, 0.22);
+  border: 1px solid #d7e0eb;
   border-radius: 14px;
-  background: linear-gradient(
-    135deg,
-    rgba(87, 109, 170, 0.13),
-    rgba(255, 255, 255, 0.025)
-  );
+  background: #fff;
 }
 .choiceHeading,
 .modelsHeader,
@@ -50,11 +46,11 @@
   width: 100%;
   min-height: 32px;
   box-sizing: border-box;
-  border: 1px solid rgba(130, 151, 186, 0.35);
+  border: 1px solid #cdd8e5;
   border-radius: 8px;
   padding: 6px 9px;
   color: var(--lg-text);
-  background: rgba(12, 19, 34, 0.35);
+  background: #fff;
 }
 .requiredMark {
   display: inline-grid;
@@ -115,8 +111,8 @@
   border: 1px solid rgba(151, 173, 222, 0.36);
   border-radius: 18px;
   color: var(--lg-text);
-  background: var(--lg-bg-0);
   box-shadow: 0 28px 80px rgba(0, 0, 0, 0.48);
+  background: #f9fbfd;
 }
 .providerDialog::backdrop {
   background: rgba(7, 12, 24, 0.58);
@@ -214,9 +210,9 @@
   justify-content: space-between;
   gap: 16px;
   padding: 14px 15px;
-  border: 1px solid rgba(139, 159, 197, 0.25);
+  border: 1px solid #d7e0eb;
   border-radius: 11px;
-  background: rgba(255, 255, 255, 0.035);
+  background: #fff;
 }
 .providerCardInfo {
   display: grid;
@@ -314,12 +310,12 @@
   display: grid;
   place-items: center;
   width: 36px;
-  border: 1px solid rgba(130, 151, 186, 0.35);
+  border: 1px solid #cdd8e5;
   border-left: 0;
   border-radius: 0 8px 8px 0;
   color: var(--lg-text-muted);
-  background: rgba(12, 19, 34, 0.35);
   cursor: pointer;
+  background: #fff;
 }
 .keyIcon {
   display: block;
@@ -380,9 +376,9 @@
   display: grid;
   gap: 10px;
   padding: 13px 52px 13px 13px;
-  border: 1px solid rgba(137, 158, 195, 0.24);
+  border: 1px solid #d7e0eb;
   border-radius: 11px;
-  background: rgba(255, 255, 255, 0.025);
+  background: #fff;
 }
 .modelTop {
   display: grid;
@@ -418,6 +414,19 @@
   top: 10px;
   right: 10px;
 }
+.promptCardActions button {
+  border: 1px solid rgba(142, 160, 198, 0.33);
+  border-radius: 7px;
+  padding: 5px 8px;
+  color: var(--lg-text-muted);
+  background: transparent;
+  font-size: 12px;
+  cursor: pointer;
+}
+.promptCardActions button:hover {
+  color: var(--lg-text);
+  background: rgba(255, 255, 255, 0.08);
+}
 .candidateWrap > button {
   min-height: 32px;
   border: 1px solid rgba(142, 160, 198, 0.33);
@@ -438,8 +447,8 @@
   padding: 7px;
   border: 1px solid rgba(146, 167, 209, 0.42);
   border-radius: 9px;
-  background: var(--lg-bg-0);
   box-shadow: 0 14px 35px rgba(0, 0, 0, 0.3);
+  background: #f9fbfd;
 }
 .candidateMenuHeader {
   display: flex;
@@ -484,6 +493,12 @@
   gap: 4px;
   align-items: center;
 }
+.promptSelector input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  flex: 0 0 auto;
+}
 .modelCard .capabilities input[type="checkbox"],
 .modelCard .capabilities input[type="checkbox"]:checked {
   all: revert;
@@ -522,9 +537,9 @@
   display: grid;
   gap: 10px;
   padding: 13px;
-  border: 1px solid rgba(139, 159, 197, 0.25);
+  border: 1px solid #d7e0eb;
   border-radius: 11px;
-  background: rgba(255, 255, 255, 0.035);
+  background: #fff;
 }
 .promptCards article.promptCardSelected {
   border-color: var(--lg-accent-1);
@@ -544,12 +559,6 @@
   min-width: 0;
   flex: 1;
 }
-.promptSelector input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-  margin: 0;
-  flex: 0 0 auto;
-}
 .promptTitleButton {
   overflow: hidden;
   padding: 0;
@@ -566,10 +575,10 @@
 .promptTitleInput,
 .promptContent {
   box-sizing: border-box;
-  border: 1px solid rgba(130, 151, 186, 0.35);
+  border: 1px solid #cdd8e5;
   border-radius: 8px;
   color: var(--lg-text);
-  background: rgba(12, 19, 34, 0.35);
+  background: #fff;
 }
 .promptTitleInput {
   min-width: 0;
@@ -592,53 +601,6 @@
 .promptContent:read-only {
   color: var(--lg-text-faint);
   cursor: default;
-}
-.promptCardActions button {
-  border: 1px solid rgba(142, 160, 198, 0.33);
-  border-radius: 7px;
-  padding: 5px 8px;
-  color: var(--lg-text-muted);
-  background: transparent;
-  font-size: 12px;
-  cursor: pointer;
-}
-.promptCardActions button:hover {
-  color: var(--lg-text);
-  background: rgba(255, 255, 255, 0.08);
-}
-[data-theme="default"] .apiChoices,
-[data-theme="default"] .providerCards article,
-[data-theme="default"] .modelCard,
-[data-theme="default"] .promptCards article {
-  background: #fff;
-  border-color: #d7e0eb;
-}
-[data-theme="default"] .selectionField select,
-[data-theme="default"] .profileGrid input,
-[data-theme="default"] .modelCard input,
-[data-theme="default"] .promptTitleInput,
-[data-theme="default"] .promptContent,
-[data-theme="default"] .typePicker select,
-[data-theme="default"] .keyField button {
-  background: #fff;
-  border-color: #cdd8e5;
-}
-[data-theme="default"] .providerDialog,
-[data-theme="default"] .candidateMenu {
-  background: #f9fbfd;
-}
-[data-theme="hand-drawn"] .providerDialog,
-[data-theme="hand-drawn"] .apiChoices,
-[data-theme="hand-drawn"] .providerCards article,
-[data-theme="hand-drawn"] .modelCard,
-[data-theme="hand-drawn"] .promptCards article {
-  border-radius: 7px 11px 8px 10px;
-  border-color: var(--ink-medium);
-  box-shadow: 2px 3px 0 rgba(45, 58, 71, 0.08);
-}
-[data-theme="hand-drawn"] .providerLaunch,
-[data-theme="hand-drawn"] .primaryButton {
-  border-radius: 5px 8px 6px 7px;
 }
 @media (max-width: 580px) {
   .providerDialog {
@@ -665,9 +627,6 @@
   .providerCards nav {
     width: 100%;
   }
-  .providerCards nav button {
-    flex: 1;
-  }
   .promptCardHeader {
     align-items: flex-start;
     flex-direction: column;
@@ -676,6 +635,9 @@
     width: 100%;
   }
   .promptCardActions button {
+    flex: 1;
+  }
+  .providerCards nav button {
     flex: 1;
   }
   .modelTop {

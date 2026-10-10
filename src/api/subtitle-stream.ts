@@ -97,7 +97,9 @@ export function createSubtitleRecognitionSession(
         chunk.channels !== 1 ||
         chunk.format !== "pcm_s16le"
       ) {
-        throw new Error("Subtitle transcription requires 16 kHz mono PCM16 audio");
+        throw new Error(
+          "Subtitle transcription requires 16 kHz mono PCM16 audio",
+        );
       }
       if (audioListener) audioListener(chunk.pcm);
       else {

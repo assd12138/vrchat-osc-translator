@@ -1,5 +1,7 @@
 const wordSegmenter = new Intl.Segmenter(undefined, { granularity: "word" });
-const charSegmenter = new Intl.Segmenter(undefined, { granularity: "grapheme" });
+const charSegmenter = new Intl.Segmenter(undefined, {
+  granularity: "grapheme",
+});
 const cjkRegex =
   /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/u;
 
@@ -29,7 +31,10 @@ function tokenize(text: string): string[] {
 }
 
 /** 将旧句与新句的候选前缀比较，允许识别修正，也允许末尾追加内容。 */
-export function calculateAsrSimilarity(oldText: string, newText: string): number {
+export function calculateAsrSimilarity(
+  oldText: string,
+  newText: string,
+): number {
   const oldTokens = tokenize(oldText);
   const newTokens = tokenize(newText);
   if (!oldTokens.length || !newTokens.length) return 0;

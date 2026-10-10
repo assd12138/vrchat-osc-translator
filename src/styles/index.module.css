@@ -1,59 +1,17 @@
-/* ============================================================
-   styles/index.module.css — shared Liquid Glass primitives
-   Exports (must stay identical for TSX consumers):
-     .panel  .title  .button  .labelS  .selectS  .inputS  .input
-     .panelToggle  .panelHeaderAction
-   (.input is an alias added for audio-panel which references
-    globalStyles.input; pure CSS, no TSX change required.)
-   ============================================================ */
+/* Shared panel and form controls */
 
-/* ---- Reusable glass surface ---- */
 .panel {
   position: relative;
   padding: 20px;
   margin: 0 auto 22px;
   border-radius: var(--lg-radius);
-  background: linear-gradient(
-    135deg,
-    rgba(var(--glass-tint), var(--glass-alpha-hi)) 0%,
-    rgba(var(--glass-tint), var(--glass-alpha)) 100%
-  );
-  border: 1px solid rgba(var(--glass-border), var(--glass-border-alpha));
-  box-shadow: var(--lg-shadow-soft);
-
-  -webkit-backdrop-filter: blur(22px) saturate(160%);
-  backdrop-filter: blur(22px) saturate(160%);
-
-  /* subtle top inner-highlight to sell the glass */
+  border: 1px solid #d5dce5;
   isolation: isolate;
   overflow: hidden;
+  background: #ffffff;
+  box-shadow: var(--lg-shadow-soft);
 }
 
-/* Specular sheen across the top edge */
-.panel::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1px;
-  background:
-    linear-gradient(
-      180deg,
-      rgba(var(--glass-highlight), 0.55),
-      rgba(var(--glass-highlight), 0.06) 18%,
-      transparent 35%
-    ),
-    linear-gradient(180deg, transparent 65%, rgba(0, 0, 0, 0.25));
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* ---- Title ---- */
 .title {
   position: relative;
   z-index: 2;
@@ -61,24 +19,12 @@
   font-size: 16px;
   letter-spacing: 0.01em;
   margin: 0 0 14px;
-  color: var(--lg-text);
   display: flex;
   align-items: baseline;
   gap: 6px;
-  /* faint accent underline that reads as "etched" */
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0.9),
-    rgba(214, 222, 240, 0.6) 60%,
-    transparent
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
+  color: var(--lg-text);
 }
 
-/* ---- Panel title actions ----
-   The title itself remains the header. The compact toggle sits at its
-   logical end without introducing another card or animated disclosure. */
 .panelToggle {
   position: relative;
   z-index: 2;
@@ -89,43 +35,46 @@
   height: 30px;
   padding: 0;
   margin-inline-start: auto;
-  color: var(--lg-text-muted);
   font: inherit;
   font-size: 18px;
   font-weight: 500;
   line-height: 1;
   cursor: pointer;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid #bec9d6;
   border-radius: var(--lg-radius-pill);
-  background: rgba(255, 255, 255, 0.07);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.16) inset;
   transition: none;
   transform: none;
+  color: #526174;
+  background: #f7f9fb;
+  box-shadow: none;
 }
 
 .panelToggle:hover {
-  color: var(--lg-text);
-  border-color: rgba(255, 255, 255, 0.34);
-  background: rgba(255, 255, 255, 0.13);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.2) inset;
+  color: #263445;
+  border-color: #8da4bd;
+  background: #eef4fa;
+  box-shadow: none;
   transform: none;
 }
 
 .panelToggle:active {
-  background: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2) inset;
+  background: #e4edf6;
+  box-shadow: none;
   transform: none;
 }
 
 .panelToggle:focus-visible,
 .panelHeaderAction:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.28);
+  box-shadow: 0 0 0 3px rgba(23, 105, 194, 0.16);
 }
 
 .panelToggle:disabled {
   cursor: not-allowed;
   opacity: 0.42;
+  color: #7d8794;
+  border-color: #d7dde5;
+  background: #f0f2f5;
 }
 
 .panelHeaderAction {
@@ -143,7 +92,6 @@
   white-space: nowrap;
 }
 
-/* ---- Button (liquid glass pill) ---- */
 .button {
   position: relative;
   display: inline-flex;
@@ -154,76 +102,55 @@
   font-size: 14px;
   font-weight: 600;
   letter-spacing: 0.01em;
-  color: var(--lg-text);
   cursor: pointer;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid #bec9d6;
   border-radius: var(--lg-radius-pill);
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.14),
-    rgba(255, 255, 255, 0.04)
-  );
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.22) inset,
-    0 -1px 0 rgba(0, 0, 0, 0.25) inset,
-    0 6px 16px -8px rgba(0, 0, 0, 0.6);
-  transition:
-    transform var(--lg-fast) var(--lg-ease),
-    border-color var(--lg-fast) var(--lg-ease),
-    background-color var(--lg-fast) var(--lg-ease),
-    box-shadow var(--lg-fast) var(--lg-ease),
-    filter var(--lg-fast) var(--lg-ease);
+  color: #263445;
+  background: #f7f9fb;
+  box-shadow: none;
+  transition: none;
 }
 
 .button:hover {
-  border-color: rgba(255, 255, 255, 0.34);
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.22),
-    rgba(255, 255, 255, 0.08)
-  );
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.3) inset,
-    0 -1px 0 rgba(0, 0, 0, 0.3) inset,
-    0 10px 22px -10px rgba(129, 140, 248, 0.55);
-  transform: translateY(-1px);
+  border-color: #8da4bd;
+  background: #eef4fa;
+  box-shadow: none;
+  transform: none;
 }
 
 .button:active {
-  transform: translateY(0) scale(0.985);
-  box-shadow:
-    0 1px 0 rgba(0, 0, 0, 0.3) inset,
-    0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+  background: #e4edf6;
+  box-shadow: none;
+  transform: none;
 }
 
 .button:focus-visible {
   outline: none;
-  border-color: rgba(129, 140, 248, 0.75);
-  box-shadow:
-    0 0 0 3px rgba(129, 140, 248, 0.28),
-    0 1px 0 rgba(255, 255, 255, 0.22) inset;
+  border-color: var(--lg-accent-1);
+  box-shadow: 0 0 0 3px rgba(23, 105, 194, 0.16);
 }
 
 .button:disabled {
   opacity: 0.4;
   cursor: not-allowed;
-  filter: saturate(0.4) brightness(0.85);
   transform: none;
   box-shadow: none;
+  color: #7d8794;
+  background: #f0f2f5;
+  border-color: #d7dde5;
+  filter: none;
 }
 
-/* ---- Label ---- */
 .labelS {
   display: block;
   margin: 6px 0 6px;
   font-weight: 600;
   font-size: 13px;
   letter-spacing: 0.02em;
-  color: var(--lg-text-muted);
   text-transform: none;
+  color: var(--lg-text-muted);
 }
 
-/* ---- Select ---- */
 .selectS {
   position: relative;
   z-index: 2;
@@ -233,18 +160,15 @@
   padding: 0 34px 0 12px;
   font-size: 14px;
   font-weight: 500;
-  color: var(--lg-text);
   box-sizing: border-box;
   border-radius: var(--lg-radius-sm);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background-color: rgba(255, 255, 255, 0.05);
-  /* arrow handled globally in App.css */
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset;
+  border: 1px solid #c8d1dc;
+  color: var(--lg-text);
+  background-color: #ffffff;
+  box-shadow: none;
 }
 
-/* ---- Inputs ---- */
-.inputS,
-.input {
+.inputS {
   position: relative;
   z-index: 2;
   width: 100%;
@@ -252,270 +176,30 @@
   margin-bottom: 12px;
   padding: 0 12px;
   font-size: 14px;
-  color: var(--lg-text);
   box-sizing: border-box;
   border-radius: var(--lg-radius-sm);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background-color: rgba(255, 255, 255, 0.05);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset;
-}
-
-/* .input = explicit alias so audio-panel's globalStyles.input resolves */
-.input {
-  margin-bottom: 0;
-}
-
-/* ---- Default theme: solid, familiar utility controls ---- */
-[data-theme="default"] .panel {
-  background: #ffffff;
-  border-color: #d5dce5;
-  box-shadow: var(--lg-shadow-soft);
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
-}
-
-[data-theme="default"] .panel::before {
-  display: none;
-}
-
-[data-theme="default"] .title {
-  color: var(--lg-text);
-  background: none;
-}
-
-[data-theme="default"] .panelToggle {
-  color: #526174;
-  border-color: #bec9d6;
-  background: #f7f9fb;
-  box-shadow: none;
-}
-
-[data-theme="default"] .panelToggle:hover {
-  color: #263445;
-  border-color: #8da4bd;
-  background: #eef4fa;
-  box-shadow: none;
-  transform: none;
-}
-
-[data-theme="default"] .panelToggle:active {
-  background: #e4edf6;
-  box-shadow: none;
-  transform: none;
-}
-
-[data-theme="default"] .panelToggle:focus-visible,
-[data-theme="default"] .panelHeaderAction:focus-visible {
-  box-shadow: 0 0 0 3px rgba(23, 105, 194, 0.16);
-}
-
-[data-theme="default"] .panelToggle:disabled {
-  color: #7d8794;
-  border-color: #d7dde5;
-  background: #f0f2f5;
-}
-
-[data-theme="default"] .button {
-  color: #263445;
-  border-color: #bec9d6;
-  background: #f7f9fb;
-  box-shadow: none;
-  transition: none;
-}
-
-[data-theme="default"] .button:hover {
-  border-color: #8da4bd;
-  background: #eef4fa;
-  box-shadow: none;
-  transform: none;
-}
-
-[data-theme="default"] .button:active {
-  background: #e4edf6;
-  box-shadow: none;
-  transform: none;
-}
-
-[data-theme="default"] .button:focus-visible {
-  border-color: var(--lg-accent-1);
-  box-shadow: 0 0 0 3px rgba(23, 105, 194, 0.16);
-}
-
-[data-theme="default"] .button:disabled {
-  color: #7d8794;
-  background: #f0f2f5;
-  border-color: #d7dde5;
-  filter: none;
-}
-
-[data-theme="default"] .labelS {
-  color: var(--lg-text-muted);
-}
-
-[data-theme="default"] .selectS,
-[data-theme="default"] .inputS,
-[data-theme="default"] .input {
+  border: 1px solid #c8d1dc;
   color: var(--lg-text);
   background-color: #ffffff;
-  border-color: #c8d1dc;
   box-shadow: none;
 }
 
-/* ---- Hand-drawn theme: warm paper + ink sketch ---- */
-[data-theme="hand-drawn"] .panel {
-  background: var(--lg-bg-1);
-  border: 1.5px solid var(--ink-medium);
-  border-radius: var(--lg-radius);
-  box-shadow: var(--lg-shadow-soft);
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
-  position: relative;
-}
-
-/* Paper edge texture */
-[data-theme="hand-drawn"] .panel::before {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  border-radius: inherit;
-  background:
-/* Top edge ink line */
-    linear-gradient(
-      90deg,
-      transparent 2%,
-      rgba(45, 58, 71, 0.03) 5%,
-      transparent 8%,
-      rgba(45, 58, 71, 0.02) 15%,
-      transparent 20%
-    ),
-    /* Right edge ink line */
-    linear-gradient(
-      0deg,
-      transparent 85%,
-      rgba(45, 58, 71, 0.04) 90%,
-      transparent 95%
-    );
-  pointer-events: none;
-  z-index: 0;
-  opacity: 0.6;
-}
-
-[data-theme="hand-drawn"] .title {
-  color: var(--ink-dark);
-  background: none;
-  font-weight: 600;
+.input {
   position: relative;
   z-index: 2;
-}
-
-[data-theme="hand-drawn"] .title::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: -4px;
-  width: 40%;
-  height: 1.5px;
-  background: var(--ink-medium);
-  border-radius: 2px 3px 1px 4px;
-}
-
-[data-theme="hand-drawn"] .panelToggle {
-  color: var(--ink-dark);
-  border: 1.5px solid var(--ink-medium);
-  border-radius: 8px 10px 7px 9px;
-  background: var(--lg-bg-1);
-  box-shadow: 2px 2px 0 -1px rgba(45, 58, 71, 0.08);
-}
-
-[data-theme="hand-drawn"] .panelToggle:hover {
-  border-color: var(--ink-dark);
-  background: var(--lg-bg-0);
-  box-shadow: 2px 2px 0 -1px rgba(45, 58, 71, 0.12);
-  transform: none;
-}
-
-[data-theme="hand-drawn"] .panelToggle:active {
-  background: var(--lg-bg-2);
-  box-shadow: 1px 1px 0 0 rgba(45, 58, 71, 0.08);
-  transform: none;
-}
-
-[data-theme="hand-drawn"] .panelToggle:focus-visible,
-[data-theme="hand-drawn"] .panelHeaderAction:focus-visible {
-  box-shadow: 2px 2px 0 0 rgba(107, 91, 60, 0.2);
-}
-
-[data-theme="hand-drawn"] .panelToggle:disabled {
-  color: var(--lg-text-faint);
-  border-color: var(--ink-light);
-  background: var(--lg-bg-2);
-  box-shadow: none;
-}
-
-[data-theme="hand-drawn"] .button {
-  color: var(--ink-dark);
-  border: 1.5px solid var(--ink-medium);
-  border-radius: 10px 12px 8px 11px;
-  background: var(--lg-bg-1);
-  box-shadow: 2px 3px 0 -1px rgba(45, 58, 71, 0.1);
-  transition: none;
-}
-
-[data-theme="hand-drawn"] .button:hover {
-  border-color: var(--ink-dark);
-  background: var(--lg-bg-0);
-  box-shadow: 3px 4px 0 -1px rgba(45, 58, 71, 0.15);
-  transform: none;
-}
-
-[data-theme="hand-drawn"] .button:active {
-  background: var(--lg-bg-2);
-  box-shadow: 1px 2px 0 0 rgba(45, 58, 71, 0.1);
-  transform: none;
-}
-
-[data-theme="hand-drawn"] .button:focus-visible {
-  border-color: var(--lg-accent-1);
-  box-shadow: 2px 2px 0 0 rgba(107, 91, 60, 0.2);
-}
-
-[data-theme="hand-drawn"] .button:disabled {
-  color: var(--lg-text-faint);
-  background: var(--lg-bg-2);
-  border-color: var(--ink-light);
-  box-shadow: none;
-  filter: none;
-}
-
-[data-theme="hand-drawn"] .labelS {
-  color: var(--lg-text-muted);
-  font-weight: 600;
-}
-
-[data-theme="hand-drawn"] .selectS,
-[data-theme="hand-drawn"] .inputS,
-[data-theme="hand-drawn"] .input {
+  width: 100%;
+  height: 38px;
+  padding: 0 12px;
+  font-size: 14px;
+  box-sizing: border-box;
+  border-radius: var(--lg-radius-sm);
+  border: 1px solid #c8d1dc;
+  margin-bottom: 0;
   color: var(--lg-text);
-  background-color: var(--lg-bg-1);
-  border: 1.5px solid var(--ink-medium);
-  border-radius: 6px 8px 5px 7px;
+  background-color: #ffffff;
   box-shadow: none;
 }
 
-[data-theme="hand-drawn"] .selectS:hover,
-[data-theme="hand-drawn"] .inputS:hover,
-[data-theme="hand-drawn"] .input:hover {
-  border-color: var(--ink-dark);
-}
-
-[data-theme="hand-drawn"] .selectS:focus,
-[data-theme="hand-drawn"] .inputS:focus,
-[data-theme="hand-drawn"] .input:focus {
-  border-color: var(--ink-dark);
-  box-shadow: 2px 2px 0 -1px rgba(45, 58, 71, 0.08);
-}
-
-/* ---- Responsive guard: prevent control crush on narrow widths ---- */
 @media (max-width: 360px) {
   .panel {
     padding: 16px;

@@ -1,6 +1,4 @@
-/* ============================================================
-   system-log — deep glass well, monospace, scrollable
-   ============================================================ */
+/* Scrollable system log */
 
 .logContainer {
   position: relative;
@@ -9,23 +7,16 @@
   padding: 14px 16px;
   max-height: 220px;
   overflow-y: auto;
-
   font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
   font-size: 12px;
   line-height: 1.65;
-  color: rgba(220, 226, 240, 0.85);
   white-space: pre-wrap;
   word-break: break-word;
-
   border-radius: var(--lg-radius-sm);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.28), rgba(0, 0, 0, 0.12));
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.05) inset,
-    0 8px 22px -12px rgba(0, 0, 0, 0.7);
-
-  -webkit-backdrop-filter: blur(10px) saturate(120%);
-  backdrop-filter: blur(10px) saturate(120%);
+  border: 1px solid #d4dce5;
+  color: #344255;
+  background: #f6f8fa;
+  box-shadow: none;
 }
 
 .logItem {
@@ -33,47 +24,16 @@
   align-items: baseline;
   gap: 6px;
   padding: 1px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid #e1e6ec;
 }
+
 .logItem:last-child {
   border-bottom: none;
 }
+
 .logItem > div:last-child {
   flex: 1;
   min-width: 0;
   white-space: pre-wrap;
   word-break: break-word;
-}
-
-/* ---- Default theme ---- */
-[data-theme="default"] .logContainer {
-  color: #344255;
-  background: #f6f8fa;
-  border-color: #d4dce5;
-  box-shadow: none;
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
-}
-
-[data-theme="default"] .logItem {
-  border-bottom-color: #e1e6ec;
-}
-
-/* ---- Hand-drawn theme ---- */
-[data-theme="hand-drawn"] .logContainer {
-  color: var(--ink-medium);
-  background: var(--lg-bg-1);
-  border: 1px solid var(--ink-light);
-  border-radius: 7px 9px 6px 8px;
-  box-shadow: 3px 4px 0 -2px rgba(45, 58, 71, 0.08);
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
-}
-
-[data-theme="hand-drawn"] .logItem {
-  border-bottom: 1px dashed rgba(107, 122, 136, 0.2);
-}
-
-[data-theme="hand-drawn"] .logItem:last-child {
-  border-bottom: none;
 }
