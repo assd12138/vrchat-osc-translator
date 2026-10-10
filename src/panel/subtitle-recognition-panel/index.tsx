@@ -1,14 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  createSubtitleRecognitionSession,
-  type SubtitleRecognitionSession,
-} from "@/api/subtitle-stream";
+import { createSubtitleRecognitionSession } from "@/api/subtitle-stream";
 import invoke, { NATIVE_COMMAND } from "@/electron/ipc";
 import globalStyles from "@/styles/index.module.css";
 import eventBus, { EventBusEvent } from "@/utils/event-bus";
 import {
-  type DisplayAudioCapture,
   DisplayAudioUnavailableError,
   startDisplayAudioCapture,
 } from "@/utils/display-audio";
@@ -17,41 +13,36 @@ import CollapsiblePanel from "../CollapsiblePanel";
 import RecognitionStatus from "../RecognitionStatus";
 import panelStyles from "./index.module.css";
 
+type RecognitionPhase = "idle" | "selecting" | "connecting" | "recognizing";
+
 export default function SubtitleRecognitionPanel() {
   const { t } = useTranslation();
-  const captureRef = useRef<DisplayAudioCapture | null>(null);
   const sessionRef = useRef<AbortController | null>(null);
-  const recognitionRef = useRef<SubtitleRecognitionSession | null>(null);
   const mountedRef = useRef(true);
-  const [starting, setStarting] = useState(false);
-  const [connecting, setConnecting] = useState(false);
-  const [capturing, setCapturing] = useState(false);
+  const [phase, setPhase] = useState<RecognitionPhase>("idle");
   const [speaking, setSpeaking] = useState(false);
   const [sourceName, setSourceName] = useState("");
   const [audioLevel, setAudioLevel] = useState(0);
   const [audioSeconds, setAudioSeconds] = useState(0);
+  const active = phase !== "idle";
+  const capturing = phase === "connecting" || phase === "recognizing";
 
-  const finishCapture = () => {
-    sessionRef.current?.abort();
+  const finishCapture = useCallback(() => {
+    const session = sessionRef.current;
     sessionRef.current = null;
-    recognitionRef.current?.stop();
-    recognitionRef.current = null;
-    captureRef.current?.stop();
-    captureRef.current = null;
+    session?.abort();
     if (mountedRef.current) {
-      setStarting(false);
-      setConnecting(false);
-      setCapturing(false);
+      setPhase("idle");
       setSpeaking(false);
       setAudioLevel(0);
     }
-  };
+  }, []);
 
   const start = async () => {
     if (sessionRef.current) return;
     const controller = new AbortController();
     sessionRef.current = controller;
-    setStarting(true);
+    setPhase("selecting");
     setSourceName("");
     setAudioSeconds(0);
     let collectedSeconds = 0;
@@ -59,7 +50,6 @@ export default function SubtitleRecognitionPanel() {
     try {
       // 配置校验同步完成，随后直接发起共享请求以保留点击的用户激活状态。
       const recognition = createSubtitleRecognitionSession(controller.signal);
-      recognitionRef.current = recognition;
       const capture = await startDisplayAudioCapture({
         signal: controller.signal,
         onChunk: (chunk) => {
@@ -76,7 +66,6 @@ export default function SubtitleRecognitionPanel() {
             eventBus.emit(EventBusEvent.ADD_LOG, t("字幕识别失败"));
             return;
           }
-          eventBus.emit(EventBusEvent.SUBTITLE_AUDIO_CHUNK, chunk);
         },
         onEnded: () => {
           if (sessionRef.current !== controller) return;
@@ -93,24 +82,23 @@ export default function SubtitleRecognitionPanel() {
         },
       });
       if (sessionRef.current !== controller || !mountedRef.current) {
-        capture.stop();
         return;
       }
-      captureRef.current = capture;
       setSourceName(capture.sourceName);
-      setCapturing(true);
-      setConnecting(true);
+      setPhase("connecting");
       await recognition.connect();
       if (sessionRef.current !== controller || !mountedRef.current) return;
-      setStarting(false);
-      setConnecting(false);
+      setPhase("recognizing");
       eventBus.emit(EventBusEvent.ADD_LOG, t("开始字幕音频采集"));
     } catch (error) {
       if (sessionRef.current !== controller) return;
       finishCapture();
-      const message = error instanceof DisplayAudioUnavailableError
-        ? t("未获取到系统音频")
-        : error instanceof Error ? error.message : String(error);
+      const message =
+        error instanceof DisplayAudioUnavailableError
+          ? t("未获取到系统音频")
+          : error instanceof Error
+            ? error.message
+            : String(error);
       console.error("[字幕识别] 启动失败", error);
       eventBus.emit(EventBusEvent.ADD_LOG, `${t("字幕识别失败")}: ${message}`);
     }
@@ -145,14 +133,9 @@ export default function SubtitleRecognitionPanel() {
     mountedRef.current = true;
     return () => {
       mountedRef.current = false;
-      sessionRef.current?.abort();
-      sessionRef.current = null;
-      recognitionRef.current?.stop();
-      recognitionRef.current = null;
-      captureRef.current?.stop();
-      captureRef.current = null;
+      finishCapture();
     };
-  }, []);
+  }, [finishCapture]);
 
   return (
     <CollapsiblePanel
@@ -160,24 +143,26 @@ export default function SubtitleRecognitionPanel() {
       title={t("字幕识别")}
       icon="🔊"
       contentId="subtitle-recognition-panel-content"
-      collapseDisabled={starting || capturing}
+      collapseDisabled={active}
     >
       <div className={styles.buttongroup}>
         <button
           type="button"
           onClick={start}
           className={globalStyles.button}
-          disabled={starting || capturing}
+          disabled={active}
         >
-          {starting
-            ? connecting ? t("连接识别服务中") : t("选择共享源中")
-            : t("开始")}
+          {phase === "selecting"
+            ? t("选择共享源中")
+            : phase === "connecting"
+              ? t("连接识别服务中")
+              : t("开始")}
         </button>
         <button
           type="button"
           onClick={stop}
           className={globalStyles.button}
-          disabled={!starting && !capturing}
+          disabled={!active}
         >
           {t("停止")}
         </button>
@@ -190,7 +175,10 @@ export default function SubtitleRecognitionPanel() {
           {t("打开字幕")}
         </button>
       </div>
-      <RecognitionStatus recognizing={capturing} speaking={speaking} />
+      <RecognitionStatus
+        recognizing={phase === "recognizing"}
+        speaking={speaking}
+      />
       {(capturing || audioSeconds > 0) && (
         <div className={panelStyles.captureInfo}>
           {sourceName && <span>{t("共享源")}：{sourceName}</span>}

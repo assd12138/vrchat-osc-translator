@@ -17,6 +17,7 @@ import { request } from "./index";
 import { buildProviderEndpoint, resolveModel } from "./provider";
 
 const translationToolName = "translateFormat";
+const VRCHAT_MAX_CHARACTERS = 140;
 
 export type ResolvedModel = { provider: ApiProvider; model: ApiModel };
 
@@ -126,13 +127,18 @@ const translateWithTool = async (
   content: string | object[],
   languages: string[],
   template: string,
+  signal?: AbortSignal,
 ): Promise<string> => {
-  const response = await postChat(resolved, {
-    messages: [{ role: "user", content }],
-    temperature: 0.7,
-    tools: [generateTranslationTool(languages)],
-    tool_choice: { type: "function", function: { name: translationToolName } },
-  });
+  const response = await postChat(
+    resolved,
+    {
+      messages: [{ role: "user", content }],
+      temperature: 0.7,
+      tools: [generateTranslationTool(languages)],
+      tool_choice: { type: "function", function: { name: translationToolName } },
+    },
+    signal,
+  );
   return applyTranslationTemplate(
     getToolArguments(response, translationToolName),
     languages,
@@ -184,6 +190,7 @@ const translateWithRequests = async (
   languages: string[],
   template: string,
   promptTemplate: string,
+  signal?: AbortSignal,
 ) => {
   const values = await Promise.all(
     languages.map(async (language) => {
@@ -192,6 +199,7 @@ const translateWithRequests = async (
         text,
         language,
         promptTemplate,
+        signal,
       );
       return [language, translation] as const;
     }),
@@ -218,6 +226,7 @@ export const translateText = (
   forceTool: boolean,
   template: string,
   languages: string[],
+  signal?: AbortSignal,
 ) => {
   if (languages.length === 0)
     throw configurationError(
@@ -232,6 +241,7 @@ export const translateText = (
         generateTranslationPrompt(text, languages, promptTemplate),
         languages,
         template,
+        signal,
       )
     : translateWithRequests(
         resolved,
@@ -239,7 +249,28 @@ export const translateText = (
         languages,
         template,
         promptTemplate,
+        signal,
       );
+};
+
+/** 麦克风流式翻译沿用输出模板和 VRChat 字数限制。 */
+export const translateStreamTranscript = (
+  text: string,
+  signal: AbortSignal,
+): Promise<string> => {
+  const { apiConfig, outputTemplate } = store.getState().settings;
+  const languages = extractLanguagesFromTemplate(outputTemplate);
+  const maxChar = Math.ceil(VRCHAT_MAX_CHARACTERS / languages.length);
+  const resolved = resolveModel(apiConfig, "translation");
+
+  return translateText(
+    resolved,
+    text.slice(0, maxChar),
+    canUseTranslationTool(resolved.model, apiConfig.batchTranslate),
+    outputTemplate,
+    languages,
+    signal,
+  );
 };
 
 /** 处理纯文本翻译，并根据当前翻译模式选择对应模型。 */

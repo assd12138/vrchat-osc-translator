@@ -21,6 +21,18 @@ export enum ModelType {
   CHAT_COMPLETION = "chat-completion",
 }
 
+const STREAM_MODEL_TYPES = [
+  ModelType.AUDIO_CPP_LIVE,
+  ModelType.NARILAB_AUDIO_SPEECH_TO_TEXT,
+  ModelType.QWEN_AUDIO_SPEECH_TO_TEXT_REALTIME,
+  ModelType.QWEN_AUDIO_SPEECH_TO_TEXT_INFERENCE,
+] as const;
+
+export type StreamModelType = (typeof STREAM_MODEL_TYPES)[number];
+
+export const isStreamModelType = (type: ModelType): type is StreamModelType =>
+  STREAM_MODEL_TYPES.some((streamType) => streamType === type);
+
 export interface NarilabAudioSpeechToText {
   uid: string;
   modelId: string;
@@ -206,21 +218,13 @@ export const createInitialApiConfig = (): ApiConfig => ({
  */
 export const isModelEligible = (slot: ModelSlot, model: ApiModel): boolean => {
   if (slot === "subtitleTranscription") {
-    return (
-      model.type === ModelType.AUDIO_CPP_LIVE ||
-      model.type === ModelType.NARILAB_AUDIO_SPEECH_TO_TEXT ||
-      model.type === ModelType.QWEN_AUDIO_SPEECH_TO_TEXT_REALTIME ||
-      model.type === ModelType.QWEN_AUDIO_SPEECH_TO_TEXT_INFERENCE
-    );
+    return isStreamModelType(model.type);
   }
   if (slot === "transcription") {
     return (
-      model.type === ModelType.AUDIO_CPP_LIVE ||
+      isStreamModelType(model.type) ||
       model.type === ModelType.AUDIO_TRANSCRIPTION ||
       model.type === ModelType.MINIMAX_AUDIO_SPEECH_TO_TEXT ||
-      model.type === ModelType.NARILAB_AUDIO_SPEECH_TO_TEXT ||
-      model.type === ModelType.QWEN_AUDIO_SPEECH_TO_TEXT_REALTIME ||
-      model.type === ModelType.QWEN_AUDIO_SPEECH_TO_TEXT_INFERENCE ||
       (model.type === ModelType.CHAT_COMPLETION && model.capabilities.audio)
     );
   }

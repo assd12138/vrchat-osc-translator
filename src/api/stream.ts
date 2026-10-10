@@ -1,15 +1,9 @@
 import type { Microphone } from "decibri";
-import { canUseTranslationTool, translateText } from "@/api/commonRouter";
-import { resolveModel } from "@/api/provider";
 import invoke, { NATIVE_COMMAND } from "@/electron/ipc";
-import { ModelType } from "@/store/api-config";
-import store from "@/store/store";
-import { extractLanguagesFromTemplate } from "@/utils";
-import { sendToVrcChat } from "@/utils/vrc-chat-queue";
+import { ModelType, type StreamModelType } from "@/store/api-config";
 
 const MAX_PENDING_TRANSLATIONS = 2;
 const TRANSLATION_TIMEOUT_MS = 10_000;
-const VRCHAT_MAX_CHARACTERS = 140;
 const RECONNECT_BASE_DELAY_MS = 1_000;
 const RECONNECT_MAX_DELAY_MS = 10_000;
 
@@ -20,21 +14,14 @@ export interface StreamTranscriptionConfig {
   modelType: StreamModelType;
 }
 
-export type StreamModelType =
-  | ModelType.AUDIO_CPP_LIVE
-  | ModelType.NARILAB_AUDIO_SPEECH_TO_TEXT
-  | ModelType.QWEN_AUDIO_SPEECH_TO_TEXT_REALTIME
-  | ModelType.QWEN_AUDIO_SPEECH_TO_TEXT_INFERENCE;
-
 export type PcmAudioData = ArrayBuffer | Int16Array | Float32Array;
 export type SubscribePcmAudio = (
   listener: (chunk: PcmAudioData) => void,
 ) => () => void;
 
 interface StreamTranslationOptions {
-  translate?: (text: string, signal: AbortSignal) => Promise<string>;
-  onTranslation?: (translation: string, transcription: string) => void;
-  signal?: AbortSignal;
+  translate: (text: string, signal: AbortSignal) => Promise<string>;
+  onTranslation: (translation: string, transcription: string) => void;
 }
 
 /** Serializes streamed transcripts while retaining only the newest useful updates. */
@@ -44,16 +31,12 @@ export class StreamTranslationProcessor {
   private stopped = false;
   private requestController: AbortController | null = null;
 
-  constructor(private readonly options: StreamTranslationOptions = {}) {
-    if (options.signal?.aborted) this.stopped = true;
-    else options.signal?.addEventListener("abort", this.stop, { once: true });
-  }
+  constructor(private readonly options: StreamTranslationOptions) {}
 
   stop = () => {
     this.stopped = true;
     this.pending = [];
     this.requestController?.abort();
-    this.options.signal?.removeEventListener("abort", this.stop);
   };
 
   push(text: string) {
@@ -100,9 +83,7 @@ export class StreamTranslationProcessor {
     let timeout: ReturnType<typeof setTimeout> | undefined;
     try {
       const translation = await Promise.race([
-        this.options.translate
-          ? this.options.translate(text, controller.signal)
-          : this.translateText(text),
+        this.options.translate(text, controller.signal),
         new Promise<never>((_, reject) => {
           timeout = setTimeout(
             () => {
@@ -114,11 +95,7 @@ export class StreamTranslationProcessor {
         }),
       ]);
       if (!this.stopped) {
-        if (this.options.onTranslation) {
-          this.options.onTranslation(translation, text);
-        } else {
-          sendToVrcChat(translation);
-        }
+        this.options.onTranslation(translation, text);
       }
     } catch (error) {
       if (!this.stopped) console.error("Stream translation failed", error);
@@ -129,21 +106,6 @@ export class StreamTranslationProcessor {
       const next = this.pending.shift();
       if (!this.stopped && next !== undefined) void this.translate(next);
     }
-  }
-
-  private translateText(text: string): Promise<string> {
-    const { apiConfig, outputTemplate } = store.getState().settings;
-    const languages = extractLanguagesFromTemplate(outputTemplate);
-    const maxChar = Math.ceil(VRCHAT_MAX_CHARACTERS / languages.length);
-    const resolved = resolveModel(apiConfig, "translation");
-
-    return translateText(
-      resolved,
-      text.slice(0, maxChar),
-      canUseTranslationTool(resolved.model, apiConfig.batchTranslate),
-      outputTemplate,
-      languages,
-    );
   }
 }
 

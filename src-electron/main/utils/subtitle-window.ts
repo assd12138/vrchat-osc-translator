@@ -64,10 +64,12 @@ export async function showSubtitleWindow(owner: BrowserWindow): Promise<void> {
         return;
       }
       const current = screen.getCursorScreenPoint();
-      win.setPosition(
-        origin.x + current.x - cursor.x,
-        origin.y + current.y - cursor.y,
-      );
+      const x = origin.x + current.x - cursor.x;
+      const y = origin.y + current.y - cursor.y;
+      const previous = win.getBounds();
+      if (x !== previous.x || y !== previous.y) {
+        win.setPosition(x, y);
+      }
     }, 16);
   };
   const startResize = (event: IpcMainEvent, edge: unknown) => {

@@ -1,4 +1,4 @@
-import { ModelType } from "@/store/api-config";
+import { isStreamModelType } from "@/store/api-config";
 import store from "@/store/store";
 import type { SubtitleAudioChunk } from "@/utils/display-audio";
 import { translateSubtitleText } from "./commonRouter";
@@ -14,7 +14,6 @@ const MAX_INITIAL_AUDIO_CHUNKS = 20;
 export interface SubtitleRecognitionSession {
   connect: () => Promise<void>;
   pushAudio: (chunk: SubtitleAudioChunk) => void;
-  stop: () => void;
 }
 
 /** 每次开始使用独立的转写连接和翻译队列，配置在开始时确定。 */
@@ -26,21 +25,14 @@ export function createSubtitleRecognitionSession(
   const translation = resolveModel(apiConfig, "subtitleTranslation");
   const targetLanguage = apiConfig.subtitleTargetLanguage;
   const modelType = transcription.model.type;
-  if (
-    modelType !== ModelType.AUDIO_CPP_LIVE &&
-    modelType !== ModelType.NARILAB_AUDIO_SPEECH_TO_TEXT &&
-    modelType !== ModelType.QWEN_AUDIO_SPEECH_TO_TEXT_REALTIME &&
-    modelType !== ModelType.QWEN_AUDIO_SPEECH_TO_TEXT_INFERENCE
-  ) {
+  if (!isStreamModelType(modelType)) {
     throw new Error("Subtitle transcription requires a streaming model");
   }
 
-  let stopped = signal.aborted;
+  let stopped = false;
   let audioListener: ((chunk: PcmAudioData) => void) | null = null;
   let initialAudio: ArrayBuffer[] = [];
-  let stopTranscription: (() => void) | null = null;
   const translationProcessor = new StreamTranslationProcessor({
-    signal,
     translate: (text, requestSignal) =>
       translateSubtitleText(translation, text, targetLanguage, requestSignal),
     onTranslation: (translatedText, originalText) => {
@@ -58,16 +50,16 @@ export function createSubtitleRecognitionSession(
     initialAudio = [];
     audioListener = null;
     translationProcessor.stop();
-    stopTranscription?.();
-    stopTranscription = null;
     signal.removeEventListener("abort", stop);
   };
-  if (!stopped) signal.addEventListener("abort", stop, { once: true });
+  // 外层通过同一信号停止采集和转写；这里仅清理会话自身的缓冲和翻译队列。
+  if (signal.aborted) stop();
+  else signal.addEventListener("abort", stop, { once: true });
 
   return {
     connect: async () => {
       if (stopped) throw new DOMException("Aborted", "AbortError");
-      stopTranscription = await streamPcmTranscription({
+      await streamPcmTranscription({
         config: {
           modelId: transcription.model.modelId,
           apiKey: transcription.provider.apiKey,
@@ -85,14 +77,12 @@ export function createSubtitleRecognitionSession(
           };
         },
         onTranscript: (text) => {
-          if (stopped || signal.aborted) return;
+          if (stopped) return;
           console.log("[字幕转写]", text);
           translationProcessor.push(text);
         },
       });
-      if (stopped || signal.aborted) {
-        stopTranscription();
-        stopTranscription = null;
+      if (stopped) {
         throw new DOMException("Aborted", "AbortError");
       }
     },
@@ -114,6 +104,5 @@ export function createSubtitleRecognitionSession(
         }
       }
     },
-    stop,
   };
 }

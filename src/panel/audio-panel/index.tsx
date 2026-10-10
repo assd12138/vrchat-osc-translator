@@ -2,21 +2,25 @@ import { MicVAD } from "@ricky0123/vad-web";
 import { Microphone } from "decibri";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { processAudioRouter, translateRouter } from "@/api/commonRouter";
+import {
+  processAudioRouter,
+  translateRouter,
+  translateStreamTranscript,
+} from "@/api/commonRouter";
 import { resolveModel } from "@/api/provider";
 import {
   type StreamTranscriptionConfig,
   StreamTranslationProcessor,
   streamTranscription,
 } from "@/api/stream";
-import { ModelType } from "@/store/api-config";
+import { isStreamModelType } from "@/store/api-config";
 import store from "@/store/store";
 import { loadMicDevices } from "@/utils";
 import { sendToVrcChat } from "@/utils/vrc-chat-queue";
 import globalStyles from "../../styles/index.module.css";
 import eventBus, { EventBusEvent } from "../../utils/event-bus";
 import CollapsiblePanel from "../CollapsiblePanel";
-import RecognitionControls from "../RecognitionControls";
+import RecognitionStatus from "../RecognitionStatus";
 import styles from "./index.module.css";
 
 export default function AudioPanel() {
@@ -25,7 +29,13 @@ export default function AudioPanel() {
   const streamMic = useRef<Microphone | null>(null);
   const stopStreamTranscription = useRef<(() => void) | null>(null);
   const streamAbortController = useRef<AbortController | null>(null);
-  const streamTranslationProcessor = useRef(new StreamTranslationProcessor());
+  const [streamTranslationProcessor] = useState(
+    () =>
+      new StreamTranslationProcessor({
+        translate: translateStreamTranscript,
+        onTranslation: sendToVrcChat,
+      }),
+  );
   // 是否正在录音
   const [recording, setRecording] = useState(false);
   // 是否正在说话
@@ -44,14 +54,7 @@ export default function AudioPanel() {
     //  如果是流式的识别模型，使用stream采集
     if (apiConfig.translationMode === "transcribe-then-translate") {
       const resolvedConfig = resolveModel(apiConfig, "transcription");
-      if (
-        resolvedConfig.model.type === ModelType.AUDIO_CPP_LIVE ||
-        resolvedConfig.model.type === ModelType.NARILAB_AUDIO_SPEECH_TO_TEXT ||
-        resolvedConfig.model.type ===
-          ModelType.QWEN_AUDIO_SPEECH_TO_TEXT_REALTIME ||
-        resolvedConfig.model.type ===
-          ModelType.QWEN_AUDIO_SPEECH_TO_TEXT_INFERENCE
-      ) {
+      if (isStreamModelType(resolvedConfig.model.type)) {
         startStreamVoice({
           modelId: resolvedConfig.model.modelId,
           apiKey: resolvedConfig.provider.apiKey,
@@ -144,7 +147,7 @@ export default function AudioPanel() {
         config,
         onTranscript: (text) => {
           eventBus.emit(EventBusEvent.ADD_LOG, text);
-          streamTranslationProcessor.current.push(text);
+          streamTranslationProcessor.push(text);
         },
         signal: abortController.signal,
       });
@@ -245,15 +248,24 @@ export default function AudioPanel() {
           {t("停止")}
         </button>
       </div>
-      <RecognitionControls
-        deviceSelectId="mic"
-        deviceLabel={t("麦克风")}
-        devices={micDevices}
-        deviceId={deviceId ?? ""}
-        onDeviceChange={setDeviceId}
-        recognizing={recording}
-        speaking={speaking}
-      />
+      <div>
+        <select
+          disabled={recording}
+          className={globalStyles.selectS}
+          name="mic"
+          id="mic"
+          aria-label={t("麦克风")}
+          value={deviceId ?? ""}
+          onChange={(event) => setDeviceId(event.target.value)}
+        >
+          {micDevices.map((device) => (
+            <option key={device.deviceId} value={device.deviceId}>
+              {device.label}
+            </option>
+          ))}
+        </select>
+      </div>
+      <RecognitionStatus recognizing={recording} speaking={speaking} />
       <div className={styles.manualInput}>
         <input
           type="text"
