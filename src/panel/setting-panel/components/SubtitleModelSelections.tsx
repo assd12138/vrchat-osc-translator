@@ -13,16 +13,13 @@ export default function SubtitleModelSelections() {
   );
 
   return (
-      <SectionCard title={t("字幕API配置")} hideHeading>
-        <div className="settings-rows">
+    <SectionCard title={t("字幕API配置")} hideHeading>
+      <div className="settings-rows">
         <ModelSelect
           slot="subtitleTranscription"
           label={t("系统音频转写模型")}
         />
-        <ModelSelect
-          slot="subtitleTranslation"
-          label={t("系统音频翻译模型")}
-        />
+        <ModelSelect slot="subtitleTranslation" label={t("系统音频翻译模型")} />
         <SelectField
           layout="row"
           label={t("系统音频目标语言")}
