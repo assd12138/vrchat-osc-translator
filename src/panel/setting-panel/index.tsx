@@ -1,8 +1,8 @@
 import i18next from "i18next";
 import { useTranslation } from "react-i18next";
 import { SectionCard, SelectField } from "@/components/ui";
-import { useAppDispatch, useAppSelector } from "../../store/hook";
-import { setLanguage } from "../../store/settings";
+import { useAppDispatch, useAppSelector } from "@/store/hook";
+import { setLanguage } from "@/store/settings";
 import TranslationPanel from "../translation-panel";
 import ModelSelections from "./components/ModelSelections";
 import PromptSettings from "./components/PromptSettings";

@@ -2,6 +2,7 @@ import { Button, Label, ProgressBar } from "@heroui/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { createSubtitleRecognitionSession } from "@/api/subtitle-stream";
+import RecognitionStatus from "@/components/RecognitionStatus";
 import { SectionCard } from "@/components/ui";
 import invoke, { NATIVE_COMMAND } from "@/electron/ipc";
 import {
@@ -9,7 +10,6 @@ import {
   startDisplayAudioCapture,
 } from "@/utils/display-audio";
 import eventBus, { EventBusEvent } from "@/utils/event-bus";
-import RecognitionStatus from "../RecognitionStatus";
 
 type RecognitionPhase = "idle" | "starting" | "connecting" | "recognizing";
 

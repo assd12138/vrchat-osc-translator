@@ -2,7 +2,7 @@ import { format } from "date-fns";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { SectionCard } from "@/components/ui";
-import eventBus, { EventBusEvent } from "../../utils/event-bus";
+import eventBus, { EventBusEvent } from "@/utils/event-bus";
 
 export default function SystemLog() {
   const { t } = useTranslation();

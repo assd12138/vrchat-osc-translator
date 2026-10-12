@@ -14,13 +14,13 @@ import {
   StreamTranslationProcessor,
   streamTranscription,
 } from "@/api/stream";
+import RecognitionStatus from "@/components/RecognitionStatus";
 import { SectionCard, SelectField } from "@/components/ui";
 import { isStreamModelType } from "@/store/api-config";
 import store from "@/store/store";
 import { loadMicDevices } from "@/utils";
+import eventBus, { EventBusEvent } from "@/utils/event-bus";
 import { sendToVrcChat } from "@/utils/vrc-chat-queue";
-import eventBus, { EventBusEvent } from "../../utils/event-bus";
-import RecognitionStatus from "../RecognitionStatus";
 
 export default function AudioPanel() {
   const { t } = useTranslation();
