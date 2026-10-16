@@ -4,8 +4,8 @@ import { useTranslation } from "react-i18next";
 import { transformOCRRouter } from "@/api/commonRouter";
 import { SectionCard, SelectField } from "@/components/ui";
 import { languages } from "@/constants/language";
-import { useAppDispatch, useAppSelector } from "../../store/hook";
-import { setOcrTargetLanguage } from "../../store/settings";
+import { useAppDispatch, useAppSelector } from "@/store/hook";
+import { setOcrTargetLanguage } from "@/store/settings";
 
 const ACCEPTED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp"];
 
