@@ -2,156 +2,161 @@
 
 [English](README.md) / [简体中文](README_CN.md)
 
-## Overview
+Translate your microphone speech into the VRChat chatbox, display floating subtitles for system audio, and translate text in images. Configure your preferred AI services in the app.
 
-VRChat OSC Translator captures speech with voice activity detection (VAD), sends it to configurable OpenAI-compatible AI providers for transcription and translation, and sends the translated chat message to VRChat through OSC. It also includes an optional OCR workflow for recognizing and translating images.
+## Download and first use
 
-## How it works
+1. Open [Releases](https://github.com/assd12138/vrchat-osc-translator/releases), choose an available application package for your operating system, and install or extract it as directed by that release. The Source code archives are for developers.
+2. Launch the app. Packaged releases include the local recognition gateway and start it automatically; you do not need to install Node.js or Python separately.
+3. Open **Provider Settings** and add your services using the registration links and settings below. Prepare a speech recognition model and a text translation model, or one model that supports direct audio translation.
+4. In **System configuration**, select your models and set an **Output template**, such as:
 
-Choose one of two audio workflows:
+   ```text
+   [ZH] #{zh}
+   [EN] #{en}
+   ```
 
-- **Transcribe then translate:** a transcription model produces text, then a text translation model translates it. The transcription model can use `/audio/transcriptions`, or it can be a chat model with audio capability.
-- **Direct translation:** one chat-completion model receives audio and returns translations directly. It must support **audio + text + tools**. This mode has no separate transcription result.
+5. Enable OSC in VRChat. On **Speech Recognition**, select a microphone and click **Start** under **Voice capture**. Grant microphone permission and speak; translations are sent to the VRChat chatbox.
 
-## Configure an AI provider
+Keep VRChat and the app on the same computer. Click **Stop** to end microphone capture. **System Log** shows recognition results and errors.
 
-1. Open **Settings** → **Provider settings** and create a provider.
-2. Enter a **Provider ID**, **Base URL**, and **API Key**. The Base URL is the API version root, usually ending in `/v1` without a trailing slash; for example, `https://api.openai.com/v1`.
-3. Use **Get model list** to call `{baseURL}/models`, or add models manually.
-4. Set each model type:
-   - **Audio transcription** uses `/audio/transcriptions`.
-   - **Chat completion** uses `/chat/completions`.
-5. For chat models, declare the actual **audio**, **image**, **text**, and **tools** capabilities. Capabilities may initially all be enabled, but they are not detected automatically: correct them to match the provider.
-6. Save the provider. Under **External API configuration**, choose a translation mode and models for each slot.
+## What you can do
 
-## Choose translation mode and models
-
-| Model slot | Eligible model |
+| Feature | How to use it |
 | --- | --- |
-| transcription | Audio-transcription model, or chat model with audio |
-| translation | Chat model with text |
-| direct | Chat model with audio + text + tools |
-| OCR | Chat model with image + text + tools |
+| Microphone translation | Translate speech into one or more languages and send it to VRChat |
+| Manual translation | Type under **Manual translation**, then click **Translate & Send** or press Enter |
+| System audio subtitles | Translate audio playing on your computer into a separate floating subtitle window |
+| Image translation | Read an image from the clipboard or upload a PNG, JPEG, or WebP file |
+| Personalization | Change interface language, reorder sidebar items, and customize subtitle appearance |
 
-Use **Transcribe then translate** when you need a transcription result or have separate speech and text models. Use **Direct translation** only with a model that meets every direct-slot capability requirement.
+## Providers and models
 
-### Output template
+### Get an API key
 
-The output template defines the VRChat message. Placeholders must use exactly two lowercase letters: `#{xx}`. For example:
+Use the official links below to register, enable the service, and create an API key. Check access to your chosen model and the available service balance in the provider's console.
 
-```text
-Me: #{en}
-翻译：#{zh}
-```
+| Service | Official signup / API key page | Used for |
+| --- | --- | --- |
+| Nari Labs (nariLab) | [Nari Labs API Keys](https://app.narilabs.com/keys) · [Getting an API key](https://docs.narilabs.com/authentication) | Streaming speech recognition |
+| Qwen, China (Beijing) | [Alibaba Cloud Bailian API Keys](https://bailian.console.aliyun.com/cn-beijing/model/settings/api-key) | Streaming speech recognition; text translation with a separate chat model |
+| Qwen, international (Singapore) | [Alibaba Cloud Model Studio API Keys](https://modelstudio.console.alibabacloud.com/ap-southeast-1/model/settings/api-key) | Streaming speech recognition; text translation with a separate chat model |
+| MiniMax | [China platform](https://platform.minimax.cn/) · [International platform](https://platform.minimax.io/) · [API key guide](https://platform.minimax.io/docs/guides/quickstart-preparation) | Speech recognition from audio segments |
 
-All non-placeholder text is preserved. A template with no language placeholder causes a configuration error.
+Other providers can be added when their APIs support the features required by your chosen model. Speech recognition and translation may use different providers.
 
-### Batch translation
+### Add a service in the app
 
-The name can be misleading. With a tool-capable translation model:
+1. Open **Provider Settings**, create a provider, and enter a name in **Provider ID**.
+2. Fill in the **Base URL** and **API Key**. Copy the relevant Base URL from the tables below.
+3. Add the model ID manually, or use **Fetch model list** if supported. Choose the matching model type.
+4. For chat models, enable only the `audio`, `image`, `text`, and `tools` capabilities the model actually supports. Capabilities are not detected automatically.
+5. Save, then assign the models under **System configuration**.
 
-- **Off:** one structured tool call translates all target languages.
-- **On:** one independent, concurrent request per target language, without tool calls.
+A failed model-list request does not prevent manual setup. Streaming services may require you to enter the model ID yourself.
 
-The latter can increase request count and cost, but may help with providers whose tool calling is unreliable. Models without tools always use one request per target language.
+### Streaming speech recognition: Nari Labs
 
-## Use with VRChat
-
-1. Enable OSC in VRChat.
-2. In the audio panel, start listening and speak.
-3. VAD detects the end of speech, then the selected workflow processes it.
-4. The translated result is queued for VRChat.
-
-Messages are sent to local UDP `127.0.0.1:9000` at `/chatbox/input`, with at least a one-second interval between sends. OCR results are displayed in the app and are not sent to VRChat automatically.
-
-## Compatible APIs
-
-| API capability | Requirement |
+| Field | Value |
 | --- | --- |
-| Model discovery | Optional `GET /models` |
-| Audio transcription | `POST /audio/transcriptions` returning `text` |
-| Chat, direct translation, and OCR | `POST /chat/completions`, with the required `content`, `tool_calls`, `input_audio`, and/or `image_url` support for the chosen use case |
+| Base URL | `https://api.narilabs.com/v1` |
+| Model type | Streaming transcription, **nariLab** |
+| Model ID | `qwen3-asr` or `qwen3-asr-fast` |
 
-whisper.cpp, Ollama, LM Studio, OpenRouter, and similar services can be used only when the deployed version exposes the required compatible interface and capabilities. Check the provider's actual API behavior before configuring it.
+These settings follow the official [transcription guide](https://docs.narilabs.com/transcribe-audio) and [model list](https://docs.narilabs.com/models-and-pricing). Use a Nari Labs API key, including when the model name contains Qwen.
 
-## Recommended providers
+### Streaming speech recognition: Qwen
 
-These recommendations are grouped by region and translation mode. Pick the combination that matches your network access and preferred workflow.
+Choose the region where you created your API key. **China and international API keys, model lists, and service access are region-specific.** See the official [regional settings](https://www.alibabacloud.com/help/en/model-studio/regions).
 
-### Direct translation mode (audio → translated text)
+The following are the Base URLs to enter in this app. Both Qwen streaming model types use the same Base URL for a given region:
 
-**For users in China:**
+| Region | Base URL |
+| --- | --- |
+| China (Beijing), existing DashScope address | `https://dashscope.aliyuncs.com/api-ws/v1` |
+| International (Singapore), existing DashScope address | `https://dashscope-intl.aliyuncs.com/api-ws/v1` |
+| China (Beijing), workspace address | `https://YOUR_WORKSPACE_ID.cn-beijing.maas.aliyuncs.com/api-ws/v1` |
+| International (Singapore), workspace address | `https://YOUR_WORKSPACE_ID.ap-southeast-1.maas.aliyuncs.com/api-ws/v1` |
 
-- **doubao-seed-2.0-mini** — [Volcengine Ark](https://console.volcengine.com/ark/region:cn-beijing/model/detail?name=doubao-seed-2-0-mini)
+Alibaba Cloud recommends workspace addresses; the existing DashScope addresses remain supported. Replace `YOUR_WORKSPACE_ID` with your actual workspace ID, or use the API Host shown in your console followed by `/api-ws/v1`. The app handles the streaming connection. See the official [Qwen realtime guide](https://www.alibabacloud.com/help/en/model-studio/qwen-asr-realtime-interaction-process) and [Fun-ASR guide](https://www.alibabacloud.com/help/en/model-studio/fun-asr-realtime-websocket-api).
 
-  Fast, lightweight direct audio translation with good Chinese support. Configure it as a chat-completion model with **audio + text + tools** capabilities and assign it to the **direct** slot.
+| Model family | Model type to select | Example model ID |
+| --- | --- | --- |
+| Qwen ASR realtime | **qwen-asr-realtime** | `qwen3-asr-flash-realtime` |
+| Qwen Audio / Fun-ASR | **qwen-audio / fun-asr** | `fun-asr-realtime` |
 
-**For users outside China:**
+Check model availability in your selected region. These addresses are for streaming recognition. If you also use Qwen for text translation, add a separate provider using the chat Base URL supplied by the console.
 
-- **gemini-3.5-flash-lite** — [Google DeepMind](https://deepmind.google/models/gemini/flash-lite/)
+### Speech recognition from audio segments: MiniMax
 
-  Low-latency multimodal model suitable for real-time audio translation. Configure it as a chat-completion model with **audio + text + tools** capabilities and assign it to the **direct** slot.
+| Region | Base URL | Model type | Example model ID |
+| --- | --- | --- | --- |
+| China | `https://api.minimax.cn/v1` | Speech transcription, **minimax** | `asr-1.0` |
+| International | `https://api.minimax.io/v1` | Speech transcription, **minimax** | `asr-1.0` |
 
-### Transcribe then translate mode
+Use an API key for the corresponding platform. In this app, MiniMax handles microphone speech segments, so it cannot be selected as the system audio streaming model. Refer to the official [China speech recognition guide](https://platform.minimax.cn/docs/api-reference/speech-to-text) or [international guide](https://platform.minimax.io/docs/api-reference/speech-to-text).
 
-**For users in China:**
+### Assign models to features
 
-- Transcription: **mimo-v2.5-asr** — [Mi Mimo](https://mimo.mi.com/models/zh-CN/mimo-v2.5-asr)
-- Translation: **deepseek-v4-flash** — [DeepSeek Platform](https://platform.deepseek.com/)
+| Setting | Required model |
+| --- | --- |
+| Voice transcription model | A supported speech recognition model, or a chat model with `audio` |
+| Voice translation model | A chat model with `text` |
+| Voice direct translation model | A chat model with `audio + text + tools` |
+| OCR model | A chat model with `image + text + tools` |
+| System audio transcription model | A streaming speech recognition model, such as Nari Labs or Qwen streaming |
+| System audio translation model | A chat model with `text` |
 
-  Add two models under the same or separate providers. mimo-v2.5-asr must be configured as **chat-completion** with **only audio** enabled; do not select text or tools. Configure deepseek-v4-flash as **chat-completion (text + tools)**. Then choose **transcribe-then-translate** and assign each slot accordingly.
+Select **Transcribe, then translate** to use separate recognition and translation models. Select **Translate directly** for one compatible model that translates audio directly; this mode has no separate transcript.
 
-**For users outside China:**
+## Output languages and translation settings
 
-- Transcription: **gpt-transcribe** — [OpenAI](https://developers.openai.com/api/docs/models/gpt-transcribe)
-- Translation: **gpt-5.6-luna** — [OpenAI](https://developers.openai.com/api/docs/models/gpt-5.6-luna)
+The **Output template** controls the languages and message sent to VRChat. Use placeholders such as `#{zh}`, `#{en}`, `#{ja}`, and `#{ko}`. Codes must contain exactly two lowercase letters; at least one placeholder is required. Other text is preserved. **Template Generator** lets you choose languages without writing placeholders manually.
 
-  Both models are available through the OpenAI API. Configure gpt-transcribe as **audio-transcription** and gpt-5.6-luna as **chat-completion (text + tools)**, then assign them to the transcription and translation slots.
+For text translation models with tool support, **Batch Translate** off uses one tool call for all languages; on sends a separate concurrent request per language. Models without tool support always use separate requests. Direct audio translation requires tool support.
+
+Under **Prompt Settings**, you can save custom text translation instructions. `#text` represents the input text and `#target` represents the target language or languages. These differ from output placeholders such as `#{en}`.
+
+## System audio subtitles
+
+1. Under **System configuration**, choose the **System audio transcription model**, **System audio translation model**, and **System audio target language**.
+2. In **Speech Recognition** → **System audio**, click **Open Subtitles**, then **Start**.
+3. Play the audio you want to recognize. Original text and translations appear in the floating window.
+4. Click **Stop** in the system audio section when finished. Closing the subtitle window alone does not stop capture.
+
+You can move, resize, or lock the subtitle window, adjust background opacity, and change font size, color, and weight separately for original text and translations. System audio capture depends on your operating system and capture permissions.
+
+Subtitles can run alongside microphone translation. They use their own target language and do not automatically send messages to VRChat.
+
+## Image translation
+
+1. Choose an **OCR model** under **System configuration**.
+2. Open **Image Translation** and select a target language.
+3. Click **Clipboard** or **Select File** to recognize and translate an image.
+
+PNG, JPEG, and WebP files are supported. Original text and translations appear separately in the app and are not automatically sent to VRChat.
 
 ## Troubleshooting
 
-| Problem | Check |
+| Problem | What to check |
 | --- | --- |
-| No models appear in a slot | Confirm the model type and declared capabilities match the slot requirements. |
-| Getting the model list fails | Check Base URL, API Key, network access, and whether the provider supports `/models`. |
-| Target language placeholder is missing | Add at least one `#{xx}` placeholder to the output template. |
-| `missing required tool call` | The model may not support tools reliably; use a compatible model or try Batch translation. |
-| `missing transcription text` | The transcription endpoint response is not compatible with the required `text` field. |
-| VRChat receives nothing | Enable VRChat OSC and make sure Electron, not only Vite, is running. |
+| No model is available in a selector | Save the provider, then check the model type and declared capabilities |
+| Fetching models fails | Add the model ID manually and check the Base URL and API key |
+| Qwen returns an authentication error | Match the API key, Base URL, and model to the same region; replace the workspace placeholder when using a workspace address |
+| Recognition works but no translation appears | Assign a text translation model as well as a speech recognition model |
+| A tool-call error appears | Use a model that supports tools. For text translation, try enabling Batch Translate; direct audio translation and OCR still require tools |
+| The microphone has no input | Check the selected device, recording permissions, and whether voice capture has started |
+| System audio subtitles show no results | Confirm audio is playing, check the capture level and permissions, and select a streaming recognition model |
+| The local recognition service is unavailable | Restart the packaged app; keep its bundled files together and check System Log |
+| VRChat receives nothing | Enable OSC, keep both apps on the same computer, and check the output template. The current destination is `127.0.0.1:9000`; messages are sent at least one second apart |
 
-## Quick start from source
-
-This repository does not provide a documented release download. Run it from source instead.
-
-1. Install Node.js **24.14.0** (the version in `.nvmrc`).
-2. Install dependencies:
-
-   ```bash
-   npm install
-   ```
-
-3. In one terminal, start the renderer:
-
-   ```bash
-   npm run dev
-   ```
-
-4. In a second terminal, start Electron:
-
-   ```bash
-   npm run electron-dev
-   ```
-
-OSC can only be sent when the app is running in Electron. Enable OSC in VRChat before using voice translation.
-
-## Development
-
-```bash
-npm run build          # Type-check and build the renderer
-npm run lint           # Format and lint source files
-npm run electron-build # Build and package the Electron application
-```
+Settings and API keys are saved on your device. Audio, text, and images are sent to the providers selected for the features you use.
 
 ## License
 
-MIT © 2026 ased12138
+[MIT](LICENSE) © 2026 ased12138
+
+## Developer documentation
+
+- [Run from source, development, and packaging](docs/development.md)
+- [Architecture, source layout, and API contracts](docs/architecture.md)

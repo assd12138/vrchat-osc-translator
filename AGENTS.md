@@ -6,7 +6,7 @@
 
 1. **修改时不要尝试添加测试。** 不新增测试文件、测试用例、测试脚本、测试依赖或测试框架。
 2. **修改后如需验证构建，仅运行 `npm run build`，只验证前端部分。** 不尝试构建或打包 Electron；不要运行 `npm run electron-build`、`npm run electron-build-render`，也不要直接调用 Electron 构建、打包脚本或工具。不要为了验证改动运行 `npm run electron-dev`，因为它会构建主进程和 preload。
-3. **修改后自动运行 `npm run lint`，并修复明显可以解决的错误。** 无需额外询问。该命令带有自动修复，会修改源文件；检查其产生的差异，修复明确的格式、导入和其他可安全解决的问题。手动修复后重新运行，确认结果。对无法明确修复的问题如实说明，不通过关闭规则或删除业务逻辑来掩盖错误。
+3. **仅修改文档时无需运行 `npm run lint`；涉及源码修改时，修改后自动运行，并修复明显可以解决的错误。** 文档包括 README、`AGENTS.md` 和 `docs/` 下的 Markdown 等；若同时修改文档和源码，仍需运行 lint，无需额外询问。该命令带有自动修复，会修改源文件；检查其产生的差异，修复明确的格式、导入和其他可安全解决的问题。手动修复后重新运行，确认结果。对无法明确修复的问题如实说明，不通过关闭规则或删除业务逻辑来掩盖错误。
 4. 保持修改与任务相关，保留用户已有的改动。交付时说明修改内容、实际执行的检查和仍未解决的问题。
 
 ## 项目概况
@@ -25,7 +25,7 @@
 | `npm run dev` | 启动 Vite 前端开发服务器，固定端口 `1420` |
 | `npm run build` | 执行 `tsc && vite build`，前端产物输出到 `dist/`；修改后唯一允许的构建验证命令 |
 | `npm run preview` | 预览已生成的前端产物 |
-| `npm run lint` | 执行 `biome check --write ./src && biome check --write ./src-electron`，修改后必须自动运行 |
+| `npm run lint` | 执行 `biome check --write ./src && biome check --write ./src-electron`，源码修改后必须自动运行；仅修改文档时无需运行 |
 
 `npm run lint` 对 Electron 源码的静态检查不属于 Electron 构建。该命令不检查 `backend/`、`scripts/` 或 Markdown 文件。
 
